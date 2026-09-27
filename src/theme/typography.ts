@@ -4,13 +4,15 @@ import type { TextStyle } from 'react-native';
  * SOUL type system (spec section 4, DECISIONS D-021).
  *
  * Two roles, never file names in screens:
- * - `body`: Plus Jakarta Sans (UI, body, chat, inputs, buttons, prices, timers; has `₹`).
+ * - `body`: Alegreya Sans (UI, body, chat, inputs, buttons, prices, timers; has `₹`).
+ *   Chosen by the owner for an informal, humanist feel. It has a small x-height, so body
+ *   roles sit about 1 px larger than a typical UI sans. Weights: 400, 500, 700 (no 600).
  * - `display`: Instrument Serif (page titles, section headings, editorial moments).
  * Families are embedded natively (expo-font config plugin) as weight-mapped font
  * families, so `fontWeight` selects the right file on Android.
  */
 export const fontFamily = {
-  body: 'PlusJakartaSans',
+  body: 'AlegreyaSans',
   display: 'InstrumentSerif',
 } as const;
 
@@ -34,7 +36,7 @@ const display = (size: number, lineHeight: number, letterSpacing: number): Varia
 const body = (
   size: number,
   lineHeight: number,
-  weight: '400' | '500' | '600',
+  weight: '400' | '500' | '700',
   letterSpacing = 0,
 ): Variant => ({
   fontFamily: fontFamily.body,
@@ -58,17 +60,17 @@ export const typeScale = {
   /** Secondary / side headings and premium moments. */
   subheading: { ...display(23, 28, -0.1), maxFontSizeMultiplier: 1.4 },
   /** Comfortable reading text: bios, chat, verification instructions. */
-  body: body(17, 25, '400'),
-  bodyStrong: body(17, 25, '500'),
-  /** Button labels: SemiBold so calls to action read with confidence. */
-  button: { ...body(16, 20, '600', 0.1), maxFontSizeMultiplier: 1.4 },
+  body: body(18, 26, '400'),
+  bodyStrong: body(18, 26, '500'),
+  /** Button labels: Bold so calls to action read with confidence. */
+  button: { ...body(17, 22, '700', 0.1), maxFontSizeMultiplier: 1.4 },
   /** Tabs, input text, filter controls. */
-  label: { ...body(16, 20, '500', 0.1), maxFontSizeMultiplier: 1.4 },
+  label: { ...body(17, 22, '500', 0.1), maxFontSizeMultiplier: 1.4 },
   /** Supporting text: helper copy, secondary metadata. */
-  supporting: body(15, 21, '400'),
-  caption: body(13, 18, '400', 0.1),
+  supporting: body(16, 22, '400'),
+  caption: body(14, 19, '400', 0.1),
   /** Only where genuinely needed (badges, tiny labels). */
-  micro: { ...body(11, 14, '500', 0.6), maxFontSizeMultiplier: 1.3 },
+  micro: { ...body(12, 15, '500', 0.6), maxFontSizeMultiplier: 1.3 },
 } as const satisfies Record<string, Variant>;
 
 export type TypeVariant = keyof typeof typeScale;

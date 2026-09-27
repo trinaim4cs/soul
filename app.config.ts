@@ -71,11 +71,11 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         android: {
           fonts: [
             {
-              fontFamily: 'PlusJakartaSans',
+              fontFamily: 'AlegreyaSans',
               fontDefinitions: [
-                { path: './assets/fonts/PlusJakartaSans-Regular.ttf', weight: 400 },
-                { path: './assets/fonts/PlusJakartaSans-Medium.ttf', weight: 500 },
-                { path: './assets/fonts/PlusJakartaSans-SemiBold.ttf', weight: 600 },
+                { path: './assets/fonts/AlegreyaSans-Regular.ttf', weight: 400 },
+                { path: './assets/fonts/AlegreyaSans-Medium.ttf', weight: 500 },
+                { path: './assets/fonts/AlegreyaSans-Bold.ttf', weight: 700 },
               ],
             },
             {

@@ -269,7 +269,7 @@ No third-party analytics in V1. If added later, only the anonymous operational e
 
 - Font tokens are named by role: `body` (UI and body text) and `display` (titles, section headings, editorial moments). Screens never name a font file.
 - **Aprila and Carcade are not used.** Free copies of Aprila are personal-use only, and the Dealjumbo edition is a 1960s swash display face unsuited to body text. "Carcade" matches no known typeface; the closest, Din Studio's *Carade*, is also personal-use only. Commercial app embedding would need paid licences, which the owner has not bought. The owner granted freedom to choose the best alternatives (2026-09-27).
-- **body = Plus Jakarta Sans** (SIL OFL 1.1, v2.071): Regular 400, Medium 500, SemiBold 600, instanced from the variable font by `scripts/instance-body-font.py`. It has the `₹` glyph and tabular figures (`tnum`) for prices, timers and distances. **Changed 2026-09-27** after owner feedback that Schibsted Grotesk looked "normal": 8 OFL faces with `₹` (Plus Jakarta Sans, Manrope, Bricolage Grotesque, Geist, Figtree, DM Sans, Albert Sans, Familjen Grotesk) were rendered in SOUL's button and body styles; Plus Jakarta Sans read the most premium. Bricolage Grotesque is the runner-up. Instrument Sans, Outfit, Sora, Urbanist, Onest and Hanken Grotesk were excluded because they have no `₹`.
+- **body = Alegreya Sans** (SIL OFL 1.1, v2.004, Huerta Tipográfica): Regular 400, Medium 500, Bold 700 (the family has no 600, so button labels use Bold). It has the `₹` glyph and tabular figures (`tnum`). **Owner's choice, 2026-09-27**, after asking for an informal feel: Schibsted Grotesk looked "normal" and Plus Jakarta Sans looked "formal". Its x-height (0.46 em) is small, so body roles are 1 px larger than before (body 18/26). Instrument Sans, Outfit, Sora and others were excluded earlier for lacking `₹`.
 - **display = Instrument Serif** (SIL OFL 1.1): Regular and Italic. It has no `₹`, so prices always use the body font.
 - The files are in `assets/fonts/` with their licences in `assets/fonts/licenses/`, from the Google Fonts repository (`google/fonts`, `ofl/`) or the Expo-maintained `@expo-google-fonts` packages. They are embedded at build time with the `expo-font` config plugin (no runtime loading, no font-swap flash).
 - If the owner later licenses Aprila or Carade for app embedding, swapping them in only changes `src/theme/typography.ts` and the font plugin entry.
@@ -313,7 +313,7 @@ The owner felt the strict monochrome direction read "too X" (too much like a soc
 
 | ID | Item | Blocks | Default until set |
 |---|---|---|---|
-| C-01 | ~~Aprila and Carcade font files~~ **closed 2026-09-27**: OFL Plus Jakarta Sans (was Schibsted Grotesk) + Instrument Serif chosen (D-021) | - | - |
+| C-01 | ~~Aprila and Carcade font files~~ **closed 2026-09-27**: OFL Alegreya Sans (owner's choice; earlier Schibsted Grotesk, then Plus Jakarta Sans) + Instrument Serif (D-021) | - | - |
 | C-02 | ~~High-resolution logo~~ **closed 2026-09-27**: 1652×1820 original obtained (D-022). A vector would still be better for the launcher icon | - | - |
 | C-03 | ~~White logo variant~~ **closed 2026-09-27**: approved, derived (D-022) | - | - |
 | C-04 | ~~Android `applicationId`~~ **closed 2026-09-27**: **`com.soul.srm`**, locked for Android, the future iOS bundle id, the deep-link scheme, notifications and distribution. Never renamed after the public beta without explicit owner approval | - | - |

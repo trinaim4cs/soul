@@ -37,12 +37,12 @@ Semantic tokens with light and dark values, following the system appearance (D-0
 | `title` | Instrument Serif | 40/44 | page titles |
 | `section` | Instrument Serif | 30/34 | major sections |
 | `subheading` | Instrument Serif | 23/28 | secondary headings, the hook, premium moments (italic allowed) |
-| `body` / `bodyStrong` | Plus Jakarta Sans 400/500 | 17/25 | bios, chat, instructions |
-| `button` | Plus Jakarta Sans 600 | 16/20 | button labels |
-| `label` | Plus Jakarta Sans 500 | 16/20 | tabs, inputs, filters |
-| `supporting` | Plus Jakarta Sans 400 | 15/21 | helper copy, metadata |
-| `caption` | Plus Jakarta Sans 400 | 13/18 | small metadata |
-| `micro` | Plus Jakarta Sans 500 | 11/14 | badges only |
+| `body` / `bodyStrong` | Alegreya Sans 400/500 | 18/26 | bios, chat, instructions |
+| `button` | Alegreya Sans 700 | 17/22 | button labels |
+| `label` | Alegreya Sans 500 | 17/22 | tabs, inputs, filters |
+| `supporting` | Alegreya Sans 400 | 16/22 | helper copy, metadata |
+| `caption` | Alegreya Sans 400 | 14/19 | small metadata |
+| `micro` | Alegreya Sans 500 | 12/15 | badges only |
 
 - Always render text with `SoulText` (`variant`, `tone`, `italic`, `numeric`). Never set font families or sizes in screens.
 - Font scaling: body roles are unbounded. Chrome-like and very large roles have a `maxFontSizeMultiplier` (1.15 to 1.4). Verified at 1.3× on the emulator.
@@ -90,7 +90,7 @@ Semantic tokens with light and dark values, following the system appearance (D-0
 
 The same tokens and primitives render on the web (D-035). Web-specific rules:
 
-- **Fonts:** Plus Jakarta Sans and Instrument Serif and the icon font are registered with `FontFace` weight descriptors under the same family names as on Android, so `fontWeight` selects the right file on both platforms. The first render waits for them (short timeout), so there is no font swap.
+- **Fonts:** Alegreya Sans and Instrument Serif and the icon font are registered with `FontFace` weight descriptors under the same family names as on Android, so `fontWeight` selects the right file on both platforms. The first render waits for them (short timeout), so there is no font swap.
 - **Layout:** a single phone-width column, at most 480 px, centred on larger screens with the background colour around it. Never a desktop layout.
 - **Safe areas:** `viewport-fit=cover` plus `env(safe-area-inset-*)` through react-native-safe-area-context. The standalone status bar style is `default`, which stays readable on both light and dark screens.
 - **Touch:** targets stay ≥ 48 px, nothing depends on hover, and text inputs use ≥ 16 px text so iOS Safari does not zoom on focus (the `label` and `body` roles already are).

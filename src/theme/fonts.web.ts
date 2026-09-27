@@ -16,19 +16,19 @@ const FACES: Face[] = [
     family: fontFamily.body,
     weight: '400',
     style: 'normal',
-    source: require('../../assets/fonts/PlusJakartaSans-Regular.ttf'),
+    source: require('../../assets/fonts/AlegreyaSans-Regular.ttf'),
   },
   {
     family: fontFamily.body,
     weight: '500',
     style: 'normal',
-    source: require('../../assets/fonts/PlusJakartaSans-Medium.ttf'),
+    source: require('../../assets/fonts/AlegreyaSans-Medium.ttf'),
   },
   {
     family: fontFamily.body,
-    weight: '600',
+    weight: '700',
     style: 'normal',
-    source: require('../../assets/fonts/PlusJakartaSans-SemiBold.ttf'),
+    source: require('../../assets/fonts/AlegreyaSans-Bold.ttf'),
   },
   {
     family: fontFamily.display,

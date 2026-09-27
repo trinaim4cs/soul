@@ -168,14 +168,14 @@ Skills per phase come from `skills/SOUL_SKILL_MAP.md`. `soul-audit` is enabled o
 **Result:**
 - Web target: single-page app with `public/index.html` (PWA meta tags, 480 px phone column, no inline scripts), manifest, placeholder icons from the supplied logo, and an app-shell-only `sw.js`.
 - Fonts and icons: `fonts.web.ts` registers every face with weight descriptors; `SoulIcon` renders a Material Symbols subset (`SoulIcons`, 23 glyphs, about 4 KB per weight, `npm run icons:subset`) instead of expo-symbols.
-- Body font changed to Plus Jakarta Sans after owner feedback; button labels use a new SemiBold `button` role (D-021).
+- Body font changed after owner feedback (now Alegreya Sans, owner's choice); button labels use a dedicated Bold `button` role (D-021).
 - Services: `secure-storage` (Supabase session: SecureStore natively, localStorage on the web), `install-context`, `pwa`; contracts for location, heading, camera, notifications, payments and device-integrity.
 - Website routes `/download` (reads `/downloads/latest.json`) and `/install`; Welcome shows the right hint per browser. The routes exist only in the web build.
 - Checkbox and button state use ARIA props, which work on Android and the web (react-native-web ignores `accessibilityState`).
 - Web tab bar: `(app)/(tabs)/_layout.web.tsx` uses the JS bottom tabs with SoulIcons (NativeTabs renders a text-only tab list in a browser); both layouts share `src/features/shell/tab-items.ts`.
 - Verified: see PWA.md "Verified". 53 unit tests, typecheck, lint and format are green.
 
-**Android check (after a rebuild, since fonts are embedded):** the check and error icons render (they were blank), Plus Jakarta Sans is used everywhere, button labels are SemiBold, the Welcome screen shows no install hint in the native app, and the keyboard-sticky footer holds on the email step.
+**Android check (after a rebuild, since fonts are embedded):** the check and error icons render (they were blank), the new body font is used everywhere, button labels use their own role, the Welcome screen shows no install hint in the native app, and the keyboard-sticky footer holds on the email step.
 
 **Carried forward:** a physical iPhone test needs HTTPS hosting (C-26); web bundle size is a Phase 19 item; the dev client shows Expo's floating tools button (development builds only).
 
@@ -298,3 +298,4 @@ Release build config, signing workflow (owner keystore, C-20), launcher icon (C-
 - 2026-09-27: Owner feedback on the button font ("looks normal"): body font changed from Schibsted Grotesk to Plus Jakarta Sans (OFL, has `₹`), chosen from 8 ₹-capable OFL candidates rendered side by side (D-021).
 - 2026-09-27: Phase 4 and phase P done: Android dev build rebuilt with the embedded fonts and verified on the emulator; web tab bar added and verified. Next: Phase 5 (profile).
 - 2026-09-27: Owner answers (round 2): gender options ok; accent kept; Razorpay; no plan-swipe rollover, top-ups never expire; Vercel free hosting on `*.vercel.app`; cloud Supabase project `bdwuhrkgrwzpwqhgsngi`; package `com.soul.srm` locked; production signing prepared but not generated; logo and compact icon mark are release blockers (placeholder app icon added); eight legal drafts written (terms version `2026-09-27-draft-2`); FCM + Web Push requirements documented. `vercel.json` added and its CSP verified locally with the production build.
+- 2026-09-27: Owner found Plus Jakarta Sans too formal and chose Alegreya Sans (informal, humanist) for body text; body roles moved up 1 px for its small x-height; buttons use Bold (D-021).
