@@ -72,7 +72,7 @@ The client can request these; only the server decides them. Each is a SECURITY D
 
 | Bucket | Public | Write | Read |
 |---|---|---|---|
-| `profile-photos` | no | owner uploads to `{uid}/…` through a pending-moderation path | signed URLs from server functions for approved photos, to eligible viewers only |
+| `profile-photos` | no | owner uploads to `{uid}/…`; registered by `add_profile_photo` | owner; other students only via signed URLs that Storage issues when `can_view_photo_object` passes (approved, visible under D-042, not anonymous) |
 | `profile-photos-blurred` | no | owner uploads the tiny (24 px) anonymous-mode copy to `{uid}/…` | owner; others via signed URLs from server functions |
 | `report-evidence` | no | via report function | service role only |
 | `chat-media` (feature-flagged) | no | conversation members, after moderation | conversation members via signed URLs |

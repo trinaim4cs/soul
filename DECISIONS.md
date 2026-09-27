@@ -6,6 +6,23 @@ Status values: `accepted` · `default, confirm` · `open`.
 
 ---
 
+## Phase 6 discovery (2026-09-27)
+
+### D-042 Discovery rules (spec v2 sections 18 to 21)
+- **Location-independent.** No geofence, radius or location of any kind (D-030).
+- **Who appears:** eligible accounts only (the same rule as `get_my_status`, kept in step by a test), not blocked in either direction, **two-way gender compatibility** (each person's gender is in the other's "show me"), the viewer inside the **candidate's** age range (the candidate's wishes), and the candidate inside the **viewer's** age filter. The main photo must be approved.
+- **Zodiac filter:** matches only people who show their zodiac; hidden signs never match, so a filter cannot be used to infer a hidden sign.
+- **Private mode:** hidden from Discover **except to people they have liked** (they can still find someone they are interested in). Matches and chats are unaffected. The Privacy screen says so.
+- **Anonymous mode:** the card has no name, and only the tiny blurred copies can be signed for others; the originals are refused by Storage.
+- **Already decided:** liked profiles never return; passed profiles return after 30 days (`app_config.pass_cooldown_days`) **[DEFAULT, confirm]**.
+- **Order (spec 21, "keep ranking simple"):** profiles completed in the last 7 days first, then a daily shuffle unique to each viewer (`md5(viewer, candidate, date)`). No attractiveness scores, no popularity.
+- **Actions:** `swipe_right(target, idempotency_key)` records a like (a replay with the same key returns the first result) and `swipe_left(target)` records a pass; both re-check visibility on the server. Phase 7 adds swipe credits to `swipe_right` (charged only when the like is new); Phase 8 adds the match.
+- **Photos of others:** Storage `select` policies call `private.can_view_photo_object`, which applies the same visibility rule, so a signed URL is issued only for an approved photo of someone the viewer may see. Nobody can list or sign photos otherwise.
+- **No name search** (spec 19): no function accepts text; the feed only pages forward with an exclude list.
+- **Filters** (spec 18): age range (18 to 60 in the app), "show me", zodiac. Nothing else.
+
+---
+
 ## Phase 5 profile (2026-09-27)
 
 ### D-041 Profile rules (spec v2 sections 14 to 17, 20)

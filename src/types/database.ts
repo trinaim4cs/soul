@@ -156,6 +156,45 @@ export type Database = {
         };
         Relationships: [];
       };
+      likes: {
+        Row: {
+          created_at: string;
+          idempotency_key: string;
+          liker_id: string;
+          target_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          idempotency_key: string;
+          liker_id: string;
+          target_id: string;
+        };
+        Update: {
+          created_at?: string;
+          idempotency_key?: string;
+          liker_id?: string;
+          target_id?: string;
+        };
+        Relationships: [];
+      };
+      passes: {
+        Row: {
+          passed_at: string;
+          passer_id: string;
+          target_id: string;
+        };
+        Insert: {
+          passed_at?: string;
+          passer_id: string;
+          target_id: string;
+        };
+        Update: {
+          passed_at?: string;
+          passer_id?: string;
+          target_id?: string;
+        };
+        Relationships: [];
+      };
       preferences: {
         Row: {
           max_age: number;
@@ -274,13 +313,17 @@ export type Database = {
         Args: { p_height: number; p_id: string; p_source: string; p_width: number };
         Returns: Json;
       };
+      discovery_feed: { Args: { p_exclude?: string[]; p_limit?: number }; Returns: Json };
       get_my_profile: { Args: Record<PropertyKey, never>; Returns: Json };
       get_my_status: { Args: Record<PropertyKey, never>; Returns: Json };
+      get_profile_card: { Args: { p_target: string }; Returns: Json };
       hook_before_user_created: { Args: { event: Json }; Returns: Json };
       remove_profile_photo: { Args: { p_id: string }; Returns: Json };
       reorder_profile_photos: { Args: { p_ids: string[] }; Returns: Json };
       set_date_of_birth: { Args: { p_dob: string }; Returns: Json };
       submit_profile: { Args: Record<PropertyKey, never>; Returns: Json };
+      swipe_left: { Args: { p_target: string }; Returns: Json };
+      swipe_right: { Args: { p_idempotency_key: string; p_target: string }; Returns: Json };
     };
     Enums: {
       account_state: 'active' | 'suspended' | 'banned' | 'deletion_pending';

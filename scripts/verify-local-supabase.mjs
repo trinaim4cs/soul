@@ -2,7 +2,7 @@
 // Uses the local development stack only: keys come from `supabase status`, never from files.
 // Identities are neutral test users and are deleted afterwards.
 import { execSync } from 'node:child_process';
-import { randomBytes } from 'node:crypto';
+import { randomBytes, randomUUID } from 'node:crypto';
 
 import { createClient } from '@supabase/supabase-js';
 
@@ -146,6 +146,129 @@ try {
     fnNoAuth.status === 401,
     `HTTP ${fnNoAuth.status}`,
   );
+
+  // Phase 5 + 6 over the real APIs: photo upload and registration, discovery, and
+  // Storage issuing signed URLs only under the discovery visibility rules.
+  const terms = (
+    await admin.from('app_config').select('value').eq('key', 'current_terms_version').single()
+  ).data.value.version;
+  const today = new Date();
+  const dob = new Date(today.getFullYear() - 22, today.getMonth(), Math.max(1, today.getDate() - 3))
+    .toISOString()
+    .slice(0, 10);
+  for (const [user, gender, showMe] of [
+    [userA, 'woman', ['man']],
+    [userB, 'man', ['woman']],
+  ]) {
+    await admin
+      .from('account_private')
+      .update({ terms_version: terms, terms_accepted_at: today.toISOString(), date_of_birth: dob })
+      .eq('id', user.id);
+    await user.client
+      .from('profiles')
+      .update({ display_name: 'Test User', hook: 'Hook', gender })
+      .eq('id', user.id);
+    await user.client.from('preferences').update({ show_me: showMe }).eq('user_id', user.id);
+  }
+  // A 1 x 1 JPEG: the server checks the objects exist in the owner's folders, not the pixels.
+  const jpeg = Buffer.from(
+    '/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=',
+    'base64',
+  );
+  const photoId = randomUUID();
+  const photoPath = `${userB.id}/${photoId}.jpg`;
+  const upload = await userB.client.storage
+    .from('profile-photos')
+    .upload(photoPath, jpeg, { contentType: 'image/jpeg' });
+  const uploadTiny = await userB.client.storage
+    .from('profile-photos-blurred')
+    .upload(photoPath, jpeg, { contentType: 'image/jpeg' });
+  check(
+    'an owner can upload into their own photo folders',
+    !upload.error && !uploadTiny.error,
+    upload.error?.message,
+  );
+  const intruder = await userA.client.storage
+    .from('profile-photos')
+    .upload(`${userB.id}/${randomUUID()}.jpg`, jpeg, { contentType: 'image/jpeg' });
+  check("nobody can upload into another user's photo folder", Boolean(intruder.error));
+  const registered = await userB.client.rpc('add_profile_photo', {
+    p_id: photoId,
+    p_width: 1080,
+    p_height: 1350,
+    p_source: 'camera',
+  });
+  check(
+    'an uploaded photo is registered',
+    registered.data?.ok === true,
+    JSON.stringify(registered.data),
+  );
+  for (const user of [userA, userB]) {
+    if (user === userA) {
+      const aId = randomUUID();
+      await userA.client.storage
+        .from('profile-photos')
+        .upload(`${userA.id}/${aId}.jpg`, jpeg, { contentType: 'image/jpeg' });
+      await userA.client.storage
+        .from('profile-photos-blurred')
+        .upload(`${userA.id}/${aId}.jpg`, jpeg, { contentType: 'image/jpeg' });
+      await userA.client.rpc('add_profile_photo', {
+        p_id: aId,
+        p_width: 1080,
+        p_height: 1350,
+        p_source: 'camera',
+      });
+    }
+    const submitted = await user.client.rpc('submit_profile');
+    check(
+      'a complete profile is accepted',
+      submitted.data?.ok === true,
+      JSON.stringify(submitted.data),
+    );
+  }
+
+  const feed = await userA.client.rpc('discovery_feed', { p_exclude: [], p_limit: 50 });
+  check(
+    'a compatible profile appears in Discover',
+    feed.data?.ok === true && feed.data.cards.some((c) => c.id === userB.id),
+  );
+  const signed = await userA.client.storage.from('profile-photos').createSignedUrl(photoPath, 60);
+  check(
+    'Storage signs a visible profile photo for another student',
+    Boolean(signed.data?.signedUrl),
+    signed.error?.message,
+  );
+  if (signed.data?.signedUrl) {
+    const image = await fetch(signed.data.signedUrl);
+    check('the signed URL serves the image', image.status === 200, `HTTP ${image.status}`);
+  }
+  const anonClient = createClient(url, status.ANON_KEY, { auth: { persistSession: false } });
+  const anonSign = await anonClient.storage.from('profile-photos').createSignedUrl(photoPath, 60);
+  check('signed-out requests cannot sign profile photos', Boolean(anonSign.error));
+
+  await userB.client.from('profiles').update({ privacy_mode: 'private' }).eq('id', userB.id);
+  const hidden = await userA.client.storage.from('profile-photos').createSignedUrl(photoPath, 60);
+  check('private mode stops others from signing the photo', Boolean(hidden.error));
+
+  await userB.client.from('profiles').update({ privacy_mode: 'anonymous' }).eq('id', userB.id);
+  const original = await userA.client.storage.from('profile-photos').createSignedUrl(photoPath, 60);
+  const blurred = await userA.client.storage
+    .from('profile-photos-blurred')
+    .createSignedUrl(photoPath, 60);
+  check(
+    'anonymous mode serves only the blurred copy',
+    Boolean(original.error) && Boolean(blurred.data?.signedUrl),
+    `original ${original.error ? 'refused' : 'signed'}, blurred ${blurred.error?.message ?? 'signed'}`,
+  );
+
+  const like = await userA.client.rpc('swipe_right', {
+    p_target: userB.id,
+    p_idempotency_key: randomUUID(),
+  });
+  check('a like is recorded through the API', like.data?.ok === true, JSON.stringify(like.data));
+
+  await userB.client.storage.from('profile-photos').remove([photoPath]);
+  await userB.client.storage.from('profile-photos-blurred').remove([photoPath]);
 } finally {
   await admin.auth.admin.deleteUser(userA.id);
   await admin.auth.admin.deleteUser(userB.id);

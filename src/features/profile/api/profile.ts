@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { randomUUID } from 'expo-crypto';
 
 import { refreshAccountStatus } from '@/features/auth/api/auth';
+import { useDeckStore } from '@/features/discovery/store/deck-store';
 import { processPhoto } from '@/features/profile/api/photo-processing';
 import {
   cleanAbout,
@@ -65,7 +66,13 @@ export async function updateShowMe(userId: string, showMe: Gender[]) {
     .update({ show_me: showMe })
     .eq('user_id', userId);
   if (error) throw error;
-  await refreshProfile(userId);
+  // "Show me" also drives Discover and its filters screen.
+  await Promise.all([
+    refreshProfile(userId),
+    queryClient.invalidateQueries({ queryKey: ['discovery-filters', userId] }),
+  ]);
+  const deck = useDeckStore.getState();
+  if (deck.status !== 'idle') void deck.refresh();
 }
 
 /** Saves the profile form: text is cleaned here, limits are enforced by the server. */

@@ -7,8 +7,8 @@ type Props = {
   source?: ImageSource | null;
   /** Blurhash from the server for an instant, private-safe placeholder. */
   blurhash?: string;
-  /** Width / height. Profile photography defaults to 4:5 portrait. */
-  aspectRatio?: number;
+  /** Width / height. Profile photography defaults to 4:5 portrait; `null` fills the parent. */
+  aspectRatio?: number | null;
   rounded?: boolean;
   /** Stable key inside recycled list cells. */
   recyclingKey?: string;
@@ -31,7 +31,13 @@ export function SoulPhoto({
 }: Props) {
   const styles = useStyles();
   return (
-    <View style={[styles.frame, { aspectRatio }, rounded && styles.rounded, style]}>
+    <View
+      style={[
+        styles.frame,
+        aspectRatio !== null && { aspectRatio },
+        rounded && styles.rounded,
+        style,
+      ]}>
       {source ? (
         <Image
           source={source}

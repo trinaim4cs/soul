@@ -6,7 +6,8 @@ import { SoulText } from '@/components/soul-text';
 import { borders, createThemedStyles, radii, sizes, spacing, useTheme } from '@/theme';
 
 /** `moment`: white pill for the fixed-black brand moments (welcome, match). */
-type Variant = 'primary' | 'secondary' | 'ghost' | 'moment';
+/** `accent` is for Like only (D-026: the accent is reserved for like, match and hearts). */
+type Variant = 'primary' | 'secondary' | 'ghost' | 'moment' | 'accent';
 type Size = 'lg' | 'md' | 'sm';
 
 type Props = {
@@ -21,6 +22,8 @@ type Props = {
   block?: boolean;
   accessibilityHint?: string;
   style?: StyleProp<ViewStyle>;
+  /** Layout of the touch box itself, e.g. `{ flex: 1 }` for buttons sharing a row. */
+  containerStyle?: StyleProp<ViewStyle>;
 };
 
 /**
@@ -39,19 +42,32 @@ export function SoulButton({
   block = false,
   accessibilityHint,
   style,
+  containerStyle,
 }: Props) {
   const styles = useStyles();
   const { colors } = useTheme();
   const inactive = disabled || loading;
   const tone = variant === 'primary' ? 'inverse' : 'primary';
   const iconColor =
-    variant === 'primary' ? 'inverseText' : variant === 'moment' ? 'moment' : 'textPrimary';
-  const labelStyle = variant === 'moment' ? { color: colors.moment } : undefined;
+    variant === 'primary'
+      ? 'inverseText'
+      : variant === 'moment'
+        ? 'moment'
+        : variant === 'accent'
+          ? 'onAccent'
+          : 'textPrimary';
+  const labelStyle =
+    variant === 'moment'
+      ? { color: colors.moment }
+      : variant === 'accent'
+        ? { color: colors.onAccent }
+        : undefined;
 
   return (
     <PressableScale
       onPress={onPress}
       disabled={inactive}
+      containerStyle={containerStyle}
       accessibilityRole="button"
       accessibilityLabel={label}
       accessibilityHint={accessibilityHint}
@@ -77,7 +93,9 @@ export function SoulButton({
               ? colors.inverseText
               : variant === 'moment'
                 ? colors.moment
-                : colors.textPrimary
+                : variant === 'accent'
+                  ? colors.onAccent
+                  : colors.textPrimary
           }
           accessibilityLabel={`${label}, loading`}
         />
@@ -111,6 +129,7 @@ const useStyles = createThemedStyles(({ colors }) =>
     },
     ghost: { backgroundColor: 'transparent' },
     moment: { backgroundColor: colors.paper },
+    accent: { backgroundColor: colors.accent },
     ghostPressed: { backgroundColor: colors.surfacePressed },
     disabled: { opacity: 0.4 },
   }),

@@ -83,6 +83,10 @@ Semantic tokens with light and dark values, following the system appearance (D-0
 | `Skeleton`, `LoadingState` | layout-mirroring placeholders, gentle pulse, static under reduced motion |
 | `EmptyState`, `ErrorState`, `OfflineState`, `PermissionState` | composed interstitials with a clear next action |
 | `SoulIcon` | Material Symbols |
+| `SoulChip` | selectable pill (radio or checkbox role); selection = ink fill + tick, never colour alone |
+| `PhotoScrim` | bottom fade on photos (`photoGradient` token; native CSS gradient, `backgroundImage` on the web) |
+
+`PressableScale` and `SoulButton` take `containerStyle` for layout of the touch box (flex, percentage widths); `style` styles the visible, scaling surface. Row layouts must use `containerStyle`, or the size is lost on the inner view. `SoulButton` has an `accent` variant for Like only (D-026).
 
 **Not yet built, on purpose** ("build when first reused"): `SoulSheet` and `SoulModal`. Following the `expo-ui` skill rule, they are evaluated first with `@expo/ui` BottomSheet (Jetpack Compose) against Expo Router `formSheet`, when the first sheet (Discover filters) is built in Phase 7. Feature components (`ProfileHeader`, `ChatComposer`, `InstantCompass` …) are built in their feature phases.
 

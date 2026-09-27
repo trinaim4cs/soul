@@ -11,6 +11,8 @@ export type ProfileViewModel = {
   /** Null in anonymous mode: the name is hidden (spec 20). */
   name: string | null;
   age: number | null;
+  /** Display label, e.g. "Non-binary". */
+  gender: string | null;
   verified: boolean;
   hook: string | null;
   about: string | null;
@@ -43,17 +45,27 @@ export function ProfileView({ profile, actions }: Props) {
       />
 
       <View style={styles.identity}>
-        <View style={styles.nameRow}>
-          <SoulText variant="section" accessibilityRole="header" style={styles.name}>
+        {/* Name and age are siblings: a long name truncates, the age always stays visible. */}
+        <View
+          style={styles.nameRow}
+          accessible
+          accessibilityRole="header"
+          accessibilityLabel={`${title}${profile.age !== null ? `, ${profile.age}` : ''}`}>
+          <SoulText variant="section" numberOfLines={1} style={styles.name}>
             {title}
-            {profile.age !== null ? (
-              <SoulText variant="section" tone="secondary">
-                {`, ${profile.age}`}
-              </SoulText>
-            ) : null}
           </SoulText>
+          {profile.age !== null ? (
+            <SoulText variant="section" tone="secondary" style={styles.age}>
+              {`, ${profile.age}`}
+            </SoulText>
+          ) : null}
           {profile.verified ? <VerifiedBadge /> : null}
         </View>
+        {profile.gender ? (
+          <SoulText variant="supporting" tone="secondary">
+            {profile.gender}
+          </SoulText>
+        ) : null}
         {profile.hook ? (
           <SoulText variant="subheading" italic>
             {profile.hook}
@@ -106,7 +118,8 @@ export function ProfileView({ profile, actions }: Props) {
 const styles = StyleSheet.create({
   root: { gap: layout.sectionGap / 2 },
   identity: { gap: spacing.xs },
-  nameRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
+  nameRow: { flexDirection: 'row', alignItems: 'center' },
+  age: { flexShrink: 0, marginRight: spacing.xs },
   name: { flexShrink: 1 },
   block: { gap: spacing.xxs, maxWidth: layout.maxTextWidth },
   actions: { gap: spacing.sm, marginTop: spacing.md },

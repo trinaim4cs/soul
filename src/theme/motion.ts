@@ -65,3 +65,21 @@ export const travel = {
   small: 8,
   medium: 16,
 } as const;
+
+/**
+ * Discover swipe card (spec 9: follows the finger, velocity hand-off, interruptible).
+ * A swipe commits when the release position plus the projected momentum passes
+ * `commitShare` of the card width, so a quick flick commits and a slow drag does not.
+ */
+export const swipe = {
+  commitShare: 0.35,
+  /** Card tilt at one card-width of travel. */
+  maxRotationDeg: 10,
+  /** Fly-out duration bounds; faster flicks leave faster. */
+  flyOutMin: 140,
+  flyOutMax: 260,
+  /** The card underneath grows from this scale to 1 as the top card leaves. */
+  nextScale: 0.96,
+  /** Apple's scroll deceleration, used to project where a flick would come to rest. */
+  deceleration: 0.998,
+} as const;

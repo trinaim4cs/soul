@@ -50,3 +50,19 @@ Tokens are in `src/theme/motion.ts`. The values follow the `expo-animation` skil
 | Distance changes | 11 | cross-fade of bucketed text only (no counting animation) |
 
 Feel is judged on a **release build** on the slowest available Android device. Dev builds are not a performance environment.
+
+## Discover swipe card (Phase 6)
+
+- **Gate:** tens of times a day, purpose **feedback** plus **spatial consistency**: the card goes where the finger sends it.
+- **Tool:** `Gesture.Pan` + shared values + `useAnimatedStyle` on the UI thread; `scheduleOnRN` only when a fly-out finishes. `Gesture.Exclusive(pan, tap)`: a tap opens the full profile.
+- **Follows the finger** on both axes; the card tilts up to `swipe.maxRotationDeg` (10°) at one card-width.
+- **Commit** when release position plus projected momentum (Apple's deceleration, `swipe.deceleration`) passes `swipe.commitShare` (35 %) of the card width: a quick flick commits, a slow drag does not.
+- **Fly-out:** `easings.out`, 140 to 260 ms depending on the flick's speed; then the like or pass is saved (optimistic, restored on network failure).
+- **Return:** `springs.release` (400 ms, damping 0.8) carrying the release velocity.
+- **Interruptible:** a new touch picks the card up where it is.
+- **The card underneath** scales from `swipe.nextScale` (0.96) to 1 as the top card travels.
+- **Stamps:** LIKE (accent) and PASS fade in with travel.
+- **Buttons** send the card off the same way; screen readers get Like/Pass actions and a tap to open.
+- **Reduced motion:** no tilt; the leaving card disappears instead of flying.
+- **Verified on the Android emulator:** follows, springs back short of the line, left and right commits, fast flicks, mid-drag state, buttons.
+

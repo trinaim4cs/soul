@@ -5,7 +5,7 @@ import { radii, useTheme } from '@/theme';
 
 type Props = {
   width?: DimensionValue;
-  height: number;
+  height: DimensionValue;
   radius?: number;
   style?: StyleProp<ViewStyle>;
 };

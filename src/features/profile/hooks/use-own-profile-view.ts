@@ -1,6 +1,6 @@
 import type { ProfileViewModel } from '@/features/profile/components/profile-view';
 import { BLURRED_BUCKET, PHOTO_BUCKET, usePhotoUrls } from '@/features/profile/api/profile';
-import { zodiacLabel, type MyProfile } from '@/features/profile/model/profile';
+import { GENDER_LABEL, zodiacLabel, type MyProfile } from '@/features/profile/model/profile';
 
 /**
  * The owner's profile as other students will see it: anonymous mode swaps in the tiny
@@ -17,6 +17,7 @@ export function useOwnProfileView(profile: MyProfile | undefined): ProfileViewMo
   return {
     name: anonymous ? null : profile.display_name,
     age: profile.age,
+    gender: profile.gender ? GENDER_LABEL[profile.gender] : null,
     verified: profile.verified,
     hook: profile.hook,
     about: profile.about,

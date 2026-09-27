@@ -13,7 +13,7 @@ Skills per phase come from `skills/SOUL_SKILL_MAP.md`. `soul-audit` is enabled o
 | 4 | SRMIST auth (rules → email → OTP → 18+) | done (Android + iPhone-size web verified) |
 | P | Platform amendment: web/PWA target, service adapters, icon font, `/download` + `/install` | done |
 | 5 | Profile | done (Android emulator + iPhone-size web) |
-| 6 | Discovery (location-independent) | todo |
+| 6 | Discovery (location-independent) | built; web + Android verified; Android icon-font rebuild pending |
 | 7 | Swipes + plans | todo |
 | 8 | Matching | todo |
 | 9 | Chat | todo |
@@ -225,6 +225,37 @@ Skills per phase come from `skills/SOUL_SKILL_MAP.md`. `soul-audit` is enabled o
 - Automated photo checks (C-30).
 - Release permission review (Phase 20): `SYSTEM_ALERT_WINDOW`, `USE_BIOMETRIC` and `USE_FINGERPRINT` come from the dev client and libraries.
 - Expo's dev "Tools" bubble overlaps the settings button in dev builds only.
+
+## Phase 6: Discovery (2026-09-27)
+
+**Server:** migration `…0800_discovery.sql`:
+- `likes` and `passes` tables.
+- `discovery_feed`, `get_profile_card`, `swipe_right` (idempotent) and `swipe_left`.
+- Visibility helpers, plus Storage policies so other students' photos can be signed only under the same rule (D-042).
+
+**App:**
+- Discover tab: swipe deck with the next card underneath, Pass and Like buttons, loading, empty ("all caught up", adjust filters, refresh), error and not-eligible states.
+- Full profile page with Pass and Like.
+- Filters sheet: age steppers, show me, zodiac. Settings → Discovery preferences.
+- Deck store: optimistic swipes restored on failure, paging before the queue runs low, and late pages from an older deck ignored.
+- New pieces: `SoulChip`, `PhotoScrim`, `SoulButton` `accent`, `swipe` motion tokens, `containerStyle`.
+- Local seed: `python scripts/seed-local-discovery.py` makes 12 neutral candidates (`--remove` to delete).
+
+**Verified:**
+- pgTAP 115/115, `db:verify` 28/28 (real Storage signing rules), 77 unit tests including the deck store.
+- On web, the feed renders with the next card, the gradient and signed photos.
+- On the Android emulator:
+  - Real flicks commit likes and passes, short drags spring back, the mid-drag stamp and tilt show, and the buttons commit.
+  - Anonymous cards are blurred with no name.
+  - Filters save and refresh the deck; the full profile page likes; the empty state shows.
+
+**Fixed during testing:**
+- Name and age were one nested text, and Android once dropped the age. They are now separate texts, so a long name truncates while the age stays visible.
+- Pass and Like on the profile page did not share the row (layout on the inner view); fixed with `containerStyle`.
+- A deck refresh while an older page was loading could stay stuck on "loading".
+- The next card was announced to screen readers on the web.
+
+**Open:** the new `remove` icon needs the Android rebuild that embeds the icon font.
 
 ---
 

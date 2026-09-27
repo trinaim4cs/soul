@@ -1,5 +1,5 @@
-import { ShellPlaceholder } from '@/components/shell-placeholder';
+import { DiscoverScreen } from '@/features/discovery/screens/discover-screen';
 
 export default function DiscoverRoute() {
-  return <ShellPlaceholder title="Discover" phase={6} />;
+  return <DiscoverScreen />;
 }

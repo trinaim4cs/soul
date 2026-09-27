@@ -59,6 +59,8 @@ export type ColorTokens = {
   scrim: string;
   /** Photo overlay for text legibility on imagery. */
   photoScrim: string;
+  /** Bottom-up fade on photos (CSS linear-gradient), behind text on swipe cards. */
+  photoGradient: string;
   onPhoto: string;
   /** Like, match and heart moments only (D-026). */
   accent: string;
@@ -92,6 +94,7 @@ export const lightColors: ColorTokens = {
   skeletonHighlight: grey[50],
   scrim: 'rgba(0, 0, 0, 0.48)',
   photoScrim: 'rgba(0, 0, 0, 0.42)',
+  photoGradient: 'linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.72) 100%)',
   onPhoto: grey[0],
   accent: romance.wine,
   onAccent: grey[0],
@@ -121,6 +124,7 @@ export const darkColors: ColorTokens = {
   skeletonHighlight: grey[850],
   scrim: 'rgba(0, 0, 0, 0.64)',
   photoScrim: 'rgba(0, 0, 0, 0.42)',
+  photoGradient: 'linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.72) 100%)',
   onPhoto: grey[0],
   accent: romance.rose,
   onAccent: grey[950],

@@ -10,13 +10,15 @@ Postgres 17 + PostGIS on Supabase. All changes go through migrations in `supabas
 | `private` | **no** | security helpers and trigger functions; future restricted tables (Instant Meet private location state) |
 | `auth`, `storage` | managed by Supabase | users, sessions, storage objects |
 
-## Tables (Phases 3 and 5)
+## Tables (Phases 3, 5 and 6)
 
 | Table | Client access | Notes |
 |---|---|---|
 | `account_private` | owner **read** only | account state; SRMIST email verified time (from OTP); accepted terms version; self-declared date of birth (18+ check constraint, set once via `set_date_of_birth`); under-18 lock time; profile-complete time. Written only by server functions and triggers |
 | `profiles` | owner read; owner **update of editable columns only** (`display_name` 1 to 30, `hook` ≤ 30, `about` ≤ 1000, `gender`, `zodiac_visible`, `privacy_mode`) | other users will only ever see projections from discovery and match functions |
 | `preferences` | owner read; owner update of `show_me`, `min_age`, `max_age`, `zodiac_filter` | private "who I want to see" and discovery filters; 18+ enforced by a check; created for every account |
+| `likes` | liker reads own rows | written only by `swipe_right`; one per pair; unique idempotency key |
+| `passes` | passer reads own rows | written only by `swipe_left`; `passed_at` drives the 30-day cooldown |
 | `profile_photos` | owner **read** only | rows are written only by `add_profile_photo`, `remove_profile_photo`, `reorder_profile_photos`; `status` pending/approved/rejected; positions 0 to 5 (unique, deferred); paths must be the owner's own `{uid}/{id}.jpg` |
 | `blocks` | blocker reads own rows | stored one-way, effective both ways (`private.is_blocked`); created only by server functions |
 | `admin_roles` | none | checked by `private.has_admin_role` |
@@ -39,17 +41,21 @@ Enums: `account_state`, `privacy_mode` (normal, private, anonymous), `admin_role
 - `public.remove_profile_photo(id)`: a completed profile keeps at least one photo; returns the object names for the client to delete.
 - `public.reorder_profile_photos(ids)`: the full set in the new order; the first becomes the main photo.
 - `public.submit_profile()`: checks the earlier steps and the required fields (photo, name, gender, show me, hook) and marks the profile step complete, or returns the missing fields.
+- `public.discovery_feed(exclude, limit)`: the next candidates as whitelisted cards (D-042); `not_eligible` for accounts that are not.
+- `public.get_profile_card(target)`: one card, only if the caller may see it.
+- `public.swipe_right(target, idempotency_key)` / `public.swipe_left(target)`: like and pass, re-checking visibility.
+- `private.is_eligible(uid)`, `private.can_view_profile(viewer, candidate)`, `private.profile_card(uid)`, `private.can_view_photo_object(bucket, name)` (the last is the only private function callable by `authenticated`, because Storage policies run as the caller).
 - `public.get_my_profile()`: the owner's own profile with derived age and zodiac, never the date of birth.
 - `private.is_blocked(a, b)` and `private.has_admin_role(uid, minimum)` are SECURITY DEFINER with a pinned `search_path` and are not executable by API roles.
 
 ## Storage
 
-Four private buckets: `profile-photos` and `profile-photos-blurred` (owner-folder policies: the owner writes and reads only `{uid}/…`), `report-evidence` and `chat-media` (no client policies). Other users receive photos only as short-lived signed URLs from server functions (Phase 6).
+Four private buckets: `profile-photos` and `profile-photos-blurred` (owner-folder policies: the owner writes and reads only `{uid}/…`), `report-evidence` and `chat-media` (no client policies). Other students can sign (and so read) a photo only when `private.can_view_photo_object` allows it: approved, visible to them under D-042, and the blurred copy only for anonymous profiles.
 
 ## Tests
 
-- `supabase/tests/database/*.test.sql` (pgTAP): **77 assertions pass across 4 files** (Phase 5 adds 27: photo registration and limits, no self-approval, review flag, reorder and removal rules, completion, derived age and zodiac, cross-account isolation), including the SRMIST domain gate, terms versions, 18+ with lockout, and terms recorded at sign-up. The foundation file covers RLS forced everywhere, provisioning, anon denial, own-row-only reads, blocked self-verification, blocked account-state changes, column-limited profile edits, cross-account update isolation, unreadable server tables, hidden config, incomplete default status, and no public buckets.
-- `npm run db:verify` runs an end-to-end HTTP check against the local stack: **16/16 pass**. With the real Auth service, gmail and look-alike domains are refused, the OTP email is delivered, wrong codes are rejected, the correct code signs in and marks email verified, and replay is rejected. It covers the RPC via PostgREST, self-verification denied (42501), cross-account read denied, own hook edit, anon denied, and the Edge Function authenticated (200) and unauthenticated (401).
+- `supabase/tests/database/*.test.sql` (pgTAP): **115 assertions pass across 5 files** (Phase 6 adds 38: every visibility rule with 16 fixture accounts, anonymous cards, likes and passes, idempotency, cooldown, zodiac inference, Storage reads) (Phase 5 adds 27: photo registration and limits, no self-approval, review flag, reorder and removal rules, completion, derived age and zodiac, cross-account isolation), including the SRMIST domain gate, terms versions, 18+ with lockout, and terms recorded at sign-up. The foundation file covers RLS forced everywhere, provisioning, anon denial, own-row-only reads, blocked self-verification, blocked account-state changes, column-limited profile edits, cross-account update isolation, unreadable server tables, hidden config, incomplete default status, and no public buckets.
+- `npm run db:verify` runs an end-to-end HTTP check against the local stack: **28/28 pass** (Phase 6 adds photo upload and registration, cross-folder upload refused, the feed, Storage signing for a visible profile, refusal for signed-out, private and anonymous originals, and a like). With the real Auth service, gmail and look-alike domains are refused, the OTP email is delivered, wrong codes are rejected, the correct code signs in and marks email verified, and replay is rejected. It covers the RPC via PostgREST, self-verification denied (42501), cross-account read denied, own hook edit, anon denied, and the Edge Function authenticated (200) and unauthenticated (401).
 
 ## Workflow
 

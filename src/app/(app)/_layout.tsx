@@ -1,6 +1,6 @@
 import { Stack } from 'expo-router';
 
-import { fontFamily, useTheme } from '@/theme';
+import { fontFamily, radii, useTheme } from '@/theme';
 
 /** Tabs at the root; profile and settings screens push over them with a plain back header. */
 export default function AppLayout() {
@@ -18,6 +18,17 @@ export default function AppLayout() {
       screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background } }}>
       <Stack.Screen name="(tabs)" />
       <Stack.Screen name="profile/edit" options={pageHeader} />
+      <Stack.Screen name="profile/[id]" options={pageHeader} />
+      <Stack.Screen
+        name="filters"
+        options={{
+          ...pageHeader,
+          presentation: 'formSheet',
+          sheetAllowedDetents: [0.92],
+          sheetGrabberVisible: true,
+          sheetCornerRadius: radii.xl,
+        }}
+      />
       <Stack.Screen name="settings/index" options={pageHeader} />
       <Stack.Screen name="settings/privacy" options={pageHeader} />
     </Stack>

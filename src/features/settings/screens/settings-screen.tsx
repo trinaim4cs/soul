@@ -25,6 +25,12 @@ export function SettingsScreen() {
           onPress={() => router.push('/profile/edit')}
         />
         <SettingsRow
+          icon="tune"
+          label="Discovery preferences"
+          detail="Age, who you see, zodiac"
+          onPress={() => router.push('/filters')}
+        />
+        <SettingsRow
           icon="visibility_off"
           label="Privacy"
           detail="Visibility, anonymous mode, zodiac"
