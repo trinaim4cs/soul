@@ -77,7 +77,7 @@
     "testPathIgnorePatterns": [
       "/node_modules/",
       "/skills/",
-      "/supabase/"
+      "/supabase/(?!functions/_shared/)"
     ]
   }
 }

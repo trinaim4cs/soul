@@ -14,6 +14,7 @@ const ERROR_COPY: Record<string, string> = {
   too_many_photos: 'You can have up to 6 photos. Remove one to add another.',
   last_photo: 'Your profile needs at least one photo.',
   invalid_size: 'That photo is too small. Choose a larger one.',
+  invalid_image: "That file isn't a photo we can use. Try taking a new one.",
 };
 const FALLBACK = "Couldn't save that photo. Check your connection and try again.";
 

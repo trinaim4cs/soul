@@ -95,63 +95,68 @@ export type PhotoSource = 'camera' | 'library';
 
 type AddPhotoResult =
   | { ok: true; status: ProfilePhoto['status']; position: number }
-  | { ok: false; reason: 'invalid' | 'invalid_size' | 'upload_missing' | 'too_many_photos' };
+  | {
+      ok: false;
+      reason:
+        | 'invalid'
+        | 'invalid_size'
+        | 'invalid_image'
+        | 'upload_missing'
+        | 'duplicate'
+        | 'too_many_photos';
+    };
+
+/** Private inbox the app uploads into; only the server publishes photos (DECISIONS D-043). */
+const UPLOAD_BUCKET = 'photo-uploads';
+
+async function invokePhotos<T>(body: Record<string, string>): Promise<T> {
+  const { data, error } = await supabase.functions.invoke<T>('profile-photos', { body });
+  if (error || !data) throw error ?? new Error('photo_request_failed');
+  return data;
+}
 
 /**
- * Upload pipeline: process on the device (crop, resize, strip metadata, tiny blurred copy),
- * upload both files into the user's own folders, then ask the server to register the photo.
- * The server checks the files exist and applies the photo limit and review rule.
+ * Upload pipeline: process on the device (crop, resize, re-encode, tiny blurred copy) and
+ * upload both files into the private inbox. The `profile-photos` Edge Function then checks
+ * each file, strips any metadata again, publishes clean copies and registers the photo,
+ * applying the photo limit and review rule. The device work is a convenience; the server
+ * check is the one that counts.
  */
 export async function addPhoto(userId: string, picked: PickedPhoto, source: PhotoSource) {
   const processed = await processPhoto(picked);
   const id = randomUUID();
-  const path = `${userId}/${id}.jpg`;
+  const fullPath = `${userId}/${id}.jpg`;
+  const tinyPath = `${userId}/${id}.tiny.jpg`;
   const upload = { contentType: 'image/jpeg', upsert: false } as const;
+  const inbox = supabase.storage.from(UPLOAD_BUCKET);
 
-  const full = await supabase.storage
-    .from(PHOTO_BUCKET)
-    .upload(path, base64ToBytes(processed.full.base64), upload);
+  const full = await inbox.upload(fullPath, base64ToBytes(processed.full.base64), upload);
   if (full.error) throw full.error;
-  const tiny = await supabase.storage
-    .from(BLURRED_BUCKET)
-    .upload(path, base64ToBytes(processed.tiny.base64), upload);
+  const tiny = await inbox.upload(tinyPath, base64ToBytes(processed.tiny.base64), upload);
   if (tiny.error) {
-    await supabase.storage.from(PHOTO_BUCKET).remove([path]);
+    await inbox.remove([fullPath]);
     throw tiny.error;
   }
 
-  const { data, error } = await supabase.rpc('add_profile_photo', {
-    p_id: id,
-    p_width: processed.full.width,
-    p_height: processed.full.height,
-    p_source: source,
-  });
-  const result = data as AddPhotoResult | null;
-  if (error || !result?.ok) {
-    await Promise.all([
-      supabase.storage.from(PHOTO_BUCKET).remove([path]),
-      supabase.storage.from(BLURRED_BUCKET).remove([path]),
-    ]);
-    if (error) throw error;
-    throw new Error(result && !result.ok ? result.reason : 'add_photo_failed');
+  let result: AddPhotoResult;
+  try {
+    result = await invokePhotos<AddPhotoResult>({ action: 'add', id, source });
+  } catch (caught) {
+    // The server empties the inbox itself; this only matters if the request never arrived.
+    await inbox.remove([fullPath, tinyPath]);
+    throw caught;
   }
+  if (!result.ok) throw new Error(result.reason);
   await refreshProfile(userId);
   return result;
 }
 
-type RemovePhotoResult =
-  | { ok: true; storage_path: string; blurred_path: string }
-  | { ok: false; reason: 'not_found' | 'last_photo' };
+type RemovePhotoResult = { ok: true } | { ok: false; reason: 'not_found' | 'last_photo' };
 
+/** The server removes the row and deletes both published files. */
 export async function removePhoto(userId: string, photoId: string) {
-  const { data, error } = await supabase.rpc('remove_profile_photo', { p_id: photoId });
-  if (error) throw error;
-  const result = data as RemovePhotoResult;
+  const result = await invokePhotos<RemovePhotoResult>({ action: 'remove', id: photoId });
   if (!result.ok) throw new Error(result.reason);
-  await Promise.all([
-    supabase.storage.from(PHOTO_BUCKET).remove([result.storage_path]),
-    supabase.storage.from(BLURRED_BUCKET).remove([result.blurred_path]),
-  ]);
   await refreshProfile(userId);
 }
 

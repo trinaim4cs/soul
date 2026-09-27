@@ -25,8 +25,10 @@ npx supabase link --project-ref bdwuhrkgrwzpwqhgsngi       # asks for the databa
 npx supabase db push                                      # applies supabase/migrations in order
 npx supabase config diff                                  # review auth settings before pushing
 npx supabase config push                                  # OTP length/expiry, email template, before_user_created hook
-npx supabase functions deploy health
+npx supabase functions deploy health profile-photos
 ```
+
+Without `profile-photos` deployed, photos cannot be added (D-043).
 
 Then in the dashboard:
 - **Authentication → URL configuration:** set Site URL to the Vercel URL.
@@ -39,10 +41,13 @@ Never apply schema changes by hand; every change is a migration.
 
 `supabase/functions/`:
 
-- `_shared/http.ts`: JSON responses; `HttpError` with a safe error envelope `{ error: { code, message } }`; no internal details in responses; logs without payloads.
-- `_shared/auth.ts`: `requireUser(req)` builds a caller-scoped client, so RLS still applies. `serviceClient()` is for server-authoritative writes only.
+- `_shared/http.ts`: JSON responses with CORS headers and preflight handling (D-044); `HttpError` with a safe error envelope `{ error: { code, message } }`; no internal details in responses; logs without payloads.
+- `_shared/auth.ts`: `requireUser(req)` builds a caller-scoped client, so RLS still applies. `serviceClient()` is for server-authoritative writes only. Both read the new key dictionaries when present, else the legacy keys.
+- `_shared/jpeg.ts`: JPEG structure check and metadata stripping (pure, no imports; unit-tested under Jest with `scripts/fixtures`).
 - `_shared/validate.ts`: Zod body parsing that rejects anything unexpected.
 - `health/`: smoke test (authenticated returns 200 with the caller's id; unauthenticated returns 401).
+- `profile-photos/`: `{ action: 'add', id, source }` checks the inbox upload, strips metadata, publishes and registers the photo; `{ action: 'remove', id }` removes the row and both files (D-043).
+- `verify_jwt` is off for every function in `config.toml`; `requireUser` does the check (D-044). A new function needs its own `[functions.<name>]` entry, and the local stack must be restarted (`npm run db:stop` then `npm run db:start`) to serve it.
 
 ## Secrets
 

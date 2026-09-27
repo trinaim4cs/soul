@@ -52,20 +52,9 @@ describe('deriveAccountStatus', () => {
     ).toBe('restricted');
   });
 
-  it('never lets a signed-out user reach the app without the dev override', () => {
+  it('never lets a signed-out user reach the app', () => {
     expect(
       deriveAccountStatus({ sessionLoaded: true, hasSession: false, server: ready('eligible') }),
     ).toBe('signed-out');
-  });
-
-  it('applies the development preview override', () => {
-    expect(
-      deriveAccountStatus({
-        sessionLoaded: false,
-        hasSession: false,
-        server: { kind: 'pending' },
-        devOverride: 'eligible',
-      }),
-    ).toBe('eligible');
   });
 });

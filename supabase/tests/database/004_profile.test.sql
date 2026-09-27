@@ -2,7 +2,7 @@
 begin;
 create extension if not exists pgtap with schema extensions;
 set search_path = public, extensions;
-select plan(27);
+select plan(31);
 
 -- Fixtures, created as the database owner: two accounts past the email, terms and age steps.
 insert into auth.users (id, email, aud, role, email_confirmed_at) values
@@ -40,17 +40,30 @@ select throws_ok(
             'x', 'x', 0, 'approved', 'camera', 800, 1000)$$,
   '42501', null, 'photos cannot be inserted directly (no self-approval)');
 
-select is(public.add_profile_photo('10000000-0000-4000-8000-000000000099', 1080, 1350, 'camera') ->> 'reason',
+select throws_ok(
+  $$select public.add_profile_photo('00000000-0000-4000-8000-0000000000e1', '10000000-0000-4000-8000-000000000001', 1080, 1350, 'camera')$$,
+  '42501', null, 'the app cannot register photos itself (only the photo Edge Function can)');
+select throws_ok(
+  $$select public.remove_profile_photo('00000000-0000-4000-8000-0000000000e1', '10000000-0000-4000-8000-000000000001')$$,
+  '42501', null, 'the app cannot remove photo rows itself');
+
+-- ---------------------------------------------------------------- as the photo Edge Function
+set local role service_role;
+select is(public.add_profile_photo('00000000-0000-4000-8000-0000000000e1', '10000000-0000-4000-8000-000000000099', 1080, 1350, 'camera') ->> 'reason',
   'upload_missing', 'a photo without an uploaded object is refused');
-select is(public.add_profile_photo('10000000-0000-4000-8000-000000000001', 50, 50, 'camera') ->> 'reason',
+select is(public.add_profile_photo('00000000-0000-4000-8000-0000000000e1', '10000000-0000-4000-8000-000000000001', 50, 50, 'camera') ->> 'reason',
   'invalid_size', 'tiny images are refused');
-select is(public.add_profile_photo('10000000-0000-4000-8000-000000000001', 1080, 1350, 'screen') ->> 'reason',
+select is(public.add_profile_photo('00000000-0000-4000-8000-0000000000e1', '10000000-0000-4000-8000-000000000001', 1080, 1350, 'screen') ->> 'reason',
   'invalid', 'unknown sources are refused');
 
-select is(public.add_profile_photo('10000000-0000-4000-8000-000000000001', 1080, 1350, 'camera') ->> 'status',
+select is(public.add_profile_photo('00000000-0000-4000-8000-0000000000e1', '10000000-0000-4000-8000-000000000001', 1080, 1350, 'camera') ->> 'status',
   'approved', 'with review off, a registered photo is approved');
-select is(public.add_profile_photo('10000000-0000-4000-8000-000000000002', 1080, 1350, 'library') ->> 'position',
+select is(public.add_profile_photo('00000000-0000-4000-8000-0000000000e1', '10000000-0000-4000-8000-000000000002', 1080, 1350, 'library') ->> 'position',
   '1', 'the second photo takes the next position');
+select is(public.add_profile_photo('00000000-0000-4000-8000-0000000000e1', '10000000-0000-4000-8000-000000000002', 1080, 1350, 'library') ->> 'reason',
+  'duplicate', 'a photo registers only once');
+
+set local role authenticated;
 
 select throws_ok(
   $$update public.profile_photos set status = 'approved'$$,
@@ -81,12 +94,16 @@ select is((select id::text from public.profile_photos
            where user_id = '00000000-0000-4000-8000-0000000000e1' and position = 0),
   '10000000-0000-4000-8000-000000000002', 'the first id becomes the primary photo');
 
-select is(public.remove_profile_photo('10000000-0000-4000-8000-000000000002') ->> 'ok', 'true',
+set local role service_role;
+select is(public.remove_profile_photo('00000000-0000-4000-8000-0000000000e2', '10000000-0000-4000-8000-000000000002') ->> 'reason', 'not_found',
+  'a photo is removed only for its owner');
+select is(public.remove_profile_photo('00000000-0000-4000-8000-0000000000e1', '10000000-0000-4000-8000-000000000002') ->> 'ok', 'true',
   'a photo can be removed while another remains');
 select is((select position from public.profile_photos where id = '10000000-0000-4000-8000-000000000001'),
   0::smallint, 'positions close up after a removal');
-select is(public.remove_profile_photo('10000000-0000-4000-8000-000000000001') ->> 'reason', 'last_photo',
+select is(public.remove_profile_photo('00000000-0000-4000-8000-0000000000e1', '10000000-0000-4000-8000-000000000001') ->> 'reason', 'last_photo',
   'a completed profile keeps at least one photo');
+set local role authenticated;
 
 select is((public.get_my_profile() ->> 'age')::int,
   extract(year from age(current_date, date '2004-06-15'))::int, 'age is derived from the private date of birth');
@@ -97,8 +114,10 @@ select ok(not (public.get_my_profile() ? 'date_of_birth'), 'the date of birth is
 set local request.jwt.claims = '{"sub": "00000000-0000-4000-8000-0000000000e2", "role": "authenticated"}';
 
 select is((select count(*)::int from public.profile_photos), 0, 'another account cannot read User A''s photos');
-select is(public.add_profile_photo('10000000-0000-4000-8000-000000000003', 1080, 1350, 'camera') ->> 'reason',
-  'upload_missing', 'User B cannot register an object stored in User A''s folder');
+set local role service_role;
+select is(public.add_profile_photo('00000000-0000-4000-8000-0000000000e2', '10000000-0000-4000-8000-000000000003', 1080, 1350, 'camera') ->> 'reason',
+  'upload_missing', 'a photo is registered only from its owner''s own folder');
+set local role authenticated;
 update public.preferences set show_me = '{woman}' where user_id = '00000000-0000-4000-8000-0000000000e1';
 reset role;
 select is((select show_me from public.preferences where user_id = '00000000-0000-4000-8000-0000000000e1'),
@@ -106,9 +125,8 @@ select is((select show_me from public.preferences where user_id = '00000000-0000
 
 -- ---------------------------------------------------------------- review switched on
 update public.app_config set value = 'true' where key = 'photo_review_required';
-set local role authenticated;
-set local request.jwt.claims = '{"sub": "00000000-0000-4000-8000-0000000000e1", "role": "authenticated"}';
-select is(public.add_profile_photo('10000000-0000-4000-8000-000000000003', 1080, 1350, 'library') ->> 'status',
+set local role service_role;
+select is(public.add_profile_photo('00000000-0000-4000-8000-0000000000e1', '10000000-0000-4000-8000-000000000003', 1080, 1350, 'library') ->> 'status',
   'pending', 'with review on, new photos wait for a moderator');
 
 select * from finish();

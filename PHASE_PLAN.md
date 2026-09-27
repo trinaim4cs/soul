@@ -263,6 +263,25 @@ Skills per phase come from `skills/SOUL_SKILL_MAP.md`. `soul-audit` is enabled o
 
 **Open:** the new `remove` icon needs the Android rebuild that embeds the icon font.
 
+## Hardening of earlier phases (2026-09-28)
+
+The owner asked for no compromises left behind in finished phases. Found and fixed:
+
+- **Photos were trusted to the app (Phase 5).** Photo intake is now server-side (D-043). The app uploads to a private inbox, and the `profile-photos` Edge Function publishes the photo:
+  - checks the JPEG structure and reads the real size
+  - strips EXIF/GPS, XMP, ICC, comments and trailing bytes (pixels unchanged)
+  - writes the published copies itself and registers the photo
+
+  Clients can no longer write, delete or swap published photos. Removal goes through the function too.
+- **Edge Functions had no CORS (Phase 3).** The PWA could not have called any function from a browser. Every function now answers preflights and sends CORS headers. The gateway `verify_jwt` is off, and `requireUser` checks the caller, so it works with the new JWT signing keys (D-044).
+- **A Phase 1 dev switch lingered.** `EXPO_PUBLIC_DEV_STATUS_OVERRIDE` was removed; the app reads exactly the three allowed variables (D-045).
+- **A discovery test depended on an empty database.** `005` now compares only its own fixtures, so local seed data cannot break it.
+
+**Verified:**
+- pgTAP 134/134 (new `006_photo_intake`), `db:verify` 39/39, 87 unit tests (including 11 JPEG tests on fixtures with EXIF, GPS, XMP, ICC, a comment and a trailing payload).
+- The cleaned fixtures decode with identical pixels (Pillow).
+- On web against the local stack, adding a photo went through the inbox and the function (`approved`, position 2), and removing it deleted the row and both files.
+
 ---
 
 ## Original per-phase plans (pre-spec-v2 numbering; kept for history)
@@ -376,3 +395,5 @@ Release build config, signing workflow (owner keystore, C-20), launcher icon (C-
 - 2026-09-27: Clean Android rebuild as `com.soul.srm` (old `app.soul.dev` uninstalled from the emulator); Alegreya Sans, SoulIcons, placeholder app icon and the release-signing guard verified in the generated project and on the emulator (Welcome, Rules, Email).
 - 2026-09-27: Phase 5 built and verified on web. C: free space fell to 8.8 GB (page file growth under memory pressure); the Android rebuild waits for space.
 - 2026-09-27: Phase 5 done: Android verified after a clean rebuild (camera upload, cross-platform sign-in, privacy, deep link). Freed 3 GB on C: by removing the Gradle 9.3.1 cache my first builds left in the user profile (builds now use D:).
+- 2026-09-27: Phase 6 built and verified on web (pane and real mobile Chrome in the emulator) and on Android; web footers now stay above the on-screen keyboard.
+- 2026-09-28: Hardening of earlier phases: server-side photo intake (D-043), Edge Function CORS and key handling (D-044), dev status override removed (D-045).

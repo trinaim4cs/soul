@@ -3,6 +3,7 @@
 // Identities are neutral test users and are deleted afterwards.
 import { execSync } from 'node:child_process';
 import { randomBytes, randomUUID } from 'node:crypto';
+import { readFileSync } from 'node:fs';
 
 import { createClient } from '@supabase/supabase-js';
 
@@ -12,6 +13,7 @@ if (!/^http:\/\/(127\.0\.0\.1|localhost):/.test(url)) {
   throw new Error(`Refusing to run against a non-local Supabase: ${url}`);
 }
 const admin = createClient(url, status.SERVICE_ROLE_KEY, { auth: { persistSession: false } });
+const fixture = (name) => new URL(`./fixtures/${name}`, import.meta.url);
 
 const results = [];
 const check = (name, ok, detail = '') => {
@@ -170,55 +172,129 @@ try {
       .eq('id', user.id);
     await user.client.from('preferences').update({ show_me: showMe }).eq('user_id', user.id);
   }
-  // A 1 x 1 JPEG: the server checks the objects exist in the owner's folders, not the pixels.
-  const jpeg = Buffer.from(
-    '/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=',
-    'base64',
-  );
-  const photoId = randomUUID();
-  const photoPath = `${userB.id}/${photoId}.jpg`;
-  const upload = await userB.client.storage
+  // Photo intake (D-043): the app uploads into its private inbox; the profile-photos Edge
+  // Function checks the file, strips metadata and publishes the clean copy.
+  const withMetadata = readFileSync(fixture('photo-with-metadata.jpg'));
+  const tinyJpeg = readFileSync(fixture('photo-tiny.jpg'));
+  const squareJpeg = readFileSync(fixture('photo-square.jpg'));
+  const jpegType = { contentType: 'image/jpeg' };
+  async function sendPhoto(user, full, tiny = tinyJpeg, source = 'camera') {
+    const id = randomUUID();
+    const inbox = user.client.storage.from('photo-uploads');
+    const a = await inbox.upload(`${user.id}/${id}.jpg`, full, jpegType);
+    const b = await inbox.upload(`${user.id}/${id}.tiny.jpg`, tiny, jpegType);
+    if (a.error || b.error) return { id, upload: a.error ?? b.error };
+    const { data, error } = await user.client.functions.invoke('profile-photos', {
+      body: { action: 'add', id, source },
+    });
+    return { id, result: data, error };
+  }
+  const inboxCount = async (user) =>
+    (await admin.storage.from('photo-uploads').list(user.id)).data?.length ?? -1;
+
+  const direct = await userB.client.storage
     .from('profile-photos')
-    .upload(photoPath, jpeg, { contentType: 'image/jpeg' });
-  const uploadTiny = await userB.client.storage
-    .from('profile-photos-blurred')
-    .upload(photoPath, jpeg, { contentType: 'image/jpeg' });
-  check(
-    'an owner can upload into their own photo folders',
-    !upload.error && !uploadTiny.error,
-    upload.error?.message,
-  );
+    .upload(`${userB.id}/${randomUUID()}.jpg`, withMetadata, jpegType);
+  check('the app cannot publish a photo directly', Boolean(direct.error));
   const intruder = await userA.client.storage
-    .from('profile-photos')
-    .upload(`${userB.id}/${randomUUID()}.jpg`, jpeg, { contentType: 'image/jpeg' });
-  check("nobody can upload into another user's photo folder", Boolean(intruder.error));
-  const registered = await userB.client.rpc('add_profile_photo', {
-    p_id: photoId,
-    p_width: 1080,
-    p_height: 1350,
-    p_source: 'camera',
+    .from('photo-uploads')
+    .upload(`${userB.id}/${randomUUID()}.jpg`, withMetadata, jpegType);
+  check("nobody can upload into another student's inbox", Boolean(intruder.error));
+
+  const sent = await sendPhoto(userB, withMetadata);
+  const photoId = sent.id;
+  const photoPath = `${userB.id}/${photoId}.jpg`;
+  check(
+    'an uploaded photo is checked, published and registered',
+    sent.result?.ok === true,
+    JSON.stringify(sent.result ?? sent.error?.message ?? sent.upload?.message),
+  );
+  const stored = await admin.storage.from('profile-photos').download(photoPath);
+  const storedBytes = Buffer.from((await stored.data?.arrayBuffer()) ?? new ArrayBuffer(0));
+  const leaked = [
+    'Exif',
+    'FixtureCam',
+    'SERIAL',
+    'fixture-xmp',
+    'ICC_PROFILE',
+    'fixture comment',
+    'TRAILING',
+  ].filter((text) => storedBytes.includes(Buffer.from(text, 'latin1')));
+  check(
+    'the published photo carries no metadata (EXIF, GPS, XMP, ICC, comments, trailing bytes)',
+    storedBytes.length > 0 && leaked.length === 0,
+    leaked.join(', '),
+  );
+  const row = (
+    await admin.from('profile_photos').select('width, height').eq('id', photoId).single()
+  ).data;
+  check(
+    'the photo size is read from the file by the server',
+    row?.width === 400 && row?.height === 500,
+    JSON.stringify(row),
+  );
+  check('the inbox is emptied after publishing', (await inboxCount(userB)) === 0);
+
+  const notImage = await sendPhoto(userB, Buffer.from('<html><script>x</script></html>'));
+  check(
+    'a file that is not a JPEG is refused',
+    notImage.result?.ok === false && notImage.result.reason === 'invalid_image',
+    JSON.stringify(notImage.result),
+  );
+  const square = await sendPhoto(userB, squareJpeg);
+  check(
+    'a photo that is not portrait 4:5 is refused',
+    square.result?.ok === false && square.result.reason === 'invalid_size',
+    JSON.stringify(square.result),
+  );
+  const bigTiny = await sendPhoto(userB, withMetadata, withMetadata);
+  check(
+    'the anonymous-mode copy must really be tiny',
+    bigTiny.result?.ok === false && bigTiny.result.reason === 'invalid_size',
+    JSON.stringify(bigTiny.result),
+  );
+  check('refused uploads leave nothing in the inbox', (await inboxCount(userB)) === 0);
+
+  await userB.client.storage.from('profile-photos').remove([photoPath]);
+  const survived = await admin.storage.from('profile-photos').list(userB.id);
+  check(
+    'the app cannot delete or swap a published photo',
+    (survived.data ?? []).some((o) => o.name === `${photoId}.jpg`),
+  );
+
+  const extra = await sendPhoto(userB, withMetadata, tinyJpeg, 'library');
+  const removed = await userB.client.functions.invoke('profile-photos', {
+    body: { action: 'remove', id: extra.id },
+  });
+  const afterRemove = await admin.storage.from('profile-photos').list(userB.id);
+  check(
+    'removing a photo deletes the row and both files',
+    removed.data?.ok === true &&
+      !(afterRemove.data ?? []).some((o) => o.name === `${extra.id}.jpg`),
+    JSON.stringify(removed.data),
+  );
+
+  const preflight = await fetch(`${url}/functions/v1/profile-photos`, {
+    method: 'OPTIONS',
+    headers: {
+      Origin: 'https://soul-example.vercel.app',
+      'Access-Control-Request-Method': 'POST',
+      'Access-Control-Request-Headers': 'authorization, content-type, x-client-info, apikey',
+    },
   });
   check(
-    'an uploaded photo is registered',
-    registered.data?.ok === true,
-    JSON.stringify(registered.data),
+    'the web app may call Edge Functions (CORS preflight)',
+    preflight.ok && preflight.headers.get('access-control-allow-origin') === '*',
+    `HTTP ${preflight.status}`,
+  );
+
+  const sentA = await sendPhoto(userA, withMetadata);
+  check(
+    'a second student can add a photo',
+    sentA.result?.ok === true,
+    JSON.stringify(sentA.result),
   );
   for (const user of [userA, userB]) {
-    if (user === userA) {
-      const aId = randomUUID();
-      await userA.client.storage
-        .from('profile-photos')
-        .upload(`${userA.id}/${aId}.jpg`, jpeg, { contentType: 'image/jpeg' });
-      await userA.client.storage
-        .from('profile-photos-blurred')
-        .upload(`${userA.id}/${aId}.jpg`, jpeg, { contentType: 'image/jpeg' });
-      await userA.client.rpc('add_profile_photo', {
-        p_id: aId,
-        p_width: 1080,
-        p_height: 1350,
-        p_source: 'camera',
-      });
-    }
     const submitted = await user.client.rpc('submit_profile');
     check(
       'a complete profile is accepted',
@@ -266,12 +342,15 @@ try {
     p_idempotency_key: randomUUID(),
   });
   check('a like is recorded through the API', like.data?.ok === true, JSON.stringify(like.data));
-
-  await userB.client.storage.from('profile-photos').remove([photoPath]);
-  await userB.client.storage.from('profile-photos-blurred').remove([photoPath]);
 } finally {
-  await admin.auth.admin.deleteUser(userA.id);
-  await admin.auth.admin.deleteUser(userB.id);
+  for (const user of [userA, userB]) {
+    for (const bucket of ['profile-photos', 'profile-photos-blurred', 'photo-uploads']) {
+      const listed = await admin.storage.from(bucket).list(user.id);
+      const names = (listed.data ?? []).map((o) => `${user.id}/${o.name}`);
+      if (names.length) await admin.storage.from(bucket).remove(names);
+    }
+    await admin.auth.admin.deleteUser(user.id);
+  }
 }
 
 const failed = results.filter((r) => !r.ok).length;

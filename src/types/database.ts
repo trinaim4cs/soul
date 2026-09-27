@@ -310,7 +310,7 @@ export type Database = {
     Functions: {
       accept_terms: { Args: { p_version: string }; Returns: Json };
       add_profile_photo: {
-        Args: { p_height: number; p_id: string; p_source: string; p_width: number };
+        Args: { p_height: number; p_id: string; p_source: string; p_user: string; p_width: number };
         Returns: Json;
       };
       discovery_feed: { Args: { p_exclude?: string[]; p_limit?: number }; Returns: Json };
@@ -318,7 +318,7 @@ export type Database = {
       get_my_status: { Args: Record<PropertyKey, never>; Returns: Json };
       get_profile_card: { Args: { p_target: string }; Returns: Json };
       hook_before_user_created: { Args: { event: Json }; Returns: Json };
-      remove_profile_photo: { Args: { p_id: string }; Returns: Json };
+      remove_profile_photo: { Args: { p_id: string; p_user: string }; Returns: Json };
       reorder_profile_photos: { Args: { p_ids: string[] }; Returns: Json };
       set_date_of_birth: { Args: { p_dob: string }; Returns: Json };
       submit_profile: { Args: Record<PropertyKey, never>; Returns: Json };

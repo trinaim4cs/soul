@@ -1,5 +1,3 @@
-import type { DevStatusOverride } from '@/lib/env';
-
 /**
  * Which route group the user may see. Only the server can declare an account `eligible`
  * (SECURITY_MODEL section 4); the client never promotes itself.
@@ -23,16 +21,9 @@ type Inputs = {
   sessionLoaded: boolean;
   hasSession: boolean;
   server: ServerStatusSnapshot;
-  devOverride?: DevStatusOverride;
 };
 
-export function deriveAccountStatus({
-  sessionLoaded,
-  hasSession,
-  server,
-  devOverride,
-}: Inputs): AccountStatus {
-  if (devOverride) return devOverride;
+export function deriveAccountStatus({ sessionLoaded, hasSession, server }: Inputs): AccountStatus {
   if (!sessionLoaded) return 'loading';
   if (!hasSession) return 'signed-out';
   if (server.kind === 'pending') return 'loading';

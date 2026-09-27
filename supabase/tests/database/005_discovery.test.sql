@@ -73,16 +73,19 @@ set local request.jwt.claims = '{"sub": "0000000f-0000-4000-8000-000000000001", 
 select is(public.get_my_status() ->> 'eligibility', 'eligible', 'get_my_status agrees with is_eligible');
 select is(public.discovery_feed() ->> 'ok', 'true', 'an eligible viewer gets a feed');
 
+-- Only this file's fixtures are compared, so local seed data (scripts/seed-local-discovery.py)
+-- cannot change the result.
 create temp table feed_ids on commit drop as
   select (c.card ->> 'id')::uuid as id, c.n
-  from jsonb_array_elements(public.discovery_feed() -> 'cards') with ordinality as c(card, n);
+  from jsonb_array_elements(public.discovery_feed(p_limit => 50) -> 'cards') with ordinality as c(card, n)
+  where c.card ->> 'id' like '0000000f-%';
 
 select set_eq('select id from feed_ids', $$values
   ('0000000f-0000-4000-8000-00000000000a'::uuid), ('0000000f-0000-4000-8000-0000000000f2'),
   ('0000000f-0000-4000-8000-0000000000f3'), ('0000000f-0000-4000-8000-0000000000f7'),
   ('0000000f-0000-4000-8000-0000000000f8'), ('0000000f-0000-4000-8000-0000000000fa')$$,
   'the feed holds exactly the compatible, visible, unblocked candidates');
-select is((select id from feed_ids where n = 1), '0000000f-0000-4000-8000-0000000000fa'::uuid,
+select is((select id from feed_ids order by n limit 1), '0000000f-0000-4000-8000-0000000000fa'::uuid,
   'new profiles come first');
 
 select is((select c from jsonb_array_elements(public.discovery_feed() -> 'cards') c

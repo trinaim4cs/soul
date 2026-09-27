@@ -28,10 +28,22 @@ export class HttpError extends Error {
   }
 }
 
+/**
+ * CORS for the web app (PWA). Any origin may call: requests carry the user's bearer token,
+ * never cookies, so another site cannot act for a signed-in student. Native apps send no
+ * Origin and ignore these headers.
+ */
+const CORS_HEADERS = {
+  'access-control-allow-origin': '*',
+  'access-control-allow-headers': 'authorization, x-client-info, apikey, content-type, x-region',
+  'access-control-allow-methods': 'GET, POST, OPTIONS',
+  'access-control-max-age': '86400',
+};
+
 export function json(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { 'content-type': 'application/json; charset=utf-8' },
+    headers: { ...CORS_HEADERS, 'content-type': 'application/json; charset=utf-8' },
   });
 }
 
@@ -49,6 +61,9 @@ export function handler(
   fn: (req: Request) => Promise<Response>,
 ): (req: Request) => Promise<Response> {
   return async (req) => {
+    if (req.method === 'OPTIONS') {
+      return new Response(null, { status: 204, headers: CORS_HEADERS });
+    }
     try {
       return await fn(req);
     } catch (error) {

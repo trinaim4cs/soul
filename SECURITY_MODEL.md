@@ -24,6 +24,8 @@ This is the working security model. It will be updated every phase and audited i
 
 - The **client** holds only the Supabase URL, the publishable key, and the user's own session: Keystore-backed SecureStore on Android (D-006), `localStorage` on the web (D-040, section 12).
 - **Edge Functions** hold the service role, the payment provider's API and webhook secrets, FCM credentials and the VAPID private key as Supabase secrets. They verify the caller's JWT, validate input with Zod, then act.
+  - The gateway's `verify_jwt` is off (`supabase/config.toml`). Every function starts with `requireUser`, which asks Auth to validate the token, so it works with any JWT signing key and also rejects revoked sessions. It also lets CORS preflights reach the function.
+  - CORS allows any origin. Calls carry a bearer token, never cookies, so another site cannot act for a signed-in student. Native apps send no `Origin` header.
 - **SECURITY DEFINER SQL functions** run fixed logic with elevated rights. Each one pins `search_path`, checks `auth.uid()`, validates arguments, and is granted only to `authenticated`.
 
 ## 3. Data classification
@@ -54,6 +56,7 @@ The client can request these; only the server decides them. Each is a SECURITY D
 | Instant entitlement, Instant visibility, session start/end | Instant functions |
 | Other user's distance and bearing | `instant_proximity` function returns buckets only |
 | Date confirmed, Hot Person badge | confirmation function + recompute job |
+| Photo published and registered | `profile-photos` Edge Function: JPEG structure, real size read from the file, metadata stripped, clean copy written by the server (D-043) |
 | Suspension, ban, photo or verification rejection | admin functions with role check + audit log |
 
 **Column-level guard:** status and entitlement columns (`verification_status`, `is_verified`, `plan_id`, `hot_person_active`, `account_state`, and similar) sit in tables or columns with **no client UPDATE grant**. Users edit profile text through a narrow RPC or through policies limited to editable columns.
@@ -72,12 +75,20 @@ The client can request these; only the server decides them. Each is a SECURITY D
 
 | Bucket | Public | Write | Read |
 |---|---|---|---|
-| `profile-photos` | no | owner uploads to `{uid}/…`; registered by `add_profile_photo` | owner; other students only via signed URLs that Storage issues when `can_view_photo_object` passes (approved, visible under D-042, not anonymous) |
-| `profile-photos-blurred` | no | owner uploads the tiny (24 px) anonymous-mode copy to `{uid}/…` | owner; others via signed URLs from server functions |
+| `photo-uploads` (inbox) | no | owner uploads `{uid}/{id}.jpg` and `{uid}/{id}.tiny.jpg` only; JPEG, 3 MB, at most 4 objects waiting | owner (to clean up); emptied by the `profile-photos` function |
+| `profile-photos` | no | **server only**: the `profile-photos` Edge Function writes the checked, metadata-free copy (D-043) | owner; other students only via signed URLs that Storage issues when `can_view_photo_object` passes (approved, visible under D-042, not anonymous) |
+| `profile-photos-blurred` | no | **server only**: the checked tiny (at most 32 × 40 px) anonymous-mode copy | owner; others via signed URLs under the same rule |
 | `report-evidence` | no | via report function | service role only |
 | `chat-media` (feature-flagged) | no | conversation members, after moderation | conversation members via signed URLs |
 
-Photos are re-encoded on the device before upload (crop, resize, JPEG), which strips EXIF including GPS; the buckets restrict MIME type and size, and `add_profile_photo` only registers objects in the caller's own folder, up to 6. A tampered client could skip the re-encode, but only for its own photo. Server-side re-encoding and automated checks are C-30.
+Photos are re-encoded on the device (crop, resize, JPEG), but that is only a convenience: a tampered app could skip it. The server check is the one that counts (D-043):
+- The `profile-photos` Edge Function reads the upload from the inbox and refuses anything that is not a well-formed JPEG (baseline or progressive, 8-bit, 1 or 3 components).
+- It reads the real width and height from the file (the app's numbers are not used), requires portrait 4:5 from 200 to 1080 px wide, and a tiny copy of at most 32 × 40 px.
+- It rebuilds the file from the decoding segments only. EXIF (GPS, camera serials), XMP, ICC, comments, thumbnails and any bytes after the end marker are dropped. Pixels are unchanged.
+- It writes the clean copies itself, registers the photo (`add_profile_photo`, service role only) and empties the inbox.
+- Clients cannot write or delete published objects, so a registered photo cannot be swapped later. Removal also goes through the function.
+
+Automated face, lighting and one-subject checks are C-30 (Phase 13, with the review queue).
 
 ## 7. Abuse and attack controls
 

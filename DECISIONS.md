@@ -6,6 +6,28 @@ Status values: `accepted` · `default, confirm` · `open`.
 
 ---
 
+## Hardening of earlier phases (2026-09-28)
+
+### D-043 Server-side photo intake
+- **Problem:** photos were cleaned only on the device (crop, resize, re-encode), and the app wrote the published files itself. A tampered APK could publish a file with GPS EXIF, a non-image, or swap a registered photo for different bytes later.
+- **Now:**
+  - The app uploads into a private inbox bucket, `photo-uploads`. It holds JPEG only, 3 MB at most, only `{uid}/{id}.jpg` and `{uid}/{id}.tiny.jpg`, and at most 4 files waiting per account.
+  - The `profile-photos` Edge Function checks the JPEG structure and reads the real size. It requires portrait 4:5 from 200 to 1080 px wide, and a tiny copy of at most 32 × 40 px.
+  - It strips every metadata segment without re-encoding, so pixels are unchanged. It then writes the published copies itself, registers the photo and empties the inbox.
+  - `add_profile_photo` and `remove_profile_photo` take the user id and run only as the service role. Clients have no write or delete access to `profile-photos` or `profile-photos-blurred`.
+- **Outcomes the app shows:** `invalid_image` ("That file isn't a photo we can use"), `invalid_size`, `too_many_photos`, `last_photo`.
+- **Not in scope here:** face, lighting and one-subject checks stay C-30. They plug into the same function (a low-confidence result sets the photo to `pending`) when the Phase 13 review queue exists.
+
+### D-044 Edge Function gateway and CORS
+- `verify_jwt = false` for every function. `requireUser` validates the token with Auth, which works with the new JWT signing keys, and preflights can reach the code.
+- CORS allows any origin, because calls use bearer tokens, never cookies. The PWA can call functions from any Vercel preview URL.
+- Service and publishable keys are read from `SUPABASE_SECRET_KEYS` / `SUPABASE_PUBLISHABLE_KEYS` when the platform provides them, else the legacy variables.
+
+### D-045 No development status override
+- The Phase 1 `EXPO_PUBLIC_DEV_STATUS_OVERRIDE` preview switch was removed. The app reads exactly three variables (`EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_ANON_KEY`, `APP_ENV`), and every route group needs a real server status. Local previews use the seeded local stack instead.
+
+---
+
 ## Phase 6 discovery (2026-09-27)
 
 ### D-042 Discovery rules (spec v2 sections 18 to 21)
@@ -374,4 +396,4 @@ The owner felt the strict monochrome direction read "too X" (too much like a soc
 | C-27 | Plan renewal: whether plans renew automatically (Razorpay subscriptions) or are bought one period at a time | Phase 12 | One period at a time, no auto-renewal **[DEFAULT, confirm]** (the purchases draft says so, marked "to confirm") |
 | C-28 | Email sender for OTP codes on the cloud project (custom SMTP). Supabase's built-in email reaches only project team members | **Before real students sign in** | Suggested without a domain: a dedicated SOUL Gmail account with an app password (SUPABASE.md); the owner enters it in the dashboard |
 | C-29 | Retention periods and legal placeholders in the drafts: deleted-data purge (proposed 30 days + 30 for backups), safety records (12 months, email fingerprint only), Instant Meet session records (90 days), refund timing (5 to 7 working days) | Legal review | Proposed values in the drafts |
-| C-30 | Automated photo checks (spec 14: visible face, lighting, one subject, no photo of a screen, no heavy manipulation). Not built yet: photos are approved on upload (review flag off) and moderated after reports. Options: on-device face detection (for example ML Kit on Android; nothing equivalent in iPhone Safari) or a server-side vision vendor. Never identity matching (D-027, D-032) | Before public launch | Report-driven review; review flag available |
+| C-30 | Automated photo checks (spec 14: visible face, lighting, one subject, no photo of a screen, no heavy manipulation). **Server intake built (D-043):** real-JPEG check, real size, metadata stripped, server-written copies. Still open: the face/lighting/subject checks, planned for Phase 13 inside the `profile-photos` function, with low-confidence photos going to `pending` for the Phase 15 review queue. Until then photos are approved on upload (review flag off) and moderated after reports. Options: on-device face detection as a hint only (the app is untrusted), or server-side detection. Never identity matching (D-027, D-032) | Before public launch | Report-driven review; review flag available |

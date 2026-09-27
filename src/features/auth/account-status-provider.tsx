@@ -7,7 +7,6 @@ import {
   type AccountStatus,
   type ServerStatusSnapshot,
 } from '@/features/auth/model/account-status';
-import { env } from '@/lib/env';
 import { supabase } from '@/lib/supabase';
 
 type SessionState = { loaded: boolean; session: Session | null };
@@ -68,7 +67,6 @@ export function AccountStatusProvider({ children }: { children: ReactNode }) {
     sessionLoaded: sessionState.loaded,
     hasSession: userId !== null,
     server,
-    devOverride: env.devStatusOverride,
   });
 
   // After the first settled status, keep showing the current route group while a new
