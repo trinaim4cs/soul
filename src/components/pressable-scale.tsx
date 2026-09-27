@@ -8,6 +8,8 @@ type Props = Omit<PressableProps, 'style' | 'children'> & {
   children: ReactNode;
   /** Style of the visible (scaling) surface. */
   style?: StyleProp<ViewStyle>;
+  /** Layout of the outer touch box (flex, percentage widths in grids). */
+  containerStyle?: StyleProp<ViewStyle>;
   /** Style applied while pressed, in addition to the scale (for example a fill change). */
   pressedStyle?: StyleProp<ViewStyle>;
   /** Full-width rows highlight instead of scaling: pass `false` with a `pressedStyle`. */
@@ -23,6 +25,7 @@ type Props = Omit<PressableProps, 'style' | 'children'> & {
 export function PressableScale({
   children,
   style,
+  containerStyle,
   pressedStyle,
   disabled,
   onPressIn,
@@ -38,6 +41,7 @@ export function PressableScale({
   return (
     <Pressable
       {...pressableProps}
+      style={containerStyle}
       disabled={disabled}
       hitSlop={hitSlop}
       pressRetentionOffset={16}

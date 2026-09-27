@@ -59,6 +59,7 @@ export function PhotoGrid({
           photo ? (
             <PressableScale
               key={photo.id}
+              containerStyle={styles.cell}
               style={[
                 styles.slot,
                 selection?.kind === 'photo' && selection.id === photo.id && styles.slotSelected,
@@ -90,6 +91,7 @@ export function PhotoGrid({
           ) : (
             <PressableScale
               key={`empty-${index}`}
+              containerStyle={styles.cell}
               style={[styles.slot, styles.empty]}
               disabled={busy || index !== firstEmpty}
               accessibilityRole="button"
@@ -169,8 +171,10 @@ const useStyles = createThemedStyles(({ colors }) =>
   StyleSheet.create({
     root: { gap: spacing.md },
     grid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs },
+    // The cell sizes the grid item; the slot fills it (percentages need the outer box).
+    cell: { width: '31.8%' },
     slot: {
-      width: '31.8%',
+      width: '100%',
       aspectRatio: sizes.photoAspect,
       borderRadius: radii.md,
       overflow: 'hidden',

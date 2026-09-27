@@ -12,7 +12,7 @@ Skills per phase come from `skills/SOUL_SKILL_MAP.md`. `soul-audit` is enabled o
 | 3 | Supabase foundation | done |
 | 4 | SRMIST auth (rules → email → OTP → 18+) | done (Android + iPhone-size web verified) |
 | P | Platform amendment: web/PWA target, service adapters, icon font, `/download` + `/install` | done |
-| 5 | Profile | built; verified on web (390 × 844); Android check pending a rebuild (C: disk space) |
+| 5 | Profile | done (Android emulator + iPhone-size web) |
 | 6 | Discovery (location-independent) | todo |
 | 7 | Swipes + plans | todo |
 | 8 | Matching | todo |
@@ -189,7 +189,7 @@ Skills per phase come from `skills/SOUL_SKILL_MAP.md`. `soul-audit` is enabled o
 
 **Exit:** typecheck, lint and tests green; the SRMIST sign-in flow passes in a 390 × 844 web viewport against local Supabase; the Android dev build shows icons; the service worker is verified not to cache private traffic.
 
-## Phase 5: Profile (built 2026-09-27)
+## Phase 5: Profile (done 2026-09-27)
 
 **Server:** migration `…0700_profile.sql`: `gender`, `preferences`, `profile_photos`, owner-folder policies for the blurred bucket, `add_profile_photo`, `remove_profile_photo`, `reorder_profile_photos`, `submit_profile`, `get_my_profile`, photo limit and review flag in `app_config` (D-041).
 
@@ -211,7 +211,20 @@ Skills per phase come from `skills/SOUL_SKILL_MAP.md`. `soul-audit` is enabled o
 
 **Fixed during testing:** quick consecutive form changes could overwrite each other (stale state); the form now uses functional updates. Save from an Edit page opened by link now returns to You.
 
-**Remaining:** Android rebuild (three new native modules) and an on-device check including the emulator camera; automated photo checks are C-30.
+**Verified on Android (emulator, clean rebuild with the new native modules):**
+- The web test account signs in on Android and lands in the tabs (same account on both platforms).
+- The You tab shows the photos, name, age, verified badge, hook, About Me and zodiac.
+- Camera path: permission prompt → emulator camera → crop → upload, stored as `camera`, 1080 × 1350, no EXIF.
+- Privacy radios and the zodiac switch report their checked state to Android accessibility.
+- The deep link `com.soul.srm://settings/privacy` opens the right screen.
+- The merged manifest has CAMERA and no RECORD_AUDIO.
+
+**Fixed on Android:** photo-grid tiles rendered tiny, because the percentage width sat on the inner animated view. `PressableScale` now takes a `containerStyle` for layout.
+
+**Carried forward:**
+- Automated photo checks (C-30).
+- Release permission review (Phase 20): `SYSTEM_ALERT_WINDOW`, `USE_BIOMETRIC` and `USE_FINGERPRINT` come from the dev client and libraries.
+- Expo's dev "Tools" bubble overlaps the settings button in dev builds only.
 
 ---
 
@@ -325,3 +338,4 @@ Release build config, signing workflow (owner keystore, C-20), launcher icon (C-
 - 2026-09-27: Owner found Plus Jakarta Sans too formal and chose Alegreya Sans (informal, humanist) for body text; body roles moved up 1 px for its small x-height; buttons use Bold (D-021).
 - 2026-09-27: Clean Android rebuild as `com.soul.srm` (old `app.soul.dev` uninstalled from the emulator); Alegreya Sans, SoulIcons, placeholder app icon and the release-signing guard verified in the generated project and on the emulator (Welcome, Rules, Email).
 - 2026-09-27: Phase 5 built and verified on web. C: free space fell to 8.8 GB (page file growth under memory pressure); the Android rebuild waits for space.
+- 2026-09-27: Phase 5 done: Android verified after a clean rebuild (camera upload, cross-platform sign-in, privacy, deep link). Freed 3 GB on C: by removing the Gradle 9.3.1 cache my first builds left in the user profile (builds now use D:).
