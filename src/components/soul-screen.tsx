@@ -3,6 +3,7 @@ import { ScrollView, StyleSheet, View, type StyleProp, type ViewStyle } from 're
 import { KeyboardAwareScrollView, KeyboardStickyView } from 'react-native-keyboard-controller';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { useKeyboardInset } from '@/components/keyboard-inset';
 import { createThemedStyles, layout, spacing } from '@/theme';
 
 type Props = {
@@ -35,6 +36,7 @@ export function SoulScreen({
 }: Props) {
   const styles = useStyles();
   const insets = useSafeAreaInsets();
+  const keyboardInset = useKeyboardInset();
   const bottom = edges.bottom ? insets.bottom + spacing.lg : spacing.lg;
   const padding = [
     styles.content,
@@ -69,9 +71,14 @@ export function SoulScreen({
   ) : null;
 
   // The top inset is applied to the container, not the scroll content, so scrolled content
-  // never slides under the transparent edge-to-edge status bar.
+  // never slides under the transparent edge-to-edge status bar. On the web, the keyboard inset
+  // lifts everything (including the pinned footer) above the on-screen keyboard.
   return (
-    <View style={[styles.root, { paddingTop: edges.top ? insets.top : 0 }]}>
+    <View
+      style={[
+        styles.root,
+        { paddingTop: edges.top ? insets.top : 0, paddingBottom: keyboardInset },
+      ]}>
       {body}
       {footerView && keyboard ? (
         <KeyboardStickyView offset={{ closed: 0, opened: insets.bottom }}>

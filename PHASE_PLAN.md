@@ -255,6 +255,12 @@ Skills per phase come from `skills/SOUL_SKILL_MAP.md`. `soul-audit` is enabled o
 - A deck refresh while an older page was loading could stay stuck on "loading".
 - The next card was announced to screen readers on the web.
 
+**Web in a real mobile browser (the emulator's Chrome, real touch):**
+- Sign-in, the deck, flick right and left, a short drag springing back, the Like button, and a tap opening the profile all work.
+- **Bug found and fixed:** with the keyboard open, pinned footers (Send code, Continue) sat under the keyboard on the web. Fixed two ways:
+  - `interactive-widget=resizes-content` (Android Chrome resizes the page).
+  - A `visualViewport` keyboard inset in `SoulScreen` (iPhone Safari keeps the page size). Verified in Chrome; the iPhone path needs a real iPhone.
+
 **Open:** the new `remove` icon needs the Android rebuild that embeds the icon font.
 
 ---
