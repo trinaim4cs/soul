@@ -1,0 +1,42 @@
+/**
+ * The icon glyphs SOUL ships: Material Symbols (Apache-2.0), the single icon family.
+ *
+ * The icon font in `assets/fonts` (`SoulIcons-Light.ttf`, `SoulIcons-Regular.ttf`) is a
+ * subset holding only these code points, a few kilobytes instead of ~1 MB per weight.
+ * After changing this map, run `npm run icons:subset` and rebuild the Android app.
+ * Code points come from `expo-symbols/build/android/symbols.json` (a test checks them).
+ */
+export const iconGlyphs = {
+  add_box: 0xe146,
+  arrow_back: 0xe5c4,
+  block: 0xe14b,
+  chat_bubble: 0xe0ca,
+  check: 0xe5ca,
+  close: 0xe5cd,
+  download: 0xf090,
+  error: 0xe000,
+  favorite: 0xe87d,
+  flag: 0xe153,
+  info: 0xe88e,
+  ios_share: 0xe6b8,
+  location_on: 0xe0c8,
+  lock: 0xe897,
+  more_vert: 0xe5d4,
+  near_me: 0xe569,
+  person: 0xe7fd,
+  photo_camera: 0xe412,
+  shield: 0xe9e0,
+  style: 0xe41d,
+  tune: 0xe429,
+  verified: 0xef76,
+  wifi_off: 0xe648,
+} as const;
+
+export type IconName = keyof typeof iconGlyphs;
+
+/** Registered natively (expo-font config plugin) and on the web (`fonts.web.ts`). */
+export const iconFontFamily = 'SoulIcons';
+
+export function iconGlyph(name: IconName): string {
+  return String.fromCodePoint(iconGlyphs[name]);
+}

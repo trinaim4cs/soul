@@ -1,0 +1,75 @@
+# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
+
+# dependencies
+node_modules/
+
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Native
+.kotlin/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# Metro
+.metro-health-check*
+
+# debug
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# macOS
+.DS_Store
+*.pem
+
+# local env files
+.env*.local
+
+# typescript
+*.tsbuildinfo
+
+example
+
+# generated native folders
+/ios
+/android
+
+# SOUL
+.env
+.env.*
+!.env.example
+*.keystore
+!debug.keystore
+google-services.json
+service-account*.json
+# local plugin artifacts (not part of SOUL)
+receipts/
+review-receipts/
+# exported skill reference repos (large); keep the map and manifest
+skills/*/
+supabase/.temp/
+supabase/.branches/
+coverage/
+
+# Signing and push credentials: never committed (DECISIONS C-16, C-20, BUILD_ANDROID.md)
+*.p12
+*.pem
+signing/
+soul-release.properties
+keystore.properties
+google-services.json
+GoogleService-Info.plist
+*service-account*.json
+*firebase-adminsdk*.json
+
+# Vercel CLI link folder and local preview config
+.vercel
+.claude/launch.json

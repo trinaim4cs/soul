@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="%LANG_ISO_CODE%">
+  <head>
+    <meta charset="utf-8" />
+    <!-- SOUL web shell for the iPhone PWA (PWA.md). No inline scripts: the host's CSP forbids them. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>%WEB_TITLE%</title>
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#FFFFFF" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000000" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <meta name="robots" content="noindex" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="SOUL" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="48x48" href="/icons/favicon-48.png" />
+    <style id="soul-shell">
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+      }
+      body {
+        overflow: hidden;
+        overscroll-behavior: none;
+        -webkit-text-size-adjust: 100%;
+        -webkit-tap-highlight-color: transparent;
+        background: #f7f7f7;
+      }
+      /* One phone-width column, centred on larger screens: never a desktop layout. */
+      #root {
+        display: flex;
+        flex: 1;
+        height: 100%;
+        max-width: 480px;
+        margin: 0 auto;
+        background: #ffffff;
+      }
+      @media (prefers-color-scheme: dark) {
+        body {
+          background: #121212;
+        }
+        #root {
+          background: #000000;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <noscript>SOUL needs JavaScript. Turn it on in your browser settings.</noscript>
+    <div id="root"></div>
+  </body>
+</html>

@@ -1,0 +1,2498 @@
+[
+  {
+    "repo": "expo/skills",
+    "commit": "efa52f0a9d2176db75992736281c77da1b714fa3",
+    "skills": [
+      {
+        "name": "expo-skill-eval",
+        "source_path": ".claude/skills/expo-skill-eval",
+        "export_path": "expo__skills\\expo-skill-eval",
+        "description_name": "expo-skill-eval"
+      },
+      {
+        "name": "expo-migrate-module",
+        "source_path": "plugins/expo-experiments/skills/expo-migrate-module",
+        "export_path": "expo__skills\\expo-migrate-module",
+        "description_name": "expo-migrate-module"
+      },
+      {
+        "name": "eas-app-stores",
+        "source_path": "plugins/expo/skills/eas-app-stores",
+        "export_path": "expo__skills\\eas-app-stores",
+        "description_name": "eas-app-stores"
+      },
+      {
+        "name": "eas-hosting",
+        "source_path": "plugins/expo/skills/eas-hosting",
+        "export_path": "expo__skills\\eas-hosting",
+        "description_name": "eas-hosting"
+      },
+      {
+        "name": "eas-observe",
+        "source_path": "plugins/expo/skills/eas-observe",
+        "export_path": "expo__skills\\eas-observe",
+        "description_name": "eas-observe"
+      },
+      {
+        "name": "eas-simulator",
+        "source_path": "plugins/expo/skills/eas-simulator",
+        "export_path": "expo__skills\\eas-simulator",
+        "description_name": "eas-simulator"
+      },
+      {
+        "name": "eas-update",
+        "source_path": "plugins/expo/skills/eas-update",
+        "export_path": "expo__skills\\eas-update",
+        "description_name": "eas-update"
+      },
+      {
+        "name": "eas-update-insights",
+        "source_path": "plugins/expo/skills/eas-update-insights",
+        "export_path": "expo__skills\\eas-update-insights",
+        "description_name": "eas-update-insights"
+      },
+      {
+        "name": "eas-workflows",
+        "source_path": "plugins/expo/skills/eas-workflows",
+        "export_path": "expo__skills\\eas-workflows",
+        "description_name": "eas-workflows"
+      },
+      {
+        "name": "expo-animation",
+        "source_path": "plugins/expo/skills/expo-animation",
+        "export_path": "expo__skills\\expo-animation",
+        "description_name": "expo-animation"
+      },
+      {
+        "name": "expo-app-clip",
+        "source_path": "plugins/expo/skills/expo-app-clip",
+        "export_path": "expo__skills\\expo-app-clip",
+        "description_name": "expo-app-clip"
+      },
+      {
+        "name": "expo-brownfield",
+        "source_path": "plugins/expo/skills/expo-brownfield",
+        "export_path": "expo__skills\\expo-brownfield",
+        "description_name": "expo-brownfield"
+      },
+      {
+        "name": "expo-data-fetching",
+        "source_path": "plugins/expo/skills/expo-data-fetching",
+        "export_path": "expo__skills\\expo-data-fetching",
+        "description_name": "expo-data-fetching"
+      },
+      {
+        "name": "expo-design-system",
+        "source_path": "plugins/expo/skills/expo-design-system",
+        "export_path": "expo__skills\\expo-design-system",
+        "description_name": "expo-design-system"
+      },
+      {
+        "name": "expo-dev-client",
+        "source_path": "plugins/expo/skills/expo-dev-client",
+        "export_path": "expo__skills\\expo-dev-client",
+        "description_name": "expo-dev-client"
+      },
+      {
+        "name": "expo-dom",
+        "source_path": "plugins/expo/skills/expo-dom",
+        "export_path": "expo__skills\\expo-dom",
+        "description_name": "expo-dom"
+      },
+      {
+        "name": "expo-examples",
+        "source_path": "plugins/expo/skills/expo-examples",
+        "export_path": "expo__skills\\expo-examples",
+        "description_name": "expo-examples"
+      },
+      {
+        "name": "expo-module",
+        "source_path": "plugins/expo/skills/expo-module",
+        "export_path": "expo__skills\\expo-module",
+        "description_name": "expo-module"
+      },
+      {
+        "name": "expo-native-ui",
+        "source_path": "plugins/expo/skills/expo-native-ui",
+        "export_path": "expo__skills\\expo-native-ui",
+        "description_name": "expo-native-ui"
+      },
+      {
+        "name": "expo-overview",
+        "source_path": "plugins/expo/skills/expo-overview",
+        "export_path": "expo__skills\\expo-overview",
+        "description_name": "expo-overview"
+      },
+      {
+        "name": "expo-project-structure",
+        "source_path": "plugins/expo/skills/expo-project-structure",
+        "export_path": "expo__skills\\expo-project-structure",
+        "description_name": "expo-project-structure"
+      },
+      {
+        "name": "expo-router",
+        "source_path": "plugins/expo/skills/expo-router",
+        "export_path": "expo__skills\\expo-router",
+        "description_name": "expo-router"
+      },
+      {
+        "name": "expo-skill-feedback",
+        "source_path": "plugins/expo/skills/expo-skill-feedback",
+        "export_path": "expo__skills\\expo-skill-feedback",
+        "description_name": "expo-skill-feedback"
+      },
+      {
+        "name": "expo-ui",
+        "source_path": "plugins/expo/skills/expo-ui",
+        "export_path": "expo__skills\\expo-ui",
+        "description_name": "expo-ui"
+      },
+      {
+        "name": "expo-upgrade",
+        "source_path": "plugins/expo/skills/expo-upgrade",
+        "export_path": "expo__skills\\expo-upgrade",
+        "description_name": "expo-upgrade"
+      },
+      {
+        "name": "expo-web-to-native",
+        "source_path": "plugins/expo/skills/expo-web-to-native",
+        "export_path": "expo__skills\\expo-web-to-native",
+        "description_name": "expo-web-to-native"
+      }
+    ]
+  },
+  {
+    "repo": "draftbit/mobile-taste-skill",
+    "commit": "eb58d9896d446b574ba4b0fb83e3587e8708a9e1",
+    "skills": [
+      {
+        "name": "mobile-design-review",
+        "source_path": "skills/mobile-design-review",
+        "export_path": "draftbit__mobile-taste-skill\\mobile-design-review",
+        "description_name": "mobile-design-review"
+      },
+      {
+        "name": "mobile-design-system",
+        "source_path": "skills/mobile-design-system",
+        "export_path": "draftbit__mobile-taste-skill\\mobile-design-system",
+        "description_name": "mobile-design-system"
+      },
+      {
+        "name": "mobile-nav-plan",
+        "source_path": "skills/mobile-nav-plan",
+        "export_path": "draftbit__mobile-taste-skill\\mobile-nav-plan",
+        "description_name": "mobile-nav-plan"
+      },
+      {
+        "name": "mobile-redesign-app",
+        "source_path": "skills/mobile-redesign-app",
+        "export_path": "draftbit__mobile-taste-skill\\mobile-redesign-app",
+        "description_name": "mobile-redesign-app"
+      },
+      {
+        "name": "mobile-redesign-screen",
+        "source_path": "skills/mobile-redesign-screen",
+        "export_path": "draftbit__mobile-taste-skill\\mobile-redesign-screen",
+        "description_name": "mobile-redesign-screen"
+      },
+      {
+        "name": "mobile-taste",
+        "source_path": "skills/mobile-taste",
+        "export_path": "draftbit__mobile-taste-skill\\mobile-taste",
+        "description_name": "mobile-taste"
+      }
+    ]
+  },
+  {
+    "repo": "nextlevelbuilder/ui-ux-pro-max-skill",
+    "commit": "823b0a14d3539b5d78c0efb614426a4fab5983ec",
+    "skills": [
+      {
+        "name": "banner-design",
+        "source_path": ".claude/skills/banner-design",
+        "export_path": "nextlevelbuilder__ui-ux-pro-max-skill\\banner-design",
+        "description_name": "banner-design"
+      },
+      {
+        "name": "brand",
+        "source_path": ".claude/skills/brand",
+        "export_path": "nextlevelbuilder__ui-ux-pro-max-skill\\brand",
+        "description_name": "brand"
+      },
+      {
+        "name": "design",
+        "source_path": ".claude/skills/design",
+        "export_path": "nextlevelbuilder__ui-ux-pro-max-skill\\design",
+        "description_name": "design"
+      },
+      {
+        "name": "design-system",
+        "source_path": ".claude/skills/design-system",
+        "export_path": "nextlevelbuilder__ui-ux-pro-max-skill\\design-system",
+        "description_name": "design-system"
+      },
+      {
+        "name": "slides",
+        "source_path": ".claude/skills/slides",
+        "export_path": "nextlevelbuilder__ui-ux-pro-max-skill\\slides",
+        "description_name": "slides"
+      },
+      {
+        "name": "ui-styling",
+        "source_path": ".claude/skills/ui-styling",
+        "export_path": "nextlevelbuilder__ui-ux-pro-max-skill\\ui-styling",
+        "description_name": "ui-styling"
+      },
+      {
+        "name": "ui-ux-pro-max",
+        "source_path": ".claude/skills/ui-ux-pro-max",
+        "export_path": "nextlevelbuilder__ui-ux-pro-max-skill\\ui-ux-pro-max",
+        "description_name": "ui-ux-pro-max"
+      }
+    ]
+  },
+  {
+    "repo": "nicohodt/claude-code-ui-ux-skill",
+    "commit": "29dc4c56aa862226a6ff053ff4255bbed062af81",
+    "skills": [
+      {
+        "name": "banner-design",
+        "source_path": ".claude/skills/banner-design",
+        "export_path": "nicohodt__claude-code-ui-ux-skill\\banner-design",
+        "description_name": "banner-design"
+      },
+      {
+        "name": "brand",
+        "source_path": ".claude/skills/brand",
+        "export_path": "nicohodt__claude-code-ui-ux-skill\\brand",
+        "description_name": "brand"
+      },
+      {
+        "name": "design",
+        "source_path": ".claude/skills/design",
+        "export_path": "nicohodt__claude-code-ui-ux-skill\\design",
+        "description_name": "design"
+      },
+      {
+        "name": "design-system",
+        "source_path": ".claude/skills/design-system",
+        "export_path": "nicohodt__claude-code-ui-ux-skill\\design-system",
+        "description_name": "design-system"
+      },
+      {
+        "name": "slides",
+        "source_path": ".claude/skills/slides",
+        "export_path": "nicohodt__claude-code-ui-ux-skill\\slides",
+        "description_name": "slides"
+      },
+      {
+        "name": "ui-styling",
+        "source_path": ".claude/skills/ui-styling",
+        "export_path": "nicohodt__claude-code-ui-ux-skill\\ui-styling",
+        "description_name": "ui-styling"
+      },
+      {
+        "name": "ui-ux-pro-max",
+        "source_path": ".claude/skills/ui-ux-pro-max",
+        "export_path": "nicohodt__claude-code-ui-ux-skill\\ui-ux-pro-max",
+        "description_name": "ui-ux-pro-max"
+      }
+    ]
+  },
+  {
+    "repo": "mae616/design-skills",
+    "commit": "79e3398bee27664de70c7b97a30dd928f6fe7976",
+    "skills": [
+      {
+        "name": "accessibility-engineer",
+        "source_path": "skills/accessibility-engineer",
+        "export_path": "mae616__design-skills\\accessibility-engineer",
+        "description_name": "accessibility-engineer"
+      },
+      {
+        "name": "creative-coder",
+        "source_path": "skills/creative-coder",
+        "export_path": "mae616__design-skills\\creative-coder",
+        "description_name": "creative-coder"
+      },
+      {
+        "name": "frontend-implementation",
+        "source_path": "skills/frontend-implementation",
+        "export_path": "mae616__design-skills\\frontend-implementation",
+        "description_name": "frontend-implementation"
+      },
+      {
+        "name": "ui-designer",
+        "source_path": "skills/ui-designer",
+        "export_path": "mae616__design-skills\\ui-designer",
+        "description_name": "ui-designer"
+      },
+      {
+        "name": "usability-psychologist",
+        "source_path": "skills/usability-psychologist",
+        "export_path": "mae616__design-skills\\usability-psychologist",
+        "description_name": "usability-psychologist"
+      }
+    ]
+  },
+  {
+    "repo": "szilu/ux-designer-skill",
+    "commit": "3f058996e2a85d6545faaa63040d263d32e632c9",
+    "skills": [
+      {
+        "name": "ux-designer",
+        "source_path": ".",
+        "export_path": "szilu__ux-designer-skill\\ux-designer",
+        "description_name": "ux-designer"
+      }
+    ]
+  },
+  {
+    "repo": "dpconde/claude-android-skill",
+    "commit": "edfca5e36ceb7532708c28fd2fd5215a9f01d105",
+    "skills": [
+      {
+        "name": "android-development",
+        "source_path": ".",
+        "export_path": "dpconde__claude-android-skill\\android-development",
+        "description_name": "android-development"
+      }
+    ]
+  },
+  {
+    "repo": "rinkuniks/android-claude-skill",
+    "commit": "acb8f9d7244d4374ecfca06e25607c52ad57ce43",
+    "skills": [
+      {
+        "name": "android-development",
+        "source_path": ".",
+        "export_path": "rinkuniks__android-claude-skill\\android-development",
+        "description_name": "android-development"
+      }
+    ]
+  },
+  {
+    "repo": "anthropics/skills",
+    "commit": "33375500bcea98d610eb30ce10ac4e59b89c390d",
+    "skills": [
+      {
+        "name": "academy-guide",
+        "source_path": "skills/academy-guide",
+        "export_path": "anthropics__skills\\academy-guide",
+        "description_name": "academy-guide"
+      },
+      {
+        "name": "algorithmic-art",
+        "source_path": "skills/algorithmic-art",
+        "export_path": "anthropics__skills\\algorithmic-art",
+        "description_name": "algorithmic-art"
+      },
+      {
+        "name": "brand-guidelines",
+        "source_path": "skills/brand-guidelines",
+        "export_path": "anthropics__skills\\brand-guidelines",
+        "description_name": "brand-guidelines"
+      },
+      {
+        "name": "canvas-design",
+        "source_path": "skills/canvas-design",
+        "export_path": "anthropics__skills\\canvas-design",
+        "description_name": "canvas-design"
+      },
+      {
+        "name": "claude-api",
+        "source_path": "skills/claude-api",
+        "export_path": "anthropics__skills\\claude-api",
+        "description_name": "claude-api"
+      },
+      {
+        "name": "discernment-nudge",
+        "source_path": "skills/discernment-nudge",
+        "export_path": "anthropics__skills\\discernment-nudge",
+        "description_name": "discernment-nudge"
+      },
+      {
+        "name": "doc-coauthoring",
+        "source_path": "skills/doc-coauthoring",
+        "export_path": "anthropics__skills\\doc-coauthoring",
+        "description_name": "doc-coauthoring"
+      },
+      {
+        "name": "docx",
+        "source_path": "skills/docx",
+        "export_path": "anthropics__skills\\docx",
+        "description_name": "docx"
+      },
+      {
+        "name": "frontend-design",
+        "source_path": "skills/frontend-design",
+        "export_path": "anthropics__skills\\frontend-design",
+        "description_name": "frontend-design"
+      },
+      {
+        "name": "internal-comms",
+        "source_path": "skills/internal-comms",
+        "export_path": "anthropics__skills\\internal-comms",
+        "description_name": "internal-comms"
+      },
+      {
+        "name": "mcp-builder",
+        "source_path": "skills/mcp-builder",
+        "export_path": "anthropics__skills\\mcp-builder",
+        "description_name": "mcp-builder"
+      },
+      {
+        "name": "pdf",
+        "source_path": "skills/pdf",
+        "export_path": "anthropics__skills\\pdf",
+        "description_name": "pdf"
+      },
+      {
+        "name": "pptx",
+        "source_path": "skills/pptx",
+        "export_path": "anthropics__skills\\pptx",
+        "description_name": "pptx"
+      },
+      {
+        "name": "skill-creator",
+        "source_path": "skills/skill-creator",
+        "export_path": "anthropics__skills\\skill-creator",
+        "description_name": "skill-creator"
+      },
+      {
+        "name": "slack-gif-creator",
+        "source_path": "skills/slack-gif-creator",
+        "export_path": "anthropics__skills\\slack-gif-creator",
+        "description_name": "slack-gif-creator"
+      },
+      {
+        "name": "theme-factory",
+        "source_path": "skills/theme-factory",
+        "export_path": "anthropics__skills\\theme-factory",
+        "description_name": "theme-factory"
+      },
+      {
+        "name": "web-artifacts-builder",
+        "source_path": "skills/web-artifacts-builder",
+        "export_path": "anthropics__skills\\web-artifacts-builder",
+        "description_name": "web-artifacts-builder"
+      },
+      {
+        "name": "webapp-testing",
+        "source_path": "skills/webapp-testing",
+        "export_path": "anthropics__skills\\webapp-testing",
+        "description_name": "webapp-testing"
+      },
+      {
+        "name": "xlsx",
+        "source_path": "skills/xlsx",
+        "export_path": "anthropics__skills\\xlsx",
+        "description_name": "xlsx"
+      }
+    ]
+  },
+  {
+    "repo": "Huc91/pixel-perfect-skill",
+    "commit": "2c677882743ebf0fcdc0bedebf055283182a04ce",
+    "skills": [
+      {
+        "name": "pixel-perfect",
+        "source_path": ".",
+        "export_path": "Huc91__pixel-perfect-skill\\pixel-perfect",
+        "description_name": "pixel-perfect"
+      }
+    ]
+  },
+  {
+    "repo": "brianharms/skill-grade",
+    "commit": "3ef630faa9d0db8777bac0c573854eaf33490018",
+    "skills": [
+      {
+        "name": "grade",
+        "source_path": ".",
+        "export_path": "brianharms__skill-grade\\grade",
+        "description_name": "grade"
+      }
+    ]
+  },
+  {
+    "repo": "affaan-m/everything-claude-code",
+    "commit": "e482e579415fde18357cafce70f177ae19fd7f03",
+    "skills": [
+      {
+        "name": "accessibility",
+        "source_path": "skills/accessibility",
+        "export_path": "affaan-m__everything-claude-code\\accessibility",
+        "description_name": "accessibility"
+      },
+      {
+        "name": "agent-architecture-audit",
+        "source_path": "skills/agent-architecture-audit",
+        "export_path": "affaan-m__everything-claude-code\\agent-architecture-audit",
+        "description_name": "agent-architecture-audit"
+      },
+      {
+        "name": "agent-eval",
+        "source_path": "skills/agent-eval",
+        "export_path": "affaan-m__everything-claude-code\\agent-eval",
+        "description_name": "agent-eval"
+      },
+      {
+        "name": "agent-harness-construction",
+        "source_path": "skills/agent-harness-construction",
+        "export_path": "affaan-m__everything-claude-code\\agent-harness-construction",
+        "description_name": "agent-harness-construction"
+      },
+      {
+        "name": "agent-introspection-debugging",
+        "source_path": "skills/agent-introspection-debugging",
+        "export_path": "affaan-m__everything-claude-code\\agent-introspection-debugging",
+        "description_name": "agent-introspection-debugging"
+      },
+      {
+        "name": "agent-payment-x402",
+        "source_path": "skills/agent-payment-x402",
+        "export_path": "affaan-m__everything-claude-code\\agent-payment-x402",
+        "description_name": "agent-payment-x402"
+      },
+      {
+        "name": "agent-self-evaluation",
+        "source_path": "skills/agent-self-evaluation",
+        "export_path": "affaan-m__everything-claude-code\\agent-self-evaluation",
+        "description_name": "agent-self-evaluation"
+      },
+      {
+        "name": "agent-sort",
+        "source_path": "skills/agent-sort",
+        "export_path": "affaan-m__everything-claude-code\\agent-sort",
+        "description_name": "agent-sort"
+      },
+      {
+        "name": "agentic-engineering",
+        "source_path": "skills/agentic-engineering",
+        "export_path": "affaan-m__everything-claude-code\\agentic-engineering",
+        "description_name": "agentic-engineering"
+      },
+      {
+        "name": "agentic-os",
+        "source_path": "skills/agentic-os",
+        "export_path": "affaan-m__everything-claude-code\\agentic-os",
+        "description_name": "agentic-os"
+      },
+      {
+        "name": "ai-first-engineering",
+        "source_path": "skills/ai-first-engineering",
+        "export_path": "affaan-m__everything-claude-code\\ai-first-engineering",
+        "description_name": "ai-first-engineering"
+      },
+      {
+        "name": "ai-regression-testing",
+        "source_path": "skills/ai-regression-testing",
+        "export_path": "affaan-m__everything-claude-code\\ai-regression-testing",
+        "description_name": "ai-regression-testing"
+      },
+      {
+        "name": "android-clean-architecture",
+        "source_path": "skills/android-clean-architecture",
+        "export_path": "affaan-m__everything-claude-code\\android-clean-architecture",
+        "description_name": "android-clean-architecture"
+      },
+      {
+        "name": "angular-developer",
+        "source_path": "skills/angular-developer",
+        "export_path": "affaan-m__everything-claude-code\\angular-developer",
+        "description_name": "angular-developer"
+      },
+      {
+        "name": "api-connector-builder",
+        "source_path": "skills/api-connector-builder",
+        "export_path": "affaan-m__everything-claude-code\\api-connector-builder",
+        "description_name": "api-connector-builder"
+      },
+      {
+        "name": "api-design",
+        "source_path": "skills/api-design",
+        "export_path": "affaan-m__everything-claude-code\\api-design",
+        "description_name": "api-design"
+      },
+      {
+        "name": "architecture-decision-records",
+        "source_path": "skills/architecture-decision-records",
+        "export_path": "affaan-m__everything-claude-code\\architecture-decision-records",
+        "description_name": "architecture-decision-records"
+      },
+      {
+        "name": "article-writing",
+        "source_path": "skills/article-writing",
+        "export_path": "affaan-m__everything-claude-code\\article-writing",
+        "description_name": "article-writing"
+      },
+      {
+        "name": "automation-audit-ops",
+        "source_path": "skills/automation-audit-ops",
+        "export_path": "affaan-m__everything-claude-code\\automation-audit-ops",
+        "description_name": "automation-audit-ops"
+      },
+      {
+        "name": "autonomous-agent-harness",
+        "source_path": "skills/autonomous-agent-harness",
+        "export_path": "affaan-m__everything-claude-code\\autonomous-agent-harness",
+        "description_name": "autonomous-agent-harness"
+      },
+      {
+        "name": "autonomous-loops",
+        "source_path": "skills/autonomous-loops",
+        "export_path": "affaan-m__everything-claude-code\\autonomous-loops",
+        "description_name": "autonomous-loops"
+      },
+      {
+        "name": "backend-patterns",
+        "source_path": "skills/backend-patterns",
+        "export_path": "affaan-m__everything-claude-code\\backend-patterns",
+        "description_name": "backend-patterns"
+      },
+      {
+        "name": "benchmark",
+        "source_path": "skills/benchmark",
+        "export_path": "affaan-m__everything-claude-code\\benchmark",
+        "description_name": "benchmark"
+      },
+      {
+        "name": "benchmark-methodology",
+        "source_path": "skills/benchmark-methodology",
+        "export_path": "affaan-m__everything-claude-code\\benchmark-methodology",
+        "description_name": "benchmark-methodology"
+      },
+      {
+        "name": "benchmark-optimization-loop",
+        "source_path": "skills/benchmark-optimization-loop",
+        "export_path": "affaan-m__everything-claude-code\\benchmark-optimization-loop",
+        "description_name": "benchmark-optimization-loop"
+      },
+      {
+        "name": "blender-motion-state-inspection",
+        "source_path": "skills/blender-motion-state-inspection",
+        "export_path": "affaan-m__everything-claude-code\\blender-motion-state-inspection",
+        "description_name": "blender-motion-state-inspection"
+      },
+      {
+        "name": "blueprint",
+        "source_path": "skills/blueprint",
+        "export_path": "affaan-m__everything-claude-code\\blueprint",
+        "description_name": "blueprint"
+      },
+      {
+        "name": "brand-discovery",
+        "source_path": "skills/brand-discovery",
+        "export_path": "affaan-m__everything-claude-code\\brand-discovery",
+        "description_name": "brand-discovery"
+      },
+      {
+        "name": "brand-voice",
+        "source_path": "skills/brand-voice",
+        "export_path": "affaan-m__everything-claude-code\\brand-voice",
+        "description_name": "brand-voice"
+      },
+      {
+        "name": "browser-qa",
+        "source_path": "skills/browser-qa",
+        "export_path": "affaan-m__everything-claude-code\\browser-qa",
+        "description_name": "browser-qa"
+      },
+      {
+        "name": "bun-runtime",
+        "source_path": "skills/bun-runtime",
+        "export_path": "affaan-m__everything-claude-code\\bun-runtime",
+        "description_name": "bun-runtime"
+      },
+      {
+        "name": "canary-watch",
+        "source_path": "skills/canary-watch",
+        "export_path": "affaan-m__everything-claude-code\\canary-watch",
+        "description_name": "canary-watch"
+      },
+      {
+        "name": "carrier-relationship-management",
+        "source_path": "skills/carrier-relationship-management",
+        "export_path": "affaan-m__everything-claude-code\\carrier-relationship-management",
+        "description_name": "carrier-relationship-management"
+      },
+      {
+        "name": "cisco-ios-patterns",
+        "source_path": "skills/cisco-ios-patterns",
+        "export_path": "affaan-m__everything-claude-code\\cisco-ios-patterns",
+        "description_name": "cisco-ios-patterns"
+      },
+      {
+        "name": "ck",
+        "source_path": "skills/ck",
+        "export_path": "affaan-m__everything-claude-code\\ck",
+        "description_name": "ck"
+      },
+      {
+        "name": "claude-devfleet",
+        "source_path": "skills/claude-devfleet",
+        "export_path": "affaan-m__everything-claude-code\\claude-devfleet",
+        "description_name": "claude-devfleet"
+      },
+      {
+        "name": "click-path-audit",
+        "source_path": "skills/click-path-audit",
+        "export_path": "affaan-m__everything-claude-code\\click-path-audit",
+        "description_name": "click-path-audit"
+      },
+      {
+        "name": "clickhouse-io",
+        "source_path": "skills/clickhouse-io",
+        "export_path": "affaan-m__everything-claude-code\\clickhouse-io",
+        "description_name": "clickhouse-io"
+      },
+      {
+        "name": "code-tour",
+        "source_path": "skills/code-tour",
+        "export_path": "affaan-m__everything-claude-code\\code-tour",
+        "description_name": "code-tour"
+      },
+      {
+        "name": "codebase-onboarding",
+        "source_path": "skills/codebase-onboarding",
+        "export_path": "affaan-m__everything-claude-code\\codebase-onboarding",
+        "description_name": "codebase-onboarding"
+      },
+      {
+        "name": "codehealth-mcp",
+        "source_path": "skills/codehealth-mcp",
+        "export_path": "affaan-m__everything-claude-code\\codehealth-mcp",
+        "description_name": "codehealth-mcp"
+      },
+      {
+        "name": "coding-standards",
+        "source_path": "skills/coding-standards",
+        "export_path": "affaan-m__everything-claude-code\\coding-standards",
+        "description_name": "coding-standards"
+      },
+      {
+        "name": "competitive-platform-analysis",
+        "source_path": "skills/competitive-platform-analysis",
+        "export_path": "affaan-m__everything-claude-code\\competitive-platform-analysis",
+        "description_name": "competitive-platform-analysis"
+      },
+      {
+        "name": "competitive-report-structure",
+        "source_path": "skills/competitive-report-structure",
+        "export_path": "affaan-m__everything-claude-code\\competitive-report-structure",
+        "description_name": "competitive-report-structure"
+      },
+      {
+        "name": "compose-multiplatform-patterns",
+        "source_path": "skills/compose-multiplatform-patterns",
+        "export_path": "affaan-m__everything-claude-code\\compose-multiplatform-patterns",
+        "description_name": "compose-multiplatform-patterns"
+      },
+      {
+        "name": "config-gc",
+        "source_path": "skills/config-gc",
+        "export_path": "affaan-m__everything-claude-code\\config-gc",
+        "description_name": "config-gc"
+      },
+      {
+        "name": "configure-ecc",
+        "source_path": "skills/configure-ecc",
+        "export_path": "affaan-m__everything-claude-code\\configure-ecc",
+        "description_name": "configure-ecc"
+      },
+      {
+        "name": "connections-optimizer",
+        "source_path": "skills/connections-optimizer",
+        "export_path": "affaan-m__everything-claude-code\\connections-optimizer",
+        "description_name": "connections-optimizer"
+      },
+      {
+        "name": "content-engine",
+        "source_path": "skills/content-engine",
+        "export_path": "affaan-m__everything-claude-code\\content-engine",
+        "description_name": "content-engine"
+      },
+      {
+        "name": "content-hash-cache-pattern",
+        "source_path": "skills/content-hash-cache-pattern",
+        "export_path": "affaan-m__everything-claude-code\\content-hash-cache-pattern",
+        "description_name": "content-hash-cache-pattern"
+      },
+      {
+        "name": "context-budget",
+        "source_path": "skills/context-budget",
+        "export_path": "affaan-m__everything-claude-code\\context-budget",
+        "description_name": "context-budget"
+      },
+      {
+        "name": "continuous-agent-loop",
+        "source_path": "skills/continuous-agent-loop",
+        "export_path": "affaan-m__everything-claude-code\\continuous-agent-loop",
+        "description_name": "continuous-agent-loop"
+      },
+      {
+        "name": "continuous-learning",
+        "source_path": "skills/continuous-learning",
+        "export_path": "affaan-m__everything-claude-code\\continuous-learning",
+        "description_name": "continuous-learning"
+      },
+      {
+        "name": "continuous-learning-v2",
+        "source_path": "skills/continuous-learning-v2",
+        "export_path": "affaan-m__everything-claude-code\\continuous-learning-v2",
+        "description_name": "continuous-learning-v2"
+      },
+      {
+        "name": "contract-first",
+        "source_path": "skills/contract-first",
+        "export_path": "affaan-m__everything-claude-code\\contract-first",
+        "description_name": "contract-first"
+      },
+      {
+        "name": "cost-aware-llm-pipeline",
+        "source_path": "skills/cost-aware-llm-pipeline",
+        "export_path": "affaan-m__everything-claude-code\\cost-aware-llm-pipeline",
+        "description_name": "cost-aware-llm-pipeline"
+      },
+      {
+        "name": "cost-tracking",
+        "source_path": "skills/cost-tracking",
+        "export_path": "affaan-m__everything-claude-code\\cost-tracking",
+        "description_name": "cost-tracking"
+      },
+      {
+        "name": "council",
+        "source_path": "skills/council",
+        "export_path": "affaan-m__everything-claude-code\\council",
+        "description_name": "council"
+      },
+      {
+        "name": "council-multi-model",
+        "source_path": "skills/council-multi-model",
+        "export_path": "affaan-m__everything-claude-code\\council-multi-model",
+        "description_name": "council-multi-model"
+      },
+      {
+        "name": "counterparty-channel-discipline",
+        "source_path": "skills/counterparty-channel-discipline",
+        "export_path": "affaan-m__everything-claude-code\\counterparty-channel-discipline",
+        "description_name": "counterparty-channel-discipline"
+      },
+      {
+        "name": "cpp-coding-standards",
+        "source_path": "skills/cpp-coding-standards",
+        "export_path": "affaan-m__everything-claude-code\\cpp-coding-standards",
+        "description_name": "cpp-coding-standards"
+      },
+      {
+        "name": "cpp-testing",
+        "source_path": "skills/cpp-testing",
+        "export_path": "affaan-m__everything-claude-code\\cpp-testing",
+        "description_name": "cpp-testing"
+      },
+      {
+        "name": "crosspost",
+        "source_path": "skills/crosspost",
+        "export_path": "affaan-m__everything-claude-code\\crosspost",
+        "description_name": "crosspost"
+      },
+      {
+        "name": "csharp-testing",
+        "source_path": "skills/csharp-testing",
+        "export_path": "affaan-m__everything-claude-code\\csharp-testing",
+        "description_name": "csharp-testing"
+      },
+      {
+        "name": "customer-billing-ops",
+        "source_path": "skills/customer-billing-ops",
+        "export_path": "affaan-m__everything-claude-code\\customer-billing-ops",
+        "description_name": "customer-billing-ops"
+      },
+      {
+        "name": "customs-trade-compliance",
+        "source_path": "skills/customs-trade-compliance",
+        "export_path": "affaan-m__everything-claude-code\\customs-trade-compliance",
+        "description_name": "customs-trade-compliance"
+      },
+      {
+        "name": "dart-flutter-patterns",
+        "source_path": "skills/dart-flutter-patterns",
+        "export_path": "affaan-m__everything-claude-code\\dart-flutter-patterns",
+        "description_name": "dart-flutter-patterns"
+      },
+      {
+        "name": "dashboard-builder",
+        "source_path": "skills/dashboard-builder",
+        "export_path": "affaan-m__everything-claude-code\\dashboard-builder",
+        "description_name": "dashboard-builder"
+      },
+      {
+        "name": "data-scraper-agent",
+        "source_path": "skills/data-scraper-agent",
+        "export_path": "affaan-m__everything-claude-code\\data-scraper-agent",
+        "description_name": "data-scraper-agent"
+      },
+      {
+        "name": "data-throughput-accelerator",
+        "source_path": "skills/data-throughput-accelerator",
+        "export_path": "affaan-m__everything-claude-code\\data-throughput-accelerator",
+        "description_name": "data-throughput-accelerator"
+      },
+      {
+        "name": "database-migrations",
+        "source_path": "skills/database-migrations",
+        "export_path": "affaan-m__everything-claude-code\\database-migrations",
+        "description_name": "database-migrations"
+      },
+      {
+        "name": "deep-research",
+        "source_path": "skills/deep-research",
+        "export_path": "affaan-m__everything-claude-code\\deep-research",
+        "description_name": "deep-research"
+      },
+      {
+        "name": "defi-amm-security",
+        "source_path": "skills/defi-amm-security",
+        "export_path": "affaan-m__everything-claude-code\\defi-amm-security",
+        "description_name": "defi-amm-security"
+      },
+      {
+        "name": "delivery-gate",
+        "source_path": "skills/delivery-gate",
+        "export_path": "affaan-m__everything-claude-code\\delivery-gate",
+        "description_name": "delivery-gate"
+      },
+      {
+        "name": "deployment-patterns",
+        "source_path": "skills/deployment-patterns",
+        "export_path": "affaan-m__everything-claude-code\\deployment-patterns",
+        "description_name": "deployment-patterns"
+      },
+      {
+        "name": "design-system",
+        "source_path": "skills/design-system",
+        "export_path": "affaan-m__everything-claude-code\\design-system",
+        "description_name": "design-system"
+      },
+      {
+        "name": "dev-team",
+        "source_path": "skills/dev-team",
+        "export_path": "affaan-m__everything-claude-code\\dev-team",
+        "description_name": "dev-team"
+      },
+      {
+        "name": "django-celery",
+        "source_path": "skills/django-celery",
+        "export_path": "affaan-m__everything-claude-code\\django-celery",
+        "description_name": "django-celery"
+      },
+      {
+        "name": "django-patterns",
+        "source_path": "skills/django-patterns",
+        "export_path": "affaan-m__everything-claude-code\\django-patterns",
+        "description_name": "django-patterns"
+      },
+      {
+        "name": "django-security",
+        "source_path": "skills/django-security",
+        "export_path": "affaan-m__everything-claude-code\\django-security",
+        "description_name": "django-security"
+      },
+      {
+        "name": "django-tdd",
+        "source_path": "skills/django-tdd",
+        "export_path": "affaan-m__everything-claude-code\\django-tdd",
+        "description_name": "django-tdd"
+      },
+      {
+        "name": "django-verification",
+        "source_path": "skills/django-verification",
+        "export_path": "affaan-m__everything-claude-code\\django-verification",
+        "description_name": "django-verification"
+      },
+      {
+        "name": "dmux-workflows",
+        "source_path": "skills/dmux-workflows",
+        "export_path": "affaan-m__everything-claude-code\\dmux-workflows",
+        "description_name": "dmux-workflows"
+      },
+      {
+        "name": "docker-patterns",
+        "source_path": "skills/docker-patterns",
+        "export_path": "affaan-m__everything-claude-code\\docker-patterns",
+        "description_name": "docker-patterns"
+      },
+      {
+        "name": "documentation-lookup",
+        "source_path": "skills/documentation-lookup",
+        "export_path": "affaan-m__everything-claude-code\\documentation-lookup",
+        "description_name": "documentation-lookup"
+      },
+      {
+        "name": "dotnet-patterns",
+        "source_path": "skills/dotnet-patterns",
+        "export_path": "affaan-m__everything-claude-code\\dotnet-patterns",
+        "description_name": "dotnet-patterns"
+      },
+      {
+        "name": "dynamic-workflow-mode",
+        "source_path": "skills/dynamic-workflow-mode",
+        "export_path": "affaan-m__everything-claude-code\\dynamic-workflow-mode",
+        "description_name": "dynamic-workflow-mode"
+      },
+      {
+        "name": "e2e-testing",
+        "source_path": "skills/e2e-testing",
+        "export_path": "affaan-m__everything-claude-code\\e2e-testing",
+        "description_name": "e2e-testing"
+      },
+      {
+        "name": "ecc-guide",
+        "source_path": "skills/ecc-guide",
+        "export_path": "affaan-m__everything-claude-code\\ecc-guide",
+        "description_name": "ecc-guide"
+      },
+      {
+        "name": "ecc-recipes",
+        "source_path": "skills/ecc-recipes",
+        "export_path": "affaan-m__everything-claude-code\\ecc-recipes",
+        "description_name": "ecc-recipes"
+      },
+      {
+        "name": "ecc-tools-cost-audit",
+        "source_path": "skills/ecc-tools-cost-audit",
+        "export_path": "affaan-m__everything-claude-code\\ecc-tools-cost-audit",
+        "description_name": "ecc-tools-cost-audit"
+      },
+      {
+        "name": "email-ops",
+        "source_path": "skills/email-ops",
+        "export_path": "affaan-m__everything-claude-code\\email-ops",
+        "description_name": "email-ops"
+      },
+      {
+        "name": "energy-procurement",
+        "source_path": "skills/energy-procurement",
+        "export_path": "affaan-m__everything-claude-code\\energy-procurement",
+        "description_name": "energy-procurement"
+      },
+      {
+        "name": "enterprise-agent-ops",
+        "source_path": "skills/enterprise-agent-ops",
+        "export_path": "affaan-m__everything-claude-code\\enterprise-agent-ops",
+        "description_name": "enterprise-agent-ops"
+      },
+      {
+        "name": "error-handling",
+        "source_path": "skills/error-handling",
+        "export_path": "affaan-m__everything-claude-code\\error-handling",
+        "description_name": "error-handling"
+      },
+      {
+        "name": "esign-field-placement",
+        "source_path": "skills/esign-field-placement",
+        "export_path": "affaan-m__everything-claude-code\\esign-field-placement",
+        "description_name": "esign-field-placement"
+      },
+      {
+        "name": "eval-harness",
+        "source_path": "skills/eval-harness",
+        "export_path": "affaan-m__everything-claude-code\\eval-harness",
+        "description_name": "eval-harness"
+      },
+      {
+        "name": "evm-token-decimals",
+        "source_path": "skills/evm-token-decimals",
+        "export_path": "affaan-m__everything-claude-code\\evm-token-decimals",
+        "description_name": "evm-token-decimals"
+      },
+      {
+        "name": "exa-search",
+        "source_path": "skills/exa-search",
+        "export_path": "affaan-m__everything-claude-code\\exa-search",
+        "description_name": "exa-search"
+      },
+      {
+        "name": "fal-ai-media",
+        "source_path": "skills/fal-ai-media",
+        "export_path": "affaan-m__everything-claude-code\\fal-ai-media",
+        "description_name": "fal-ai-media"
+      },
+      {
+        "name": "fastapi-patterns",
+        "source_path": "skills/fastapi-patterns",
+        "export_path": "affaan-m__everything-claude-code\\fastapi-patterns",
+        "description_name": "fastapi-patterns"
+      },
+      {
+        "name": "finance-billing-ops",
+        "source_path": "skills/finance-billing-ops",
+        "export_path": "affaan-m__everything-claude-code\\finance-billing-ops",
+        "description_name": "finance-billing-ops"
+      },
+      {
+        "name": "flox-environments",
+        "source_path": "skills/flox-environments",
+        "export_path": "affaan-m__everything-claude-code\\flox-environments",
+        "description_name": "flox-environments"
+      },
+      {
+        "name": "flutter-dart-code-review",
+        "source_path": "skills/flutter-dart-code-review",
+        "export_path": "affaan-m__everything-claude-code\\flutter-dart-code-review",
+        "description_name": "flutter-dart-code-review"
+      },
+      {
+        "name": "foundation-models-on-device",
+        "source_path": "skills/foundation-models-on-device",
+        "export_path": "affaan-m__everything-claude-code\\foundation-models-on-device",
+        "description_name": "foundation-models-on-device"
+      },
+      {
+        "name": "frontend-a11y",
+        "source_path": "skills/frontend-a11y",
+        "export_path": "affaan-m__everything-claude-code\\frontend-a11y",
+        "description_name": "frontend-a11y"
+      },
+      {
+        "name": "frontend-design-direction",
+        "source_path": "skills/frontend-design-direction",
+        "export_path": "affaan-m__everything-claude-code\\frontend-design-direction",
+        "description_name": "frontend-design-direction"
+      },
+      {
+        "name": "frontend-patterns",
+        "source_path": "skills/frontend-patterns",
+        "export_path": "affaan-m__everything-claude-code\\frontend-patterns",
+        "description_name": "frontend-patterns"
+      },
+      {
+        "name": "frontend-slides",
+        "source_path": "skills/frontend-slides",
+        "export_path": "affaan-m__everything-claude-code\\frontend-slides",
+        "description_name": "frontend-slides"
+      },
+      {
+        "name": "fsharp-testing",
+        "source_path": "skills/fsharp-testing",
+        "export_path": "affaan-m__everything-claude-code\\fsharp-testing",
+        "description_name": "fsharp-testing"
+      },
+      {
+        "name": "gan-style-harness",
+        "source_path": "skills/gan-style-harness",
+        "export_path": "affaan-m__everything-claude-code\\gan-style-harness",
+        "description_name": "gan-style-harness"
+      },
+      {
+        "name": "gateguard",
+        "source_path": "skills/gateguard",
+        "export_path": "affaan-m__everything-claude-code\\gateguard",
+        "description_name": "gateguard"
+      },
+      {
+        "name": "generating-python-installer",
+        "source_path": "skills/generating-python-installer",
+        "export_path": "affaan-m__everything-claude-code\\generating-python-installer",
+        "description_name": "generating-python-installer"
+      },
+      {
+        "name": "git-workflow",
+        "source_path": "skills/git-workflow",
+        "export_path": "affaan-m__everything-claude-code\\git-workflow",
+        "description_name": "git-workflow"
+      },
+      {
+        "name": "github-ops",
+        "source_path": "skills/github-ops",
+        "export_path": "affaan-m__everything-claude-code\\github-ops",
+        "description_name": "github-ops"
+      },
+      {
+        "name": "golang-patterns",
+        "source_path": "skills/golang-patterns",
+        "export_path": "affaan-m__everything-claude-code\\golang-patterns",
+        "description_name": "golang-patterns"
+      },
+      {
+        "name": "golang-testing",
+        "source_path": "skills/golang-testing",
+        "export_path": "affaan-m__everything-claude-code\\golang-testing",
+        "description_name": "golang-testing"
+      },
+      {
+        "name": "google-workspace-ops",
+        "source_path": "skills/google-workspace-ops",
+        "export_path": "affaan-m__everything-claude-code\\google-workspace-ops",
+        "description_name": "google-workspace-ops"
+      },
+      {
+        "name": "growth-log",
+        "source_path": "skills/growth-log",
+        "export_path": "affaan-m__everything-claude-code\\growth-log",
+        "description_name": "growth-log"
+      },
+      {
+        "name": "healthcare-cdss-patterns",
+        "source_path": "skills/healthcare-cdss-patterns",
+        "export_path": "affaan-m__everything-claude-code\\healthcare-cdss-patterns",
+        "description_name": "healthcare-cdss-patterns"
+      },
+      {
+        "name": "healthcare-emr-patterns",
+        "source_path": "skills/healthcare-emr-patterns",
+        "export_path": "affaan-m__everything-claude-code\\healthcare-emr-patterns",
+        "description_name": "healthcare-emr-patterns"
+      },
+      {
+        "name": "healthcare-eval-harness",
+        "source_path": "skills/healthcare-eval-harness",
+        "export_path": "affaan-m__everything-claude-code\\healthcare-eval-harness",
+        "description_name": "healthcare-eval-harness"
+      },
+      {
+        "name": "healthcare-phi-compliance",
+        "source_path": "skills/healthcare-phi-compliance",
+        "export_path": "affaan-m__everything-claude-code\\healthcare-phi-compliance",
+        "description_name": "healthcare-phi-compliance"
+      },
+      {
+        "name": "hermes-imports",
+        "source_path": "skills/hermes-imports",
+        "export_path": "affaan-m__everything-claude-code\\hermes-imports",
+        "description_name": "hermes-imports"
+      },
+      {
+        "name": "hexagonal-architecture",
+        "source_path": "skills/hexagonal-architecture",
+        "export_path": "affaan-m__everything-claude-code\\hexagonal-architecture",
+        "description_name": "hexagonal-architecture"
+      },
+      {
+        "name": "hipaa-compliance",
+        "source_path": "skills/hipaa-compliance",
+        "export_path": "affaan-m__everything-claude-code\\hipaa-compliance",
+        "description_name": "hipaa-compliance"
+      },
+      {
+        "name": "homelab-network-readiness",
+        "source_path": "skills/homelab-network-readiness",
+        "export_path": "affaan-m__everything-claude-code\\homelab-network-readiness",
+        "description_name": "homelab-network-readiness"
+      },
+      {
+        "name": "homelab-network-setup",
+        "source_path": "skills/homelab-network-setup",
+        "export_path": "affaan-m__everything-claude-code\\homelab-network-setup",
+        "description_name": "homelab-network-setup"
+      },
+      {
+        "name": "homelab-pihole-dns",
+        "source_path": "skills/homelab-pihole-dns",
+        "export_path": "affaan-m__everything-claude-code\\homelab-pihole-dns",
+        "description_name": "homelab-pihole-dns"
+      },
+      {
+        "name": "homelab-vlan-segmentation",
+        "source_path": "skills/homelab-vlan-segmentation",
+        "export_path": "affaan-m__everything-claude-code\\homelab-vlan-segmentation",
+        "description_name": "homelab-vlan-segmentation"
+      },
+      {
+        "name": "homelab-wireguard-vpn",
+        "source_path": "skills/homelab-wireguard-vpn",
+        "export_path": "affaan-m__everything-claude-code\\homelab-wireguard-vpn",
+        "description_name": "homelab-wireguard-vpn"
+      },
+      {
+        "name": "hookify-rules",
+        "source_path": "skills/hookify-rules",
+        "export_path": "affaan-m__everything-claude-code\\hookify-rules",
+        "description_name": "hookify-rules"
+      },
+      {
+        "name": "inherit-legacy-style",
+        "source_path": "skills/inherit-legacy-style",
+        "export_path": "affaan-m__everything-claude-code\\inherit-legacy-style",
+        "description_name": "inherit-legacy-style"
+      },
+      {
+        "name": "intent-driven-development",
+        "source_path": "skills/intent-driven-development",
+        "export_path": "affaan-m__everything-claude-code\\intent-driven-development",
+        "description_name": "intent-driven-development"
+      },
+      {
+        "name": "inventory-demand-planning",
+        "source_path": "skills/inventory-demand-planning",
+        "export_path": "affaan-m__everything-claude-code\\inventory-demand-planning",
+        "description_name": "inventory-demand-planning"
+      },
+      {
+        "name": "investor-materials",
+        "source_path": "skills/investor-materials",
+        "export_path": "affaan-m__everything-claude-code\\investor-materials",
+        "description_name": "investor-materials"
+      },
+      {
+        "name": "investor-outreach",
+        "source_path": "skills/investor-outreach",
+        "export_path": "affaan-m__everything-claude-code\\investor-outreach",
+        "description_name": "investor-outreach"
+      },
+      {
+        "name": "ios-icon-gen",
+        "source_path": "skills/ios-icon-gen",
+        "export_path": "affaan-m__everything-claude-code\\ios-icon-gen",
+        "description_name": "ios-icon-gen"
+      },
+      {
+        "name": "iterative-retrieval",
+        "source_path": "skills/iterative-retrieval",
+        "export_path": "affaan-m__everything-claude-code\\iterative-retrieval",
+        "description_name": "iterative-retrieval"
+      },
+      {
+        "name": "ito-baskets",
+        "source_path": "skills/ito-baskets",
+        "export_path": "affaan-m__everything-claude-code\\ito-baskets",
+        "description_name": "ito-baskets"
+      },
+      {
+        "name": "ito-compute",
+        "source_path": "skills/ito-compute",
+        "export_path": "affaan-m__everything-claude-code\\ito-compute",
+        "description_name": "ito-compute"
+      },
+      {
+        "name": "ito-inference",
+        "source_path": "skills/ito-inference",
+        "export_path": "affaan-m__everything-claude-code\\ito-inference",
+        "description_name": "ito-inference"
+      },
+      {
+        "name": "ito-training",
+        "source_path": "skills/ito-training",
+        "export_path": "affaan-m__everything-claude-code\\ito-training",
+        "description_name": "ito-training"
+      },
+      {
+        "name": "java-coding-standards",
+        "source_path": "skills/java-coding-standards",
+        "export_path": "affaan-m__everything-claude-code\\java-coding-standards",
+        "description_name": "java-coding-standards"
+      },
+      {
+        "name": "jira-integration",
+        "source_path": "skills/jira-integration",
+        "export_path": "affaan-m__everything-claude-code\\jira-integration",
+        "description_name": "jira-integration"
+      },
+      {
+        "name": "jpa-patterns",
+        "source_path": "skills/jpa-patterns",
+        "export_path": "affaan-m__everything-claude-code\\jpa-patterns",
+        "description_name": "jpa-patterns"
+      },
+      {
+        "name": "knowledge-ops",
+        "source_path": "skills/knowledge-ops",
+        "export_path": "affaan-m__everything-claude-code\\knowledge-ops",
+        "description_name": "knowledge-ops"
+      },
+      {
+        "name": "kotlin-coroutines-flows",
+        "source_path": "skills/kotlin-coroutines-flows",
+        "export_path": "affaan-m__everything-claude-code\\kotlin-coroutines-flows",
+        "description_name": "kotlin-coroutines-flows"
+      },
+      {
+        "name": "kotlin-exposed-patterns",
+        "source_path": "skills/kotlin-exposed-patterns",
+        "export_path": "affaan-m__everything-claude-code\\kotlin-exposed-patterns",
+        "description_name": "kotlin-exposed-patterns"
+      },
+      {
+        "name": "kotlin-ktor-patterns",
+        "source_path": "skills/kotlin-ktor-patterns",
+        "export_path": "affaan-m__everything-claude-code\\kotlin-ktor-patterns",
+        "description_name": "kotlin-ktor-patterns"
+      },
+      {
+        "name": "kotlin-patterns",
+        "source_path": "skills/kotlin-patterns",
+        "export_path": "affaan-m__everything-claude-code\\kotlin-patterns",
+        "description_name": "kotlin-patterns"
+      },
+      {
+        "name": "kotlin-testing",
+        "source_path": "skills/kotlin-testing",
+        "export_path": "affaan-m__everything-claude-code\\kotlin-testing",
+        "description_name": "kotlin-testing"
+      },
+      {
+        "name": "kubernetes-patterns",
+        "source_path": "skills/kubernetes-patterns",
+        "export_path": "affaan-m__everything-claude-code\\kubernetes-patterns",
+        "description_name": "kubernetes-patterns"
+      },
+      {
+        "name": "laravel-patterns",
+        "source_path": "skills/laravel-patterns",
+        "export_path": "affaan-m__everything-claude-code\\laravel-patterns",
+        "description_name": "laravel-patterns"
+      },
+      {
+        "name": "laravel-plugin-discovery",
+        "source_path": "skills/laravel-plugin-discovery",
+        "export_path": "affaan-m__everything-claude-code\\laravel-plugin-discovery",
+        "description_name": "laravel-plugin-discovery"
+      },
+      {
+        "name": "laravel-security",
+        "source_path": "skills/laravel-security",
+        "export_path": "affaan-m__everything-claude-code\\laravel-security",
+        "description_name": "laravel-security"
+      },
+      {
+        "name": "laravel-tdd",
+        "source_path": "skills/laravel-tdd",
+        "export_path": "affaan-m__everything-claude-code\\laravel-tdd",
+        "description_name": "laravel-tdd"
+      },
+      {
+        "name": "laravel-verification",
+        "source_path": "skills/laravel-verification",
+        "export_path": "affaan-m__everything-claude-code\\laravel-verification",
+        "description_name": "laravel-verification"
+      },
+      {
+        "name": "latency-critical-systems",
+        "source_path": "skills/latency-critical-systems",
+        "export_path": "affaan-m__everything-claude-code\\latency-critical-systems",
+        "description_name": "latency-critical-systems"
+      },
+      {
+        "name": "lead-intelligence",
+        "source_path": "skills/lead-intelligence",
+        "export_path": "affaan-m__everything-claude-code\\lead-intelligence",
+        "description_name": "lead-intelligence"
+      },
+      {
+        "name": "liquid-glass-design",
+        "source_path": "skills/liquid-glass-design",
+        "export_path": "affaan-m__everything-claude-code\\liquid-glass-design",
+        "description_name": "liquid-glass-design"
+      },
+      {
+        "name": "living-docs-governance",
+        "source_path": "skills/living-docs-governance",
+        "export_path": "affaan-m__everything-claude-code\\living-docs-governance",
+        "description_name": "living-docs-governance"
+      },
+      {
+        "name": "llm-trading-agent-security",
+        "source_path": "skills/llm-trading-agent-security",
+        "export_path": "affaan-m__everything-claude-code\\llm-trading-agent-security",
+        "description_name": "llm-trading-agent-security"
+      },
+      {
+        "name": "logistics-exception-management",
+        "source_path": "skills/logistics-exception-management",
+        "export_path": "affaan-m__everything-claude-code\\logistics-exception-management",
+        "description_name": "logistics-exception-management"
+      },
+      {
+        "name": "loop-design-check",
+        "source_path": "skills/loop-design-check",
+        "export_path": "affaan-m__everything-claude-code\\loop-design-check",
+        "description_name": "loop-design-check"
+      },
+      {
+        "name": "mailtrap-email-integration",
+        "source_path": "skills/mailtrap-email-integration",
+        "export_path": "affaan-m__everything-claude-code\\mailtrap-email-integration",
+        "description_name": "mailtrap-email-integration"
+      },
+      {
+        "name": "make-interfaces-feel-better",
+        "source_path": "skills/make-interfaces-feel-better",
+        "export_path": "affaan-m__everything-claude-code\\make-interfaces-feel-better",
+        "description_name": "make-interfaces-feel-better"
+      },
+      {
+        "name": "manim-video",
+        "source_path": "skills/manim-video",
+        "export_path": "affaan-m__everything-claude-code\\manim-video",
+        "description_name": "manim-video"
+      },
+      {
+        "name": "market-research",
+        "source_path": "skills/market-research",
+        "export_path": "affaan-m__everything-claude-code\\market-research",
+        "description_name": "market-research"
+      },
+      {
+        "name": "marketing-campaign",
+        "source_path": "skills/marketing-campaign",
+        "export_path": "affaan-m__everything-claude-code\\marketing-campaign",
+        "description_name": "marketing-campaign"
+      },
+      {
+        "name": "master-agreement-generator",
+        "source_path": "skills/master-agreement-generator",
+        "export_path": "affaan-m__everything-claude-code\\master-agreement-generator",
+        "description_name": "master-agreement-generator"
+      },
+      {
+        "name": "mcp-server-patterns",
+        "source_path": "skills/mcp-server-patterns",
+        "export_path": "affaan-m__everything-claude-code\\mcp-server-patterns",
+        "description_name": "mcp-server-patterns"
+      },
+      {
+        "name": "messages-ops",
+        "source_path": "skills/messages-ops",
+        "export_path": "affaan-m__everything-claude-code\\messages-ops",
+        "description_name": "messages-ops"
+      },
+      {
+        "name": "ml-adoption-playbook",
+        "source_path": "skills/ml-adoption-playbook",
+        "export_path": "affaan-m__everything-claude-code\\ml-adoption-playbook",
+        "description_name": "ml-adoption-playbook"
+      },
+      {
+        "name": "mle-workflow",
+        "source_path": "skills/mle-workflow",
+        "export_path": "affaan-m__everything-claude-code\\mle-workflow",
+        "description_name": "mle-workflow"
+      },
+      {
+        "name": "motion-advanced",
+        "source_path": "skills/motion-advanced",
+        "export_path": "affaan-m__everything-claude-code\\motion-advanced",
+        "description_name": "motion-advanced"
+      },
+      {
+        "name": "motion-foundations",
+        "source_path": "skills/motion-foundations",
+        "export_path": "affaan-m__everything-claude-code\\motion-foundations",
+        "description_name": "motion-foundations"
+      },
+      {
+        "name": "motion-patterns",
+        "source_path": "skills/motion-patterns",
+        "export_path": "affaan-m__everything-claude-code\\motion-patterns",
+        "description_name": "motion-patterns"
+      },
+      {
+        "name": "mysql-patterns",
+        "source_path": "skills/mysql-patterns",
+        "export_path": "affaan-m__everything-claude-code\\mysql-patterns",
+        "description_name": "mysql-patterns"
+      },
+      {
+        "name": "nanoclaw-repl",
+        "source_path": "skills/nanoclaw-repl",
+        "export_path": "affaan-m__everything-claude-code\\nanoclaw-repl",
+        "description_name": "nanoclaw-repl"
+      },
+      {
+        "name": "nasiko-control-plane",
+        "source_path": "skills/nasiko-control-plane",
+        "export_path": "affaan-m__everything-claude-code\\nasiko-control-plane",
+        "description_name": "nasiko-control-plane"
+      },
+      {
+        "name": "nestjs-patterns",
+        "source_path": "skills/nestjs-patterns",
+        "export_path": "affaan-m__everything-claude-code\\nestjs-patterns",
+        "description_name": "nestjs-patterns"
+      },
+      {
+        "name": "netmiko-ssh-automation",
+        "source_path": "skills/netmiko-ssh-automation",
+        "export_path": "affaan-m__everything-claude-code\\netmiko-ssh-automation",
+        "description_name": "netmiko-ssh-automation"
+      },
+      {
+        "name": "network-bgp-diagnostics",
+        "source_path": "skills/network-bgp-diagnostics",
+        "export_path": "affaan-m__everything-claude-code\\network-bgp-diagnostics",
+        "description_name": "network-bgp-diagnostics"
+      },
+      {
+        "name": "network-config-validation",
+        "source_path": "skills/network-config-validation",
+        "export_path": "affaan-m__everything-claude-code\\network-config-validation",
+        "description_name": "network-config-validation"
+      },
+      {
+        "name": "network-interface-health",
+        "source_path": "skills/network-interface-health",
+        "export_path": "affaan-m__everything-claude-code\\network-interface-health",
+        "description_name": "network-interface-health"
+      },
+      {
+        "name": "nextjs-turbopack",
+        "source_path": "skills/nextjs-turbopack",
+        "export_path": "affaan-m__everything-claude-code\\nextjs-turbopack",
+        "description_name": "nextjs-turbopack"
+      },
+      {
+        "name": "nodejs-keccak256",
+        "source_path": "skills/nodejs-keccak256",
+        "export_path": "affaan-m__everything-claude-code\\nodejs-keccak256",
+        "description_name": "nodejs-keccak256"
+      },
+      {
+        "name": "nutrient-document-processing",
+        "source_path": "skills/nutrient-document-processing",
+        "export_path": "affaan-m__everything-claude-code\\nutrient-document-processing",
+        "description_name": "nutrient-document-processing"
+      },
+      {
+        "name": "nuxt4-patterns",
+        "source_path": "skills/nuxt4-patterns",
+        "export_path": "affaan-m__everything-claude-code\\nuxt4-patterns",
+        "description_name": "nuxt4-patterns"
+      },
+      {
+        "name": "openclaw-persona-forge",
+        "source_path": "skills/openclaw-persona-forge",
+        "export_path": "affaan-m__everything-claude-code\\openclaw-persona-forge",
+        "description_name": "openclaw-persona-forge"
+      },
+      {
+        "name": "opensource-pipeline",
+        "source_path": "skills/opensource-pipeline",
+        "export_path": "affaan-m__everything-claude-code\\opensource-pipeline",
+        "description_name": "opensource-pipeline"
+      },
+      {
+        "name": "operator-approval-loop",
+        "source_path": "skills/operator-approval-loop",
+        "export_path": "affaan-m__everything-claude-code\\operator-approval-loop",
+        "description_name": "operator-approval-loop"
+      },
+      {
+        "name": "orch-add-feature",
+        "source_path": "skills/orch-add-feature",
+        "export_path": "affaan-m__everything-claude-code\\orch-add-feature",
+        "description_name": "orch-add-feature"
+      },
+      {
+        "name": "orch-build-mvp",
+        "source_path": "skills/orch-build-mvp",
+        "export_path": "affaan-m__everything-claude-code\\orch-build-mvp",
+        "description_name": "orch-build-mvp"
+      },
+      {
+        "name": "orch-change-feature",
+        "source_path": "skills/orch-change-feature",
+        "export_path": "affaan-m__everything-claude-code\\orch-change-feature",
+        "description_name": "orch-change-feature"
+      },
+      {
+        "name": "orch-fix-defect",
+        "source_path": "skills/orch-fix-defect",
+        "export_path": "affaan-m__everything-claude-code\\orch-fix-defect",
+        "description_name": "orch-fix-defect"
+      },
+      {
+        "name": "orch-pipeline",
+        "source_path": "skills/orch-pipeline",
+        "export_path": "affaan-m__everything-claude-code\\orch-pipeline",
+        "description_name": "orch-pipeline"
+      },
+      {
+        "name": "orch-refine-code",
+        "source_path": "skills/orch-refine-code",
+        "export_path": "affaan-m__everything-claude-code\\orch-refine-code",
+        "description_name": "orch-refine-code"
+      },
+      {
+        "name": "parallel-execution-optimizer",
+        "source_path": "skills/parallel-execution-optimizer",
+        "export_path": "affaan-m__everything-claude-code\\parallel-execution-optimizer",
+        "description_name": "parallel-execution-optimizer"
+      },
+      {
+        "name": "perl-patterns",
+        "source_path": "skills/perl-patterns",
+        "export_path": "affaan-m__everything-claude-code\\perl-patterns",
+        "description_name": "perl-patterns"
+      },
+      {
+        "name": "perl-security",
+        "source_path": "skills/perl-security",
+        "export_path": "affaan-m__everything-claude-code\\perl-security",
+        "description_name": "perl-security"
+      },
+      {
+        "name": "perl-testing",
+        "source_path": "skills/perl-testing",
+        "export_path": "affaan-m__everything-claude-code\\perl-testing",
+        "description_name": "perl-testing"
+      },
+      {
+        "name": "plan-canvas",
+        "source_path": "skills/plan-canvas",
+        "export_path": "affaan-m__everything-claude-code\\plan-canvas",
+        "description_name": "plan-canvas"
+      },
+      {
+        "name": "plan-orchestrate",
+        "source_path": "skills/plan-orchestrate",
+        "export_path": "affaan-m__everything-claude-code\\plan-orchestrate",
+        "description_name": "plan-orchestrate"
+      },
+      {
+        "name": "plankton-code-quality",
+        "source_path": "skills/plankton-code-quality",
+        "export_path": "affaan-m__everything-claude-code\\plankton-code-quality",
+        "description_name": "plankton-code-quality"
+      },
+      {
+        "name": "postgres-patterns",
+        "source_path": "skills/postgres-patterns",
+        "export_path": "affaan-m__everything-claude-code\\postgres-patterns",
+        "description_name": "postgres-patterns"
+      },
+      {
+        "name": "prediction-market-oracle-research",
+        "source_path": "skills/prediction-market-oracle-research",
+        "export_path": "affaan-m__everything-claude-code\\prediction-market-oracle-research",
+        "description_name": "prediction-market-oracle-research"
+      },
+      {
+        "name": "prediction-market-risk-review",
+        "source_path": "skills/prediction-market-risk-review",
+        "export_path": "affaan-m__everything-claude-code\\prediction-market-risk-review",
+        "description_name": "prediction-market-risk-review"
+      },
+      {
+        "name": "prisma-patterns",
+        "source_path": "skills/prisma-patterns",
+        "export_path": "affaan-m__everything-claude-code\\prisma-patterns",
+        "description_name": "prisma-patterns"
+      },
+      {
+        "name": "product-capability",
+        "source_path": "skills/product-capability",
+        "export_path": "affaan-m__everything-claude-code\\product-capability",
+        "description_name": "product-capability"
+      },
+      {
+        "name": "product-lens",
+        "source_path": "skills/product-lens",
+        "export_path": "affaan-m__everything-claude-code\\product-lens",
+        "description_name": "product-lens"
+      },
+      {
+        "name": "production-audit",
+        "source_path": "skills/production-audit",
+        "export_path": "affaan-m__everything-claude-code\\production-audit",
+        "description_name": "production-audit"
+      },
+      {
+        "name": "production-scheduling",
+        "source_path": "skills/production-scheduling",
+        "export_path": "affaan-m__everything-claude-code\\production-scheduling",
+        "description_name": "production-scheduling"
+      },
+      {
+        "name": "project-flow-ops",
+        "source_path": "skills/project-flow-ops",
+        "export_path": "affaan-m__everything-claude-code\\project-flow-ops",
+        "description_name": "project-flow-ops"
+      },
+      {
+        "name": "prompt-optimizer",
+        "source_path": "skills/prompt-optimizer",
+        "export_path": "affaan-m__everything-claude-code\\prompt-optimizer",
+        "description_name": "prompt-optimizer"
+      },
+      {
+        "name": "python-patterns",
+        "source_path": "skills/python-patterns",
+        "export_path": "affaan-m__everything-claude-code\\python-patterns",
+        "description_name": "python-patterns"
+      },
+      {
+        "name": "python-testing",
+        "source_path": "skills/python-testing",
+        "export_path": "affaan-m__everything-claude-code\\python-testing",
+        "description_name": "python-testing"
+      },
+      {
+        "name": "pytorch-patterns",
+        "source_path": "skills/pytorch-patterns",
+        "export_path": "affaan-m__everything-claude-code\\pytorch-patterns",
+        "description_name": "pytorch-patterns"
+      },
+      {
+        "name": "quality-nonconformance",
+        "source_path": "skills/quality-nonconformance",
+        "export_path": "affaan-m__everything-claude-code\\quality-nonconformance",
+        "description_name": "quality-nonconformance"
+      },
+      {
+        "name": "quarkus-patterns",
+        "source_path": "skills/quarkus-patterns",
+        "export_path": "affaan-m__everything-claude-code\\quarkus-patterns",
+        "description_name": "quarkus-patterns"
+      },
+      {
+        "name": "quarkus-security",
+        "source_path": "skills/quarkus-security",
+        "export_path": "affaan-m__everything-claude-code\\quarkus-security",
+        "description_name": "quarkus-security"
+      },
+      {
+        "name": "quarkus-tdd",
+        "source_path": "skills/quarkus-tdd",
+        "export_path": "affaan-m__everything-claude-code\\quarkus-tdd",
+        "description_name": "quarkus-tdd"
+      },
+      {
+        "name": "quarkus-verification",
+        "source_path": "skills/quarkus-verification",
+        "export_path": "affaan-m__everything-claude-code\\quarkus-verification",
+        "description_name": "quarkus-verification"
+      },
+      {
+        "name": "rails-patterns",
+        "source_path": "skills/rails-patterns",
+        "export_path": "affaan-m__everything-claude-code\\rails-patterns",
+        "description_name": "rails-patterns"
+      },
+      {
+        "name": "ralphinho-rfc-pipeline",
+        "source_path": "skills/ralphinho-rfc-pipeline",
+        "export_path": "affaan-m__everything-claude-code\\ralphinho-rfc-pipeline",
+        "description_name": "ralphinho-rfc-pipeline"
+      },
+      {
+        "name": "react-native-patterns",
+        "source_path": "skills/react-native-patterns",
+        "export_path": "affaan-m__everything-claude-code\\react-native-patterns",
+        "description_name": "react-native-patterns"
+      },
+      {
+        "name": "react-patterns",
+        "source_path": "skills/react-patterns",
+        "export_path": "affaan-m__everything-claude-code\\react-patterns",
+        "description_name": "react-patterns"
+      },
+      {
+        "name": "react-performance",
+        "source_path": "skills/react-performance",
+        "export_path": "affaan-m__everything-claude-code\\react-performance",
+        "description_name": "react-performance"
+      },
+      {
+        "name": "react-testing",
+        "source_path": "skills/react-testing",
+        "export_path": "affaan-m__everything-claude-code\\react-testing",
+        "description_name": "react-testing"
+      },
+      {
+        "name": "recsys-pipeline-architect",
+        "source_path": "skills/recsys-pipeline-architect",
+        "export_path": "affaan-m__everything-claude-code\\recsys-pipeline-architect",
+        "description_name": "recsys-pipeline-architect"
+      },
+      {
+        "name": "recursive-decision-ledger",
+        "source_path": "skills/recursive-decision-ledger",
+        "export_path": "affaan-m__everything-claude-code\\recursive-decision-ledger",
+        "description_name": "recursive-decision-ledger"
+      },
+      {
+        "name": "redis-patterns",
+        "source_path": "skills/redis-patterns",
+        "export_path": "affaan-m__everything-claude-code\\redis-patterns",
+        "description_name": "redis-patterns"
+      },
+      {
+        "name": "regex-vs-llm-structured-text",
+        "source_path": "skills/regex-vs-llm-structured-text",
+        "export_path": "affaan-m__everything-claude-code\\regex-vs-llm-structured-text",
+        "description_name": "regex-vs-llm-structured-text"
+      },
+      {
+        "name": "remotion-video-creation",
+        "source_path": "skills/remotion-video-creation",
+        "export_path": "affaan-m__everything-claude-code\\remotion-video-creation",
+        "description_name": "remotion-video-creation"
+      },
+      {
+        "name": "repo-scan",
+        "source_path": "skills/repo-scan",
+        "export_path": "affaan-m__everything-claude-code\\repo-scan",
+        "description_name": "repo-scan"
+      },
+      {
+        "name": "research-ops",
+        "source_path": "skills/research-ops",
+        "export_path": "affaan-m__everything-claude-code\\research-ops",
+        "description_name": "research-ops"
+      },
+      {
+        "name": "returns-reverse-logistics",
+        "source_path": "skills/returns-reverse-logistics",
+        "export_path": "affaan-m__everything-claude-code\\returns-reverse-logistics",
+        "description_name": "returns-reverse-logistics"
+      },
+      {
+        "name": "rules-distill",
+        "source_path": "skills/rules-distill",
+        "export_path": "affaan-m__everything-claude-code\\rules-distill",
+        "description_name": "rules-distill"
+      },
+      {
+        "name": "rust-patterns",
+        "source_path": "skills/rust-patterns",
+        "export_path": "affaan-m__everything-claude-code\\rust-patterns",
+        "description_name": "rust-patterns"
+      },
+      {
+        "name": "rust-testing",
+        "source_path": "skills/rust-testing",
+        "export_path": "affaan-m__everything-claude-code\\rust-testing",
+        "description_name": "rust-testing"
+      },
+      {
+        "name": "safety-guard",
+        "source_path": "skills/safety-guard",
+        "export_path": "affaan-m__everything-claude-code\\safety-guard",
+        "description_name": "safety-guard"
+      },
+      {
+        "name": "santa-method",
+        "source_path": "skills/santa-method",
+        "export_path": "affaan-m__everything-claude-code\\santa-method",
+        "description_name": "santa-method"
+      },
+      {
+        "name": "scientific-db-pubmed-database",
+        "source_path": "skills/scientific-db-pubmed-database",
+        "export_path": "affaan-m__everything-claude-code\\scientific-db-pubmed-database",
+        "description_name": "pubmed-database"
+      },
+      {
+        "name": "scientific-db-uspto-database",
+        "source_path": "skills/scientific-db-uspto-database",
+        "export_path": "affaan-m__everything-claude-code\\scientific-db-uspto-database",
+        "description_name": "uspto-database"
+      },
+      {
+        "name": "scientific-pkg-gget",
+        "source_path": "skills/scientific-pkg-gget",
+        "export_path": "affaan-m__everything-claude-code\\scientific-pkg-gget",
+        "description_name": "gget"
+      },
+      {
+        "name": "scientific-thinking-literature-review",
+        "source_path": "skills/scientific-thinking-literature-review",
+        "export_path": "affaan-m__everything-claude-code\\scientific-thinking-literature-review",
+        "description_name": "literature-review"
+      },
+      {
+        "name": "scientific-thinking-scholar-evaluation",
+        "source_path": "skills/scientific-thinking-scholar-evaluation",
+        "export_path": "affaan-m__everything-claude-code\\scientific-thinking-scholar-evaluation",
+        "description_name": "scholar-evaluation"
+      },
+      {
+        "name": "search-first",
+        "source_path": "skills/search-first",
+        "export_path": "affaan-m__everything-claude-code\\search-first",
+        "description_name": "search-first"
+      },
+      {
+        "name": "security-bounty-hunter",
+        "source_path": "skills/security-bounty-hunter",
+        "export_path": "affaan-m__everything-claude-code\\security-bounty-hunter",
+        "description_name": "security-bounty-hunter"
+      },
+      {
+        "name": "security-review",
+        "source_path": "skills/security-review",
+        "export_path": "affaan-m__everything-claude-code\\security-review",
+        "description_name": "security-review"
+      },
+      {
+        "name": "security-scan",
+        "source_path": "skills/security-scan",
+        "export_path": "affaan-m__everything-claude-code\\security-scan",
+        "description_name": "security-scan"
+      },
+      {
+        "name": "seo",
+        "source_path": "skills/seo",
+        "export_path": "affaan-m__everything-claude-code\\seo",
+        "description_name": "seo"
+      },
+      {
+        "name": "skill-comply",
+        "source_path": "skills/skill-comply",
+        "export_path": "affaan-m__everything-claude-code\\skill-comply",
+        "description_name": "skill-comply"
+      },
+      {
+        "name": "skill-scout",
+        "source_path": "skills/skill-scout",
+        "export_path": "affaan-m__everything-claude-code\\skill-scout",
+        "description_name": "skill-scout"
+      },
+      {
+        "name": "skill-stocktake",
+        "source_path": "skills/skill-stocktake",
+        "export_path": "affaan-m__everything-claude-code\\skill-stocktake",
+        "description_name": "skill-stocktake"
+      },
+      {
+        "name": "social-graph-ranker",
+        "source_path": "skills/social-graph-ranker",
+        "export_path": "affaan-m__everything-claude-code\\social-graph-ranker",
+        "description_name": "social-graph-ranker"
+      },
+      {
+        "name": "social-publisher",
+        "source_path": "skills/social-publisher",
+        "export_path": "affaan-m__everything-claude-code\\social-publisher",
+        "description_name": "social-publisher"
+      },
+      {
+        "name": "springboot-patterns",
+        "source_path": "skills/springboot-patterns",
+        "export_path": "affaan-m__everything-claude-code\\springboot-patterns",
+        "description_name": "springboot-patterns"
+      },
+      {
+        "name": "springboot-security",
+        "source_path": "skills/springboot-security",
+        "export_path": "affaan-m__everything-claude-code\\springboot-security",
+        "description_name": "springboot-security"
+      },
+      {
+        "name": "springboot-tdd",
+        "source_path": "skills/springboot-tdd",
+        "export_path": "affaan-m__everything-claude-code\\springboot-tdd",
+        "description_name": "springboot-tdd"
+      },
+      {
+        "name": "springboot-verification",
+        "source_path": "skills/springboot-verification",
+        "export_path": "affaan-m__everything-claude-code\\springboot-verification",
+        "description_name": "springboot-verification"
+      },
+      {
+        "name": "strategic-compact",
+        "source_path": "skills/strategic-compact",
+        "export_path": "affaan-m__everything-claude-code\\strategic-compact",
+        "description_name": "strategic-compact"
+      },
+      {
+        "name": "swift-actor-persistence",
+        "source_path": "skills/swift-actor-persistence",
+        "export_path": "affaan-m__everything-claude-code\\swift-actor-persistence",
+        "description_name": "swift-actor-persistence"
+      },
+      {
+        "name": "swift-concurrency-6-2",
+        "source_path": "skills/swift-concurrency-6-2",
+        "export_path": "affaan-m__everything-claude-code\\swift-concurrency-6-2",
+        "description_name": "swift-concurrency-6-2"
+      },
+      {
+        "name": "swift-protocol-di-testing",
+        "source_path": "skills/swift-protocol-di-testing",
+        "export_path": "affaan-m__everything-claude-code\\swift-protocol-di-testing",
+        "description_name": "swift-protocol-di-testing"
+      },
+      {
+        "name": "swiftui-patterns",
+        "source_path": "skills/swiftui-patterns",
+        "export_path": "affaan-m__everything-claude-code\\swiftui-patterns",
+        "description_name": "swiftui-patterns"
+      },
+      {
+        "name": "taste",
+        "source_path": "skills/taste",
+        "export_path": "affaan-m__everything-claude-code\\taste",
+        "description_name": "taste"
+      },
+      {
+        "name": "taste-application",
+        "source_path": "skills/taste-application",
+        "export_path": "affaan-m__everything-claude-code\\taste-application",
+        "description_name": "taste-application"
+      },
+      {
+        "name": "taste-distillation",
+        "source_path": "skills/taste-distillation",
+        "export_path": "affaan-m__everything-claude-code\\taste-distillation",
+        "description_name": "taste-distillation"
+      },
+      {
+        "name": "tasteforge-video",
+        "source_path": "skills/tasteforge-video",
+        "export_path": "affaan-m__everything-claude-code\\tasteforge-video",
+        "description_name": "tasteforge-video"
+      },
+      {
+        "name": "tdd-workflow",
+        "source_path": "skills/tdd-workflow",
+        "export_path": "affaan-m__everything-claude-code\\tdd-workflow",
+        "description_name": "tdd-workflow"
+      },
+      {
+        "name": "team-agent-orchestration",
+        "source_path": "skills/team-agent-orchestration",
+        "export_path": "affaan-m__everything-claude-code\\team-agent-orchestration",
+        "description_name": "team-agent-orchestration"
+      },
+      {
+        "name": "team-builder",
+        "source_path": "skills/team-builder",
+        "export_path": "affaan-m__everything-claude-code\\team-builder",
+        "description_name": "team-builder"
+      },
+      {
+        "name": "terminal-opener",
+        "source_path": "skills/terminal-opener",
+        "export_path": "affaan-m__everything-claude-code\\terminal-opener",
+        "description_name": "terminal-opener"
+      },
+      {
+        "name": "terminal-ops",
+        "source_path": "skills/terminal-ops",
+        "export_path": "affaan-m__everything-claude-code\\terminal-ops",
+        "description_name": "terminal-ops"
+      },
+      {
+        "name": "tinystruct-patterns",
+        "source_path": "skills/tinystruct-patterns",
+        "export_path": "affaan-m__everything-claude-code\\tinystruct-patterns",
+        "description_name": "tinystruct-patterns"
+      },
+      {
+        "name": "token-budget-advisor",
+        "source_path": "skills/token-budget-advisor",
+        "export_path": "affaan-m__everything-claude-code\\token-budget-advisor",
+        "description_name": "token-budget-advisor"
+      },
+      {
+        "name": "ui-demo",
+        "source_path": "skills/ui-demo",
+        "export_path": "affaan-m__everything-claude-code\\ui-demo",
+        "description_name": "ui-demo"
+      },
+      {
+        "name": "ui-to-vue",
+        "source_path": "skills/ui-to-vue",
+        "export_path": "affaan-m__everything-claude-code\\ui-to-vue",
+        "description_name": "ui-to-vue"
+      },
+      {
+        "name": "uncloud",
+        "source_path": "skills/uncloud",
+        "export_path": "affaan-m__everything-claude-code\\uncloud",
+        "description_name": "uncloud"
+      },
+      {
+        "name": "unified-memory",
+        "source_path": "skills/unified-memory",
+        "export_path": "affaan-m__everything-claude-code\\unified-memory",
+        "description_name": "unified-memory"
+      },
+      {
+        "name": "unified-notifications-ops",
+        "source_path": "skills/unified-notifications-ops",
+        "export_path": "affaan-m__everything-claude-code\\unified-notifications-ops",
+        "description_name": "unified-notifications-ops"
+      },
+      {
+        "name": "verification-loop",
+        "source_path": "skills/verification-loop",
+        "export_path": "affaan-m__everything-claude-code\\verification-loop",
+        "description_name": "verification-loop"
+      },
+      {
+        "name": "video-editing",
+        "source_path": "skills/video-editing",
+        "export_path": "affaan-m__everything-claude-code\\video-editing",
+        "description_name": "video-editing"
+      },
+      {
+        "name": "videodb",
+        "source_path": "skills/videodb",
+        "export_path": "affaan-m__everything-claude-code\\videodb",
+        "description_name": "videodb"
+      },
+      {
+        "name": "visa-doc-translate",
+        "source_path": "skills/visa-doc-translate",
+        "export_path": "affaan-m__everything-claude-code\\visa-doc-translate",
+        "description_name": "visa-doc-translate"
+      },
+      {
+        "name": "vite-patterns",
+        "source_path": "skills/vite-patterns",
+        "export_path": "affaan-m__everything-claude-code\\vite-patterns",
+        "description_name": "vite-patterns"
+      },
+      {
+        "name": "vue-patterns",
+        "source_path": "skills/vue-patterns",
+        "export_path": "affaan-m__everything-claude-code\\vue-patterns",
+        "description_name": "vue-patterns"
+      },
+      {
+        "name": "windows-desktop-e2e",
+        "source_path": "skills/windows-desktop-e2e",
+        "export_path": "affaan-m__everything-claude-code\\windows-desktop-e2e",
+        "description_name": "windows-desktop-e2e"
+      },
+      {
+        "name": "workspace-surface-audit",
+        "source_path": "skills/workspace-surface-audit",
+        "export_path": "affaan-m__everything-claude-code\\workspace-surface-audit",
+        "description_name": "workspace-surface-audit"
+      },
+      {
+        "name": "x-api",
+        "source_path": "skills/x-api",
+        "export_path": "affaan-m__everything-claude-code\\x-api",
+        "description_name": "x-api"
+      }
+    ]
+  },
+  {
+    "repo": "soreavis/claude-audit-skills",
+    "commit": "f20ae6ae9b9cd80b93c2fcd9665f1e965be667a4",
+    "skills": [
+      {
+        "name": "audit-a11y",
+        "source_path": "plugins/audit/skills/audit-a11y",
+        "export_path": "soreavis__claude-audit-skills\\audit-a11y",
+        "description_name": "audit-a11y"
+      },
+      {
+        "name": "audit-all",
+        "source_path": "plugins/audit/skills/audit-all",
+        "export_path": "soreavis__claude-audit-skills\\audit-all",
+        "description_name": "audit-all"
+      },
+      {
+        "name": "audit-compliance",
+        "source_path": "plugins/audit/skills/audit-compliance",
+        "export_path": "soreavis__claude-audit-skills\\audit-compliance",
+        "description_name": "audit-compliance"
+      },
+      {
+        "name": "audit-deep",
+        "source_path": "plugins/audit/skills/audit-deep",
+        "export_path": "soreavis__claude-audit-skills\\audit-deep",
+        "description_name": "audit-deep"
+      },
+      {
+        "name": "audit-deploy",
+        "source_path": "plugins/audit/skills/audit-deploy",
+        "export_path": "soreavis__claude-audit-skills\\audit-deploy",
+        "description_name": "audit-deploy"
+      },
+      {
+        "name": "audit-deps",
+        "source_path": "plugins/audit/skills/audit-deps",
+        "export_path": "soreavis__claude-audit-skills\\audit-deps",
+        "description_name": "audit-deps"
+      },
+      {
+        "name": "audit-diff",
+        "source_path": "plugins/audit/skills/audit-diff",
+        "export_path": "soreavis__claude-audit-skills\\audit-diff",
+        "description_name": "audit-diff"
+      },
+      {
+        "name": "audit-forms",
+        "source_path": "plugins/audit/skills/audit-forms",
+        "export_path": "soreavis__claude-audit-skills\\audit-forms",
+        "description_name": "audit-forms"
+      },
+      {
+        "name": "audit-hallucination",
+        "source_path": "plugins/audit/skills/audit-hallucination",
+        "export_path": "soreavis__claude-audit-skills\\audit-hallucination",
+        "description_name": "audit-hallucination"
+      },
+      {
+        "name": "audit-responsive",
+        "source_path": "plugins/audit/skills/audit-responsive",
+        "export_path": "soreavis__claude-audit-skills\\audit-responsive",
+        "description_name": "audit-responsive"
+      },
+      {
+        "name": "audit-security",
+        "source_path": "plugins/audit/skills/audit-security",
+        "export_path": "soreavis__claude-audit-skills\\audit-security",
+        "description_name": "audit-security"
+      },
+      {
+        "name": "audit-seo",
+        "source_path": "plugins/audit/skills/audit-seo",
+        "export_path": "soreavis__claude-audit-skills\\audit-seo",
+        "description_name": "audit-seo"
+      },
+      {
+        "name": "audit-tech-stack",
+        "source_path": "plugins/audit/skills/audit-tech-stack",
+        "export_path": "soreavis__claude-audit-skills\\audit-tech-stack",
+        "description_name": "audit-tech-stack"
+      }
+    ]
+  },
+  {
+    "repo": "Nordic-AI/production-readiness-skills",
+    "commit": "0105f3d67755a20837b7217fd36e1a5ba1cae647",
+    "skills": [
+      {
+        "name": "accessibility-audit",
+        "source_path": "skills/accessibility-audit",
+        "export_path": "Nordic-AI__production-readiness-skills\\accessibility-audit",
+        "description_name": "accessibility-audit"
+      },
+      {
+        "name": "ai-readiness",
+        "source_path": "skills/ai-readiness",
+        "export_path": "Nordic-AI__production-readiness-skills\\ai-readiness",
+        "description_name": "ai-readiness"
+      },
+      {
+        "name": "compliance-check",
+        "source_path": "skills/compliance-check",
+        "export_path": "Nordic-AI__production-readiness-skills\\compliance-check",
+        "description_name": "compliance-check"
+      },
+      {
+        "name": "data-protection-audit",
+        "source_path": "skills/data-protection-audit",
+        "export_path": "Nordic-AI__production-readiness-skills\\data-protection-audit",
+        "description_name": "data-protection-audit"
+      },
+      {
+        "name": "observability-audit",
+        "source_path": "skills/observability-audit",
+        "export_path": "Nordic-AI__production-readiness-skills\\observability-audit",
+        "description_name": "observability-audit"
+      },
+      {
+        "name": "production-readiness",
+        "source_path": "skills/production-readiness",
+        "export_path": "Nordic-AI__production-readiness-skills\\production-readiness",
+        "description_name": "production-readiness"
+      },
+      {
+        "name": "release-readiness",
+        "source_path": "skills/release-readiness",
+        "export_path": "Nordic-AI__production-readiness-skills\\release-readiness",
+        "description_name": "release-readiness"
+      },
+      {
+        "name": "reliability-audit",
+        "source_path": "skills/reliability-audit",
+        "export_path": "Nordic-AI__production-readiness-skills\\reliability-audit",
+        "description_name": "reliability-audit"
+      },
+      {
+        "name": "scalability-review",
+        "source_path": "skills/scalability-review",
+        "export_path": "Nordic-AI__production-readiness-skills\\scalability-review",
+        "description_name": "scalability-review"
+      },
+      {
+        "name": "security-audit",
+        "source_path": "skills/security-audit",
+        "export_path": "Nordic-AI__production-readiness-skills\\security-audit",
+        "description_name": "security-audit"
+      },
+      {
+        "name": "supply-chain-audit",
+        "source_path": "skills/supply-chain-audit",
+        "export_path": "Nordic-AI__production-readiness-skills\\supply-chain-audit",
+        "description_name": "supply-chain-audit"
+      },
+      {
+        "name": "test-coverage",
+        "source_path": "skills/test-coverage",
+        "export_path": "Nordic-AI__production-readiness-skills\\test-coverage",
+        "description_name": "test-coverage"
+      }
+    ]
+  },
+  {
+    "repo": "microsoft/playwright-mcp",
+    "skills": []
+  },
+  {
+    "repo": "facebook/react-native",
+    "skills": []
+  },
+  {
+    "repo": "expo/expo",
+    "commit": "d604db1f29009bf5979d1907a2988f016dec26e2",
+    "skills": [
+      {
+        "name": "deep-code-review",
+        "source_path": ".claude/skills/deep-code-review",
+        "export_path": "expo__expo\\deep-code-review",
+        "description_name": "deep-code-review"
+      },
+      {
+        "name": "expo-api-docs",
+        "source_path": ".claude/skills/expo-api-docs",
+        "export_path": "expo__expo\\expo-api-docs",
+        "description_name": "expo-api-docs"
+      },
+      {
+        "name": "expo-review",
+        "source_path": ".claude/skills/expo-review",
+        "export_path": "expo__expo\\expo-review",
+        "description_name": "expo-review"
+      },
+      {
+        "name": "android-e2e-testing",
+        "source_path": "packages/expo-router/.claude/skills/android-e2e-testing",
+        "export_path": "expo__expo\\android-e2e-testing",
+        "description_name": "android-e2e-testing"
+      },
+      {
+        "name": "expo-sqlite",
+        "source_path": "packages/expo-sqlite/skills/expo-sqlite",
+        "export_path": "expo__expo\\expo-sqlite",
+        "description_name": "expo-sqlite"
+      }
+    ]
+  },
+  {
+    "repo": "software-mansion/react-native-reanimated",
+    "skills": []
+  },
+  {
+    "repo": "software-mansion/react-native-gesture-handler",
+    "commit": "e26231e9d89ec25f45ff3961d76c575ec6f04700",
+    "skills": [
+      {
+        "name": "gesture-handler-3-migration",
+        "source_path": "skills/gesture-handler-3-migration",
+        "export_path": "software-mansion__react-native-gesture-handler\\gesture-handler-3-migration",
+        "description_name": "gesture-handler-3-migration"
+      }
+    ]
+  }
+]
