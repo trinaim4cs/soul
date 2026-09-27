@@ -12,6 +12,8 @@ type Props = {
   rounded?: boolean;
   /** Stable key inside recycled list cells. */
   recyclingKey?: string;
+  /** Anonymous mode: the source is already a tiny (24 px) derivative; this softens it further. */
+  blurRadius?: number;
   accessibilityLabel?: string;
   style?: StyleProp<ViewStyle>;
 };
@@ -23,6 +25,7 @@ export function SoulPhoto({
   aspectRatio = sizes.photoAspect,
   rounded = true,
   recyclingKey,
+  blurRadius,
   accessibilityLabel,
   style,
 }: Props) {
@@ -36,6 +39,7 @@ export function SoulPhoto({
           contentFit="cover"
           transition={durations.small}
           recyclingKey={recyclingKey}
+          blurRadius={blurRadius}
           style={StyleSheet.absoluteFill}
           accessibilityLabel={accessibilityLabel}
           accessible={Boolean(accessibilityLabel)}

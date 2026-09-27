@@ -73,11 +73,11 @@ The client can request these; only the server decides them. Each is a SECURITY D
 | Bucket | Public | Write | Read |
 |---|---|---|---|
 | `profile-photos` | no | owner uploads to `{uid}/…` through a pending-moderation path | signed URLs from server functions for approved photos, to eligible viewers only |
-| `profile-photos-blurred` | no | server only (anonymous-mode derivatives) | signed URLs |
+| `profile-photos-blurred` | no | owner uploads the tiny (24 px) anonymous-mode copy to `{uid}/…` | owner; others via signed URLs from server functions |
 | `report-evidence` | no | via report function | service role only |
 | `chat-media` (feature-flagged) | no | conversation members, after moderation | conversation members via signed URLs |
 
-Uploads are validated server-side (MIME sniffing, size limit, image re-encode to strip EXIF including GPS). Upload counts are rate limited.
+Photos are re-encoded on the device before upload (crop, resize, JPEG), which strips EXIF including GPS; the buckets restrict MIME type and size, and `add_profile_photo` only registers objects in the caller's own folder, up to 6. A tampered client could skip the re-encode, but only for its own photo. Server-side re-encoding and automated checks are C-30.
 
 ## 7. Abuse and attack controls
 

@@ -6,6 +6,21 @@ Status values: `accepted` · `default, confirm` · `open`.
 
 ---
 
+## Phase 5 profile (2026-09-27)
+
+### D-041 Profile rules (spec v2 sections 14 to 17, 20)
+- **Required before the app opens:** at least one photo that is not rejected, a first name (1 to 30 characters), gender, "show me" (at least one), and the 30-character hook. About Me is optional (up to 1000). The server decides (`submit_profile()`); the app only mirrors the rule for instant feedback.
+- **Gender:** Woman, Man, Non-binary (C-13). Gender is shown on the profile. "Show me" is private (`preferences.show_me`).
+- **Photos:** up to 6 (`app_config.max_profile_photos`). The first is the main photo. The main photo prefers a fresh camera shot (front camera); the gallery is the fallback. Each photo is cropped to 4:5 and resized to at most 1080 × 1350 on the device, then re-encoded as JPEG, which also removes EXIF metadata including location.
+- **Upload path:** files go to `profile-photos/{uid}/{id}.jpg` and a 24-pixel-wide copy to `profile-photos-blurred/{uid}/{id}.jpg`, both through owner-folder storage policies. `add_profile_photo()` registers a photo only if both objects exist in the caller's own folders and the limit allows it. Owners cannot insert or change photo rows or statuses directly.
+- **Review:** `app_config.photo_review_required` (default **false** for the beta). When true, new photos stay `pending` until a moderator approves them (moderation tools arrive in Phase 15). Other users will only ever receive `approved` photos (Phase 6).
+- **Anonymous mode:** the name is hidden and only the tiny blurred copies are served, so no detail can be recovered by the viewer. The copy is made on the device: a user who tampers with it can only expose their own photo. Age, verified badge, hook, About Me and zodiac (if on) still show (spec 20).
+- **Private mode:** hidden from Discover; matches and chats keep working.
+- **Zodiac:** derived from the private date of birth on the server, never stored or editable; shown only when the owner turns it on.
+- **Discovery preferences** (`preferences.min_age` 18, `max_age` 30, `zodiac_filter`) exist now and get their UI in Phase 6. The 18 to 30 default range is **[DEFAULT, confirm]**.
+
+---
+
 ## Platform and distribution amendment (2026-09-27): supersedes any "Android-only" statement
 
 ### D-035 Two initial platforms, one codebase
@@ -342,3 +357,4 @@ The owner felt the strict monochrome direction read "too X" (too much like a soc
 | C-27 | Plan renewal: whether plans renew automatically (Razorpay subscriptions) or are bought one period at a time | Phase 12 | One period at a time, no auto-renewal **[DEFAULT, confirm]** (the purchases draft says so, marked "to confirm") |
 | C-28 | Email sender for OTP codes on the cloud project (custom SMTP). Supabase's built-in email reaches only project team members | **Before real students sign in** | Suggested without a domain: a dedicated SOUL Gmail account with an app password (SUPABASE.md); the owner enters it in the dashboard |
 | C-29 | Retention periods and legal placeholders in the drafts: deleted-data purge (proposed 30 days + 30 for backups), safety records (12 months, email fingerprint only), Instant Meet session records (90 days), refund timing (5 to 7 working days) | Legal review | Proposed values in the drafts |
+| C-30 | Automated photo checks (spec 14: visible face, lighting, one subject, no photo of a screen, no heavy manipulation). Not built yet: photos are approved on upload (review flag off) and moderated after reports. Options: on-device face detection (for example ML Kit on Android; nothing equivalent in iPhone Safari) or a server-side vision vendor. Never identity matching (D-027, D-032) | Before public launch | Report-driven review; review flag available |

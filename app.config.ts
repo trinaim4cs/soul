@@ -98,6 +98,15 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       },
     ],
     'expo-secure-store',
+    [
+      // Profile photos only (spec 14). No microphone: SOUL never records video or audio.
+      'expo-image-picker',
+      {
+        photosPermission: 'SOUL uses the photos you choose for your profile.',
+        cameraPermission: 'SOUL uses the camera so you can take your profile photo.',
+        microphonePermission: false,
+      },
+    ],
     // Release builds sign only with the production key from local config (DECISIONS C-20).
     './plugins/with-release-signing',
   ],

@@ -156,11 +156,84 @@ export type Database = {
         };
         Relationships: [];
       };
+      preferences: {
+        Row: {
+          max_age: number;
+          min_age: number;
+          show_me: Database['public']['Enums']['gender'][];
+          updated_at: string;
+          user_id: string;
+          zodiac_filter: string[] | null;
+        };
+        Insert: {
+          max_age?: number;
+          min_age?: number;
+          show_me?: Database['public']['Enums']['gender'][];
+          updated_at?: string;
+          user_id: string;
+          zodiac_filter?: string[] | null;
+        };
+        Update: {
+          max_age?: number;
+          min_age?: number;
+          show_me?: Database['public']['Enums']['gender'][];
+          updated_at?: string;
+          user_id?: string;
+          zodiac_filter?: string[] | null;
+        };
+        Relationships: [];
+      };
+      profile_photos: {
+        Row: {
+          blurred_path: string;
+          created_at: string;
+          height: number;
+          id: string;
+          position: number;
+          rejection_reason: string | null;
+          reviewed_at: string | null;
+          source: string;
+          status: Database['public']['Enums']['photo_status'];
+          storage_path: string;
+          user_id: string;
+          width: number;
+        };
+        Insert: {
+          blurred_path: string;
+          created_at?: string;
+          height: number;
+          id: string;
+          position: number;
+          rejection_reason?: string | null;
+          reviewed_at?: string | null;
+          source: string;
+          status: Database['public']['Enums']['photo_status'];
+          storage_path: string;
+          user_id: string;
+          width: number;
+        };
+        Update: {
+          blurred_path?: string;
+          created_at?: string;
+          height?: number;
+          id?: string;
+          position?: number;
+          rejection_reason?: string | null;
+          reviewed_at?: string | null;
+          source?: string;
+          status?: Database['public']['Enums']['photo_status'];
+          storage_path?: string;
+          user_id?: string;
+          width?: number;
+        };
+        Relationships: [];
+      };
       profiles: {
         Row: {
           about: string | null;
           created_at: string;
           display_name: string | null;
+          gender: Database['public']['Enums']['gender'] | null;
           hook: string | null;
           id: string;
           privacy_mode: Database['public']['Enums']['privacy_mode'];
@@ -171,6 +244,7 @@ export type Database = {
           about?: string | null;
           created_at?: string;
           display_name?: string | null;
+          gender?: Database['public']['Enums']['gender'] | null;
           hook?: string | null;
           id: string;
           privacy_mode?: Database['public']['Enums']['privacy_mode'];
@@ -181,6 +255,7 @@ export type Database = {
           about?: string | null;
           created_at?: string;
           display_name?: string | null;
+          gender?: Database['public']['Enums']['gender'] | null;
           hook?: string | null;
           id?: string;
           privacy_mode?: Database['public']['Enums']['privacy_mode'];
@@ -195,13 +270,23 @@ export type Database = {
     };
     Functions: {
       accept_terms: { Args: { p_version: string }; Returns: Json };
+      add_profile_photo: {
+        Args: { p_height: number; p_id: string; p_source: string; p_width: number };
+        Returns: Json;
+      };
+      get_my_profile: { Args: Record<PropertyKey, never>; Returns: Json };
       get_my_status: { Args: Record<PropertyKey, never>; Returns: Json };
       hook_before_user_created: { Args: { event: Json }; Returns: Json };
+      remove_profile_photo: { Args: { p_id: string }; Returns: Json };
+      reorder_profile_photos: { Args: { p_ids: string[] }; Returns: Json };
       set_date_of_birth: { Args: { p_dob: string }; Returns: Json };
+      submit_profile: { Args: Record<PropertyKey, never>; Returns: Json };
     };
     Enums: {
       account_state: 'active' | 'suspended' | 'banned' | 'deletion_pending';
       admin_role: 'moderator' | 'admin';
+      gender: 'woman' | 'man' | 'non_binary';
+      photo_status: 'pending' | 'approved' | 'rejected';
       privacy_mode: 'normal' | 'private' | 'anonymous';
     };
     CompositeTypes: {
@@ -316,6 +401,8 @@ export const Constants = {
     Enums: {
       account_state: ['active', 'suspended', 'banned', 'deletion_pending'],
       admin_role: ['moderator', 'admin'],
+      gender: ['woman', 'man', 'non_binary'],
+      photo_status: ['pending', 'approved', 'rejected'],
       privacy_mode: ['normal', 'private', 'anonymous'],
     },
   },

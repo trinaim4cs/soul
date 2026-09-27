@@ -12,7 +12,7 @@ Skills per phase come from `skills/SOUL_SKILL_MAP.md`. `soul-audit` is enabled o
 | 3 | Supabase foundation | done |
 | 4 | SRMIST auth (rules → email → OTP → 18+) | done (Android + iPhone-size web verified) |
 | P | Platform amendment: web/PWA target, service adapters, icon font, `/download` + `/install` | done |
-| 5 | Profile | todo |
+| 5 | Profile | built; verified on web (390 × 844); Android check pending a rebuild (C: disk space) |
 | 6 | Discovery (location-independent) | todo |
 | 7 | Swipes + plans | todo |
 | 8 | Matching | todo |
@@ -189,6 +189,30 @@ Skills per phase come from `skills/SOUL_SKILL_MAP.md`. `soul-audit` is enabled o
 
 **Exit:** typecheck, lint and tests green; the SRMIST sign-in flow passes in a 390 × 844 web viewport against local Supabase; the Android dev build shows icons; the service worker is verified not to cache private traffic.
 
+## Phase 5: Profile (built 2026-09-27)
+
+**Server:** migration `…0700_profile.sql`: `gender`, `preferences`, `profile_photos`, owner-folder policies for the blurred bucket, `add_profile_photo`, `remove_profile_photo`, `reorder_profile_photos`, `submit_profile`, `get_my_profile`, photo limit and review flag in `app_config` (D-041).
+
+**App:**
+- Onboarding profile setup: main photo (camera first, gallery fallback), then photos, name, gender, show me, hook, About Me.
+- The You tab shows your profile exactly as others see it (vertical viewer, anonymous preview included).
+- Edit profile, Privacy (visible / private / anonymous, zodiac toggle), Settings (edit, privacy, policies, sign out).
+- New shared pieces: `SoulChip`, `ProfileView`, `PhotoGrid`, `ProfileForm`, the camera service (expo-image-picker) and on-device photo processing (expo-image-manipulator).
+
+**Verified on web (iPhone size, local Supabase):**
+- The full new-account flow runs from rules to the tabs.
+- Photo upload stores 1080 × 1350 JPEG plus a 24 px copy, approved.
+- Validation messages show.
+- Saved text is cleaned.
+- Anonymous preview uses blurred copies and hides the name; zodiac shows when on.
+- Make main and remove both work, removed files are deleted, and the last photo cannot be removed.
+- Edit saves.
+- Also passing: pgTAP 77/77, `db:verify` 16/16, 63 unit tests, typecheck, lint, format.
+
+**Fixed during testing:** quick consecutive form changes could overwrite each other (stale state); the form now uses functional updates. Save from an Edit page opened by link now returns to You.
+
+**Remaining:** Android rebuild (three new native modules) and an on-device check including the emulator camera; automated photo checks are C-30.
+
 ---
 
 ## Original per-phase plans (pre-spec-v2 numbering; kept for history)
@@ -300,3 +324,4 @@ Release build config, signing workflow (owner keystore, C-20), launcher icon (C-
 - 2026-09-27: Owner answers (round 2): gender options ok; accent kept; Razorpay; no plan-swipe rollover, top-ups never expire; Vercel free hosting on `*.vercel.app`; cloud Supabase project `bdwuhrkgrwzpwqhgsngi`; package `com.soul.srm` locked; production signing prepared but not generated; logo and compact icon mark are release blockers (placeholder app icon added); eight legal drafts written (terms version `2026-09-27-draft-2`); FCM + Web Push requirements documented. `vercel.json` added and its CSP verified locally with the production build.
 - 2026-09-27: Owner found Plus Jakarta Sans too formal and chose Alegreya Sans (informal, humanist) for body text; body roles moved up 1 px for its small x-height; buttons use Bold (D-021).
 - 2026-09-27: Clean Android rebuild as `com.soul.srm` (old `app.soul.dev` uninstalled from the emulator); Alegreya Sans, SoulIcons, placeholder app icon and the release-signing guard verified in the generated project and on the emulator (Welcome, Rules, Email).
+- 2026-09-27: Phase 5 built and verified on web. C: free space fell to 8.8 GB (page file growth under memory pressure); the Android rebuild waits for space.

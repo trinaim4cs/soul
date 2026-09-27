@@ -1,5 +1,5 @@
-import { ShellPlaceholder } from '@/components/shell-placeholder';
+import { MyProfileScreen } from '@/features/profile/screens/my-profile-screen';
 
 export default function YouRoute() {
-  return <ShellPlaceholder title="You" phase={5} />;
+  return <MyProfileScreen />;
 }
