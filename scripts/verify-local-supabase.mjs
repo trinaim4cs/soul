@@ -21,17 +21,21 @@ const check = (name, ok, detail = '') => {
   console.log(`${ok ? 'PASS' : 'FAIL'}  ${name}${detail ? `  (${detail})` : ''}`);
 };
 
+const anonClient = () => createClient(url, status.ANON_KEY, { auth: { persistSession: false } });
+
+// Sessions come only from emailed codes (D-046), so test users sign in with a one-time
+// token from a generated sign-in link instead of a password.
 async function makeUser(label) {
-  const password = randomBytes(18).toString('base64url');
   const email = `${label}.${randomBytes(4).toString('hex')}@srmist.edu.in`;
-  const { data, error } = await admin.auth.admin.createUser({
-    email,
-    password,
-    email_confirm: true,
-  });
+  const { data, error } = await admin.auth.admin.createUser({ email, email_confirm: true });
   if (error) throw error;
-  const client = createClient(url, status.ANON_KEY, { auth: { persistSession: false } });
-  const signIn = await client.auth.signInWithPassword({ email, password });
+  const link = await admin.auth.admin.generateLink({ type: 'magiclink', email });
+  if (link.error) throw link.error;
+  const client = anonClient();
+  const signIn = await client.auth.verifyOtp({
+    token_hash: link.data.properties.hashed_token,
+    type: 'email',
+  });
   if (signIn.error) throw signIn.error;
   return { id: data.user.id, client, token: signIn.data.session.access_token };
 }
@@ -88,6 +92,40 @@ const replay = await createClient(url, status.ANON_KEY, {
 check('a used code cannot be replayed', Boolean(replay.error));
 if (verified.data?.user) await admin.auth.admin.deleteUser(verified.data.user.id);
 
+// D-046: the emailed code is the only way in, and accounts stay on SRMIST addresses.
+const hex = () => randomBytes(4).toString('hex');
+const pwSignUp = await anonClient().auth.signUp({
+  email: `test.user.${hex()}@srmist.edu.in`,
+  password: randomBytes(18).toString('base64url'),
+});
+check(
+  'a password sign-up gets no session (the emailed code is still required)',
+  !pwSignUp.data?.session,
+  pwSignUp.error?.message,
+);
+if (pwSignUp.data?.user) {
+  const pending = await admin.auth.admin.getUserById(pwSignUp.data.user.id);
+  check('a password sign-up is not marked verified', !pending.data?.user?.email_confirmed_at);
+  await admin.auth.admin.deleteUser(pwSignUp.data.user.id);
+}
+const pwEmail = `test.user.${hex()}@srmist.edu.in`;
+const pwPassword = randomBytes(18).toString('base64url');
+const pwUser = await admin.auth.admin.createUser({
+  email: pwEmail,
+  password: pwPassword,
+  email_confirm: true,
+});
+const pwSignIn = await anonClient().auth.signInWithPassword({
+  email: pwEmail,
+  password: pwPassword,
+});
+check(
+  'password sign-in is refused even for a confirmed account',
+  Boolean(pwSignIn.error) && !pwSignIn.data?.session,
+  pwSignIn.error?.message,
+);
+if (pwUser.data?.user) await admin.auth.admin.deleteUser(pwUser.data.user.id);
+
 const userA = await makeUser('test.user.a');
 const userB = await makeUser('test.user.b');
 
@@ -124,6 +162,9 @@ try {
     'User A can edit their own hook',
     !hook.error && hook.data?.[0]?.hook === 'Late chai, early runs',
   );
+
+  const moved = await userA.client.auth.updateUser({ email: `test.user.${hex()}@gmail.com` });
+  check('an account cannot move to a non-SRMIST email', Boolean(moved.error), moved.error?.message);
 
   const anon = createClient(url, status.ANON_KEY, { auth: { persistSession: false } });
   const anonRead = await anon.from('profiles').select('id');

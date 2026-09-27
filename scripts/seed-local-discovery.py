@@ -11,7 +11,6 @@ Needs Python 3 with Pillow.
 
 import io
 import json
-import secrets
 import subprocess
 import sys
 import urllib.error
@@ -119,9 +118,9 @@ def seed():
     terms = call("GET", "/rest/v1/app_config?key=eq.current_terms_version&select=value")[0]["value"]["version"]
     today = date.today()
     for n, gender, show_me, age, privacy, zodiac_visible, photos, min_age, max_age, fresh, hook in PROFILES:
+        # No password: SOUL accounts sign in only with an emailed code (D-046).
         user = call("POST", "/auth/v1/admin/users", {
             "email": EMAIL.format(n),
-            "password": secrets.token_urlsafe(18),
             "email_confirm": True,
         })
         uid = user["id"]

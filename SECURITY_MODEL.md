@@ -46,7 +46,7 @@ The client can request these; only the server decides them. Each is a SECURITY D
 | Transition | Authority |
 |---|---|
 | Email domain allowed, OTP issued or verified | Supabase Auth + server allowlist hook |
-| SRMIST email verified | Supabase Auth OTP + `before-user-created` domain hook (spec v2: the only verification, D-027) |
+| SRMIST email verified | Supabase Auth OTP + `before-user-created` domain hook (spec v2: the only verification, D-027). Password sign-ups need confirmation and password sign-ins get no token (custom access token hook); email changes stay inside the allowed domains (D-046) |
 | 18+ date of birth | `set_date_of_birth()` (once; under-18 refused and locked, minor's DOB never stored, D-028) |
 | Rules/Terms accepted | recorded at sign-up from the ticked version, or `accept_terms()`; the server checks the current version (D-029) |
 | Eligibility for the app | `get_my_status()`: email verified + current terms + 18+ DOB + profile complete + account active. **No location involved (spec v2: no geofence)** |

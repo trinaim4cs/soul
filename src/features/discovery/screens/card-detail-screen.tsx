@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
+import { useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { SoulButton } from '@/components/soul-button';
@@ -24,7 +25,9 @@ import { spacing } from '@/theme';
  * checks visibility again (`get_profile_card`).
  */
 export function CardDetailScreen({ id }: { id: string }) {
-  const cached = useDeckStore((state) => state.cards.find((card) => card.id === id));
+  // The card as it was when the page opened. Liking or passing removes it from the deck,
+  // and the page must not reload or change while it slides away.
+  const [cached] = useState(() => useDeckStore.getState().cardById(id));
   const remote = useQuery({
     queryKey: ['profile-card', id],
     queryFn: () => fetchProfileCard(id),
@@ -58,8 +61,12 @@ export function CardDetailScreen({ id }: { id: string }) {
 function CardDetail({ card, fromDeck }: { card: DiscoveryCard; fromDeck: boolean }) {
   const decide = useDeckStore((state) => state.decide);
   const urls = usePhotoUrls(cardBucket(card), cardPhotoPaths(card));
+  const chosen = useRef(false);
 
   function choose(direction: SwipeDirection) {
+    // One decision per visit: a double tap must not save twice or go back twice.
+    if (chosen.current) return;
+    chosen.current = true;
     void decide(card, direction);
     if (router.canGoBack()) router.back();
     else router.replace('/');

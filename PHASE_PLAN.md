@@ -276,9 +276,15 @@ The owner asked for no compromises left behind in finished phases. Found and fix
 - **Edge Functions had no CORS (Phase 3).** The PWA could not have called any function from a browser. Every function now answers preflights and sends CORS headers. The gateway `verify_jwt` is off, and `requireUser` checks the caller, so it works with the new JWT signing keys (D-044).
 - **A Phase 1 dev switch lingered.** `EXPO_PUBLIC_DEV_STATUS_OVERRIDE` was removed; the app reads exactly the three allowed variables (D-045).
 - **A discovery test depended on an empty database.** `005` now compares only its own fixtures, so local seed data cannot break it.
+- **Verification could be bypassed (Phase 4, security).** With email confirmations off, a password `signUp` for any SRMIST address returned a session at once, and the server marked the email verified without a code. Reproduced on the local stack, then closed (D-046):
+  - confirmations are on
+  - a custom access token hook refuses password sign-ins
+  - a trigger keeps account emails inside the allowed domains (moving to gmail was also possible)
+- **Discover showed "You're all caught up" for a moment** when the queue emptied faster than the next page arrived. It now shows loading (new deck-store test).
+- **The full-profile page reloaded while sliding away** after Like or Pass: the card left the deck and the page fetched it again, showing a spinner. A double tap could also save twice and go back twice. The page now keeps the card it opened with and takes one decision per visit.
 
 **Verified:**
-- pgTAP 134/134 (new `006_photo_intake`), `db:verify` 39/39, 87 unit tests (including 11 JPEG tests on fixtures with EXIF, GPS, XMP, ICC, a comment and a trailing payload).
+- pgTAP 148/148 (new `006_photo_intake`, `007_auth_hardening`), `db:verify` 43/43, 88 unit tests (including 11 JPEG tests on fixtures with EXIF, GPS, XMP, ICC, a comment and a trailing payload).
 - The cleaned fixtures decode with identical pixels (Pillow).
 - On web against the local stack, adding a photo went through the inbox and the function (`approved`, position 2), and removing it deleted the row and both files.
 
@@ -396,4 +402,4 @@ Release build config, signing workflow (owner keystore, C-20), launcher icon (C-
 - 2026-09-27: Phase 5 built and verified on web. C: free space fell to 8.8 GB (page file growth under memory pressure); the Android rebuild waits for space.
 - 2026-09-27: Phase 5 done: Android verified after a clean rebuild (camera upload, cross-platform sign-in, privacy, deep link). Freed 3 GB on C: by removing the Gradle 9.3.1 cache my first builds left in the user profile (builds now use D:).
 - 2026-09-27: Phase 6 built and verified on web (pane and real mobile Chrome in the emulator) and on Android; web footers now stay above the on-screen keyboard.
-- 2026-09-28: Hardening of earlier phases: server-side photo intake (D-043), Edge Function CORS and key handling (D-044), dev status override removed (D-045).
+- 2026-09-28: Hardening of earlier phases: server-side photo intake (D-043), Edge Function CORS and key handling (D-044), dev status override removed (D-045), verification bypass through password sign-up closed (D-046), two Discover UI bugs fixed.

@@ -103,6 +103,25 @@ describe('discovery deck', () => {
     expect(useDeckStore.getState().status).toBe('empty');
   });
 
+  it('shows loading, not "all caught up", while the next page is still on its way', async () => {
+    let resolvePage: (value: unknown) => void = () => {};
+    api.fetchFeed
+      .mockResolvedValueOnce({ ok: true, cards: [card(1), card(2), card(3)] })
+      .mockImplementationOnce(() => new Promise((resolve) => (resolvePage = resolve)));
+    api.swipeRight.mockResolvedValue({ ok: true });
+    useDeckStore.getState().start('viewer');
+    await flush();
+
+    for (const n of [1, 2, 3]) await useDeckStore.getState().decide(card(n), 'like');
+    expect(useDeckStore.getState().cards).toEqual([]);
+    expect(useDeckStore.getState().status).toBe('loading');
+
+    resolvePage({ ok: true, cards: [card(4)] });
+    await flush();
+    expect(useDeckStore.getState().status).toBe('ready');
+    expect(useDeckStore.getState().cards.map((c) => c.id)).toEqual([card(4).id]);
+  });
+
   it('ignores a page that arrives after the deck was refreshed', async () => {
     let resolveOld: (value: unknown) => void = () => {};
     api.fetchFeed

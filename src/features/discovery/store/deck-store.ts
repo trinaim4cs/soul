@@ -102,13 +102,14 @@ export const useDeckStore = create<DeckState>((set, get) => ({
 
   async decide(card, direction) {
     const generation = get().generation;
-    // Optimistic: the card leaves at once; the next one is already underneath.
+    // Optimistic: the card leaves at once; the next one is already underneath. If the queue
+    // runs dry before the next page arrives, show loading, not "all caught up".
     set((state) => {
       const cards = state.cards.filter((item) => item.id !== card.id);
       return {
         cards,
         decided: { ...state.decided, [card.id]: true },
-        status: cards.length > 0 ? 'ready' : state.exhausted ? 'empty' : state.status,
+        status: cards.length > 0 ? 'ready' : state.exhausted ? 'empty' : 'loading',
         message: null,
       };
     });

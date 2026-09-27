@@ -24,7 +24,7 @@ npx supabase login                                        # opens the browser on
 npx supabase link --project-ref bdwuhrkgrwzpwqhgsngi       # asks for the database password
 npx supabase db push                                      # applies supabase/migrations in order
 npx supabase config diff                                  # review auth settings before pushing
-npx supabase config push                                  # OTP length/expiry, email template, before_user_created hook
+npx supabase config push                                  # OTP length/expiry, confirmations, email template, both auth hooks
 npx supabase functions deploy health profile-photos
 ```
 
@@ -33,6 +33,10 @@ Without `profile-photos` deployed, photos cannot be added (D-043).
 Then in the dashboard:
 - **Authentication → URL configuration:** set Site URL to the Vercel URL.
 - **Authentication → SMTP (required before real students can sign in, C-28):** Supabase's built-in email only reaches the project's team members and is heavily rate-limited. Without buying a domain, the simplest sender is a dedicated Gmail account for SOUL with 2-step verification and an app password (`smtp.gmail.com`, port 587, about 500 emails a day). You enter those credentials in the dashboard yourself.
+- **Check the auth hardening (D-046):**
+  - Authentication → Sign In / Providers → Email: **Confirm email** is on.
+  - Authentication → Hooks: *Before User Created* → `public.hook_before_user_created`, and *Customize Access Token (JWT) Claims* → `public.hook_custom_access_token`.
+  - Without the second hook, password sign-in would be possible again.
 - Check that `get_my_status` exists: `POST /rest/v1/rpc/get_my_status` with the publishable key returns 401 or a status, not `PGRST202`.
 
 Never apply schema changes by hand; every change is a migration.

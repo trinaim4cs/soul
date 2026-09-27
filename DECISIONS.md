@@ -26,6 +26,15 @@ Status values: `accepted` · `default, confirm` · `open`.
 ### D-045 No development status override
 - The Phase 1 `EXPO_PUBLIC_DEV_STATUS_OVERRIDE` preview switch was removed. The app reads exactly three variables (`EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_ANON_KEY`, `APP_ENV`), and every route group needs a real server status. Local previews use the seeded local stack instead.
 
+### D-046 Email + code is the only way in (auth hardening)
+- **Found:** Supabase Auth also accepts password sign-ups, and email confirmations were off. Anyone with the public key could call `signUp` with any SRMIST address and a password. Tested on the local stack, this returned a session at once, and the server marked the email verified without any code. That was a full bypass of verification (D-027) and a way to pre-register someone else's address.
+- **Now:**
+  - Email confirmations are on (`config.toml`), so a password sign-up stays unconfirmed and gets no session.
+  - A **custom access token hook** (`public.hook_custom_access_token`) refuses every token issued by a password sign-in, even for a confirmed account.
+  - A trigger on `auth.users` refuses moving an account, or even requesting a move, to an email outside the allowed domains. A verified student cannot hand the account to a non-SRMIST address. A new SRMIST address still needs both inboxes to confirm.
+- **Test users** (local scripts) sign in with a one-time token from an admin sign-in link; seed accounts have no password.
+- **Cloud:** `supabase config push` sets confirmations and both hooks. Check them in the dashboard (SUPABASE.md).
+
 ---
 
 ## Phase 6 discovery (2026-09-27)
