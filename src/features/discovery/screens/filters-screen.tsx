@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Platform, StyleSheet, View } from 'react-native';
 
 import { PressableScale } from '@/components/pressable-scale';
 import { SoulButton } from '@/components/soul-button';
@@ -82,9 +82,18 @@ function FiltersForm({ initial, userId }: { initial: DiscoveryFilters; userId: s
     <SoulScreen
       scroll
       edges={{ top: false, bottom: true }}
+      // A sheet has no header above it, so the title needs its own room from the edge.
+      contentStyle={styles.sheet}
       footer={
         <SoulButton label="Show profiles" block loading={saving} onPress={() => void save()} />
       }>
+      {Platform.OS === 'android' ? (
+        // The native grabber is iOS-only; this shows where the sheet starts and that it drags
+        // down to close (it also marks the sheet's edge on a black background in dark mode).
+        <View style={styles.handleRow} importantForAccessibility="no-hide-descendants">
+          <View style={styles.handle} />
+        </View>
+      ) : null}
       <SoulText variant="title" accessibilityRole="header">
         Filters
       </SoulText>
@@ -218,6 +227,14 @@ function Stepper({ label, value, onChange, canDecrease, canIncrease }: StepperPr
 
 const useStyles = createThemedStyles(({ colors }) =>
   StyleSheet.create({
+    sheet: { paddingTop: spacing.xl },
+    handleRow: { position: 'absolute', top: spacing.sm, left: 0, right: 0, alignItems: 'center' },
+    handle: {
+      width: spacing.xl,
+      height: spacing.xxs,
+      borderRadius: radii.full,
+      backgroundColor: colors.border,
+    },
     section: { gap: spacing.sm, marginTop: spacing.xl },
     chips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs },
     steppers: { flexDirection: 'row', gap: spacing.md },

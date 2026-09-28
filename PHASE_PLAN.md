@@ -13,7 +13,7 @@ Skills per phase come from `skills/SOUL_SKILL_MAP.md`. `soul-audit` is enabled o
 | 4 | SRMIST auth (rules → email → OTP → 18+) | done (Android + iPhone-size web verified) |
 | P | Platform amendment: web/PWA target, service adapters, icon font, `/download` + `/install` | done |
 | 5 | Profile | done (Android emulator + iPhone-size web) |
-| 6 | Discovery (location-independent) | built; web + Android verified; Android icon-font rebuild pending |
+| 6 | Discovery (location-independent) | done (web + Android verified; icon font rebuilt 2026-09-28) |
 | 7 | Swipes + plans | todo |
 | 8 | Matching | todo |
 | 9 | Chat | todo |
@@ -261,7 +261,7 @@ Skills per phase come from `skills/SOUL_SKILL_MAP.md`. `soul-audit` is enabled o
   - `interactive-widget=resizes-content` (Android Chrome resizes the page).
   - A `visualViewport` keyboard inset in `SoulScreen` (iPhone Safari keeps the page size). Verified in Chrome; the iPhone path needs a real iPhone.
 
-**Open:** the new `remove` icon needs the Android rebuild that embeds the icon font.
+**Closed 2026-09-28:** the Android rebuild embeds the new `remove` icon (verified in Filters).
 
 ## Hardening of earlier phases (2026-09-28)
 
@@ -282,11 +282,30 @@ The owner asked for no compromises left behind in finished phases. Found and fix
   - a trigger keeps account emails inside the allowed domains (moving to gmail was also possible)
 - **Discover showed "You're all caught up" for a moment** when the queue emptied faster than the next page arrived. It now shows loading (new deck-store test).
 - **The full-profile page reloaded while sliding away** after Like or Pass: the card left the deck and the page fetched it again, showing a spinner. A double tap could also save twice and go back twice. The page now keeps the card it opened with and takes one decision per visit.
+- **The "failed first swipe" on Android (open since Phase 6) is explained and fixed.** It was reproduced reliably: after a cold start, about half of the first flicks sprang back.
+  - Cause: when the phone is busy right after launch, the release decision used the card position from the last frame, which can trail the finger. With a release velocity of 0 (the finger stops before lifting), a swipe past the line could still spring back.
+  - Fix: the card now decides from the release event's own translation.
+  - Found while checking: my first debug build logged with `console.log` from a worklet, which throws and fails the gesture; runs from that build were discarded.
+- **The Filters sheet title sat on the sheet's top edge,** and on Android the sheet had no drag cue (the native grabber is iOS-only). In dark mode its black top edge was invisible against the dimmed screen. The sheet now has top room and an Android drag handle.
 
 **Verified:**
 - pgTAP 148/148 (new `006_photo_intake`, `007_auth_hardening`), `db:verify` 43/43, 88 unit tests (including 11 JPEG tests on fixtures with EXIF, GPS, XMP, ICC, a comment and a trailing payload).
 - The cleaned fixtures decode with identical pixels (Pillow).
 - On web against the local stack, adding a photo went through the inbox and the function (`approved`, position 2), and removing it deleted the row and both files.
+- **Android (clean rebuild with the icon font, local stack):**
+  - The Filters "−" icon renders.
+  - A camera photo went through the inbox and the function: the server read 1080 × 1350 and emptied the inbox. Removing it deleted the row and both files.
+  - A double tap on Like in the full profile saved one like and went back once.
+  - Dark mode at 1.3× font scale holds on Discover, Filters, the full profile and You.
+  - First gesture after a cold start (launched from the icon), after the fix:
+
+    | Gesture | Committed |
+    |---|---|
+    | Slow drag | 3/3 |
+    | 300 ms swipe | 4/4 |
+    | 120 ms flick | 3/3 (one with release velocity 0) |
+
+- **Remaining note:** a synthetic 120 ms `adb` flick under launch load can still deliver only two move events, so it registers under half the travel. Real touches are sampled by the hardware, but confirm on a real phone with a release build in Phase 17.
 
 ---
 

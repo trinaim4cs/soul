@@ -56,7 +56,7 @@ Feel is judged on a **release build** on the slowest available Android device. D
 - **Gate:** tens of times a day, purpose **feedback** plus **spatial consistency**: the card goes where the finger sends it.
 - **Tool:** `Gesture.Pan` + shared values + `useAnimatedStyle` on the UI thread; `scheduleOnRN` only when a fly-out finishes. `Gesture.Exclusive(pan, tap)`: a tap opens the full profile.
 - **Follows the finger** on both axes; the card tilts up to `swipe.maxRotationDeg` (10°) at one card-width.
-- **Commit** when release position plus projected momentum (Apple's deceleration, `swipe.deceleration`) passes `swipe.commitShare` (35 %) of the card width: a quick flick commits, a slow drag does not.
+- **Commit** when release position plus projected momentum (Apple's deceleration, `swipe.deceleration`) passes `swipe.commitShare` (35 %) of the card width: a quick flick commits, and so does a slow drag released past the line; a short slow drag does not. The release position comes from the end event's own translation, not the last frame, which can trail the finger when the phone is busy.
 - **Fly-out:** `easings.out`, 140 to 260 ms depending on the flick's speed; then the like or pass is saved (optimistic, restored on network failure).
 - **Return:** `springs.release` (400 ms, damping 0.8) carrying the release velocity.
 - **Interruptible:** a new touch picks the card up where it is.

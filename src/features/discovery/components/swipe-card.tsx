@@ -118,7 +118,12 @@ export const SwipeCard = forwardRef<SwipeCardHandle, Props>(function SwipeCard(
       })
       .onEnd((event) => {
         if (leaving.get()) return;
-        const landing = x.get() + project(event.velocityX);
+        // Decide from the release event itself: the last update can trail it by a frame
+        // when the phone is busy (right after launch), which used to drop real swipes.
+        const releaseX = startX.get() + event.translationX;
+        x.set(releaseX);
+        y.set(startY.get() + event.translationY);
+        const landing = releaseX + project(event.velocityX);
         const line = width.get() * swipe.commitShare;
         if (landing > line) flyOut('like', event.velocityX, event.velocityY);
         else if (landing < -line) flyOut('pass', event.velocityX, event.velocityY);
