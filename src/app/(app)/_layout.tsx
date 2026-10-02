@@ -2,7 +2,10 @@ import { Stack } from 'expo-router';
 
 import { fontFamily, radii, useTheme } from '@/theme';
 
-/** Tabs at the root; profile and settings screens push over them with a plain back header. */
+/**
+ * Tabs at the root; profile and settings screens push over them with a plain back header.
+ * Filters is a sheet and the paywall a modal with its own close button.
+ */
 export default function AppLayout() {
   const { colors } = useTheme();
   const pageHeader = {
@@ -29,6 +32,7 @@ export default function AppLayout() {
           sheetCornerRadius: radii.xl,
         }}
       />
+      <Stack.Screen name="paywall" options={{ presentation: 'modal', headerShown: false }} />
       <Stack.Screen name="settings/index" options={pageHeader} />
       <Stack.Screen name="settings/privacy" options={pageHeader} />
     </Stack>

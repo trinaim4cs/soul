@@ -41,6 +41,16 @@ Then in the dashboard:
 
 Never apply schema changes by hand; every change is a migration.
 
+## Local test data for plans
+
+No build can buy anything before Phase 12. To see the app with a plan or a top-up on the **local** stack, grant one the way the payment webhook will:
+
+```bash
+docker exec supabase_db_SOUL psql -U postgres -c "select public.activate_plan((select id from auth.users where email = 'testuser03@srmist.edu.in'), 'monthly', 'local-test-1');"
+```
+
+Plan ids are `weekly`, `monthly`, `quarter`, `half_year`, `topup_5`, `topup_12` and `topup_25`. Use a new key each time; the same key is granted only once.
+
 ## Edge Functions
 
 `supabase/functions/`:

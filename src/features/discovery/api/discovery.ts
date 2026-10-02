@@ -29,20 +29,26 @@ export async function fetchProfileCard(target: string): Promise<DiscoveryCard | 
 
 export type SwipeResult = { ok: true } | { ok: false; reason: 'not_available' | 'invalid' };
 
+/** `balance` is the like balance after this request, when the server reports one. */
+export type LikeResult =
+  | { ok: true; liked: true; replayed: boolean; balance: number }
+  | { ok: false; reason: 'no_swipes'; balance: number }
+  | { ok: false; reason: 'not_available' | 'invalid' };
+
 /**
- * A like carries an idempotency key, so a retry after a dropped connection never counts twice
- * (Phase 7 charges swipe credits inside the same server transaction).
+ * A like carries an idempotency key, so a retry after a dropped connection never counts twice.
+ * The server charges one like credit in the same transaction, only when the like is new.
  */
 export async function swipeRight(
   target: string,
   idempotencyKey = randomUUID(),
-): Promise<SwipeResult> {
+): Promise<LikeResult> {
   const { data, error } = await supabase.rpc('swipe_right', {
     p_target: target,
     p_idempotency_key: idempotencyKey,
   });
   if (error) throw error;
-  return data as SwipeResult;
+  return data as LikeResult;
 }
 
 export async function swipeLeft(target: string): Promise<SwipeResult> {

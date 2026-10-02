@@ -195,6 +195,45 @@ export type Database = {
         };
         Relationships: [];
       };
+      plans: {
+        Row: {
+          active: boolean;
+          id: string;
+          includes_instant: boolean;
+          kind: Database['public']['Enums']['plan_kind'];
+          period: string | null;
+          period_label: string | null;
+          price_paise: number;
+          right_swipes: number;
+          sort_order: number;
+          title: string;
+        };
+        Insert: {
+          active?: boolean;
+          id: string;
+          includes_instant?: boolean;
+          kind: Database['public']['Enums']['plan_kind'];
+          period?: string | null;
+          period_label?: string | null;
+          price_paise: number;
+          right_swipes: number;
+          sort_order: number;
+          title: string;
+        };
+        Update: {
+          active?: boolean;
+          id?: string;
+          includes_instant?: boolean;
+          kind?: Database['public']['Enums']['plan_kind'];
+          period?: string | null;
+          period_label?: string | null;
+          price_paise?: number;
+          right_swipes?: number;
+          sort_order?: number;
+          title?: string;
+        };
+        Relationships: [];
+      };
       preferences: {
         Row: {
           max_age: number;
@@ -303,12 +342,114 @@ export type Database = {
         };
         Relationships: [];
       };
+      subscriptions: {
+        Row: {
+          created_at: string;
+          ends_at: string;
+          id: string;
+          plan_id: string;
+          source_key: string;
+          starts_at: string;
+          status: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          ends_at: string;
+          id?: string;
+          plan_id: string;
+          source_key: string;
+          starts_at: string;
+          status?: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          ends_at?: string;
+          id?: string;
+          plan_id?: string;
+          source_key?: string;
+          starts_at?: string;
+          status?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'subscriptions_plan_id_fkey';
+            columns: ['plan_id'];
+            isOneToOne: false;
+            referencedRelation: 'plans';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      swipe_credit_ledger: {
+        Row: {
+          bucket: Database['public']['Enums']['swipe_bucket'];
+          created_at: string;
+          delta: number;
+          entry: Database['public']['Enums']['ledger_entry'];
+          expires_at: string | null;
+          id: number;
+          idempotency_key: string;
+          like_target: string | null;
+          lot_id: number | null;
+          subscription_id: string | null;
+          user_id: string;
+          valid_from: string | null;
+        };
+        Insert: {
+          bucket: Database['public']['Enums']['swipe_bucket'];
+          created_at?: string;
+          delta: number;
+          entry: Database['public']['Enums']['ledger_entry'];
+          expires_at?: string | null;
+          id?: never;
+          idempotency_key: string;
+          like_target?: string | null;
+          lot_id?: number | null;
+          subscription_id?: string | null;
+          user_id: string;
+          valid_from?: string | null;
+        };
+        Update: {
+          bucket?: Database['public']['Enums']['swipe_bucket'];
+          created_at?: string;
+          delta?: number;
+          entry?: Database['public']['Enums']['ledger_entry'];
+          expires_at?: string | null;
+          id?: never;
+          idempotency_key?: string;
+          like_target?: string | null;
+          lot_id?: number | null;
+          subscription_id?: string | null;
+          user_id?: string;
+          valid_from?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'swipe_credit_ledger_lot_id_fkey';
+            columns: ['lot_id'];
+            isOneToOne: false;
+            referencedRelation: 'swipe_credit_ledger';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'swipe_credit_ledger_subscription_id_fkey';
+            columns: ['subscription_id'];
+            isOneToOne: false;
+            referencedRelation: 'subscriptions';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
     };
     Views: {
       [_ in never]: never;
     };
     Functions: {
       accept_terms: { Args: { p_version: string }; Returns: Json };
+      activate_plan: { Args: { p_key: string; p_plan: string; p_user: string }; Returns: Json };
       add_profile_photo: {
         Args: { p_height: number; p_id: string; p_source: string; p_user: string; p_width: number };
         Returns: Json;
@@ -316,8 +457,10 @@ export type Database = {
       discovery_feed: { Args: { p_exclude?: string[]; p_limit?: number }; Returns: Json };
       get_my_profile: { Args: Record<PropertyKey, never>; Returns: Json };
       get_my_status: { Args: Record<PropertyKey, never>; Returns: Json };
+      get_my_swipes: { Args: Record<PropertyKey, never>; Returns: Json };
       get_profile_card: { Args: { p_target: string }; Returns: Json };
       hook_before_user_created: { Args: { event: Json }; Returns: Json };
+      hook_custom_access_token: { Args: { event: Json }; Returns: Json };
       remove_profile_photo: { Args: { p_id: string; p_user: string }; Returns: Json };
       reorder_profile_photos: { Args: { p_ids: string[] }; Returns: Json };
       set_date_of_birth: { Args: { p_dob: string }; Returns: Json };
@@ -329,8 +472,11 @@ export type Database = {
       account_state: 'active' | 'suspended' | 'banned' | 'deletion_pending';
       admin_role: 'moderator' | 'admin';
       gender: 'woman' | 'man' | 'non_binary';
+      ledger_entry: 'grant' | 'consume' | 'refund' | 'reverse' | 'expire';
       photo_status: 'pending' | 'approved' | 'rejected';
+      plan_kind: 'subscription' | 'topup';
       privacy_mode: 'normal' | 'private' | 'anonymous';
+      swipe_bucket: 'free' | 'plan' | 'topup';
     };
     CompositeTypes: {
       [_ in never]: never;
@@ -445,8 +591,11 @@ export const Constants = {
       account_state: ['active', 'suspended', 'banned', 'deletion_pending'],
       admin_role: ['moderator', 'admin'],
       gender: ['woman', 'man', 'non_binary'],
+      ledger_entry: ['grant', 'consume', 'refund', 'reverse', 'expire'],
       photo_status: ['pending', 'approved', 'rejected'],
+      plan_kind: ['subscription', 'topup'],
       privacy_mode: ['normal', 'private', 'anonymous'],
+      swipe_bucket: ['free', 'plan', 'topup'],
     },
   },
 } as const;

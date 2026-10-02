@@ -11,6 +11,17 @@ jest.mock('@/features/discovery/api/discovery', () => ({
   swipeRight: jest.fn(),
 }));
 
+jest.mock('@/features/swipes/api/swipes', () => ({
+  refreshSwipes: jest.fn(),
+  setServerBalance: jest.fn(),
+  spendOneLocally: jest.fn(),
+}));
+
+const swipes = jest.requireMock('@/features/swipes/api/swipes') as {
+  refreshSwipes: jest.Mock;
+  setServerBalance: jest.Mock;
+  spendOneLocally: jest.Mock;
+};
 const api = jest.requireMock('@/features/discovery/api/discovery') as {
   fetchFeed: jest.Mock;
   swipeLeft: jest.Mock;
@@ -55,7 +66,7 @@ describe('discovery deck', () => {
     api.fetchFeed
       .mockResolvedValueOnce({ ok: true, cards: [card(1), card(2), card(3)] })
       .mockResolvedValueOnce({ ok: true, cards: [card(4)] });
-    api.swipeRight.mockResolvedValue({ ok: true });
+    api.swipeRight.mockResolvedValue({ ok: true, liked: true, replayed: false, balance: 3 });
     useDeckStore.getState().start('viewer');
     await flush();
 
@@ -94,7 +105,7 @@ describe('discovery deck', () => {
     api.fetchFeed
       .mockResolvedValueOnce({ ok: true, cards: [card(1)] })
       .mockResolvedValue({ ok: true, cards: [] });
-    api.swipeRight.mockResolvedValue({ ok: true });
+    api.swipeRight.mockResolvedValue({ ok: true, liked: true, replayed: false, balance: 3 });
     useDeckStore.getState().start('viewer');
     await flush();
     expect(useDeckStore.getState().exhausted).toBe(true);
@@ -108,7 +119,7 @@ describe('discovery deck', () => {
     api.fetchFeed
       .mockResolvedValueOnce({ ok: true, cards: [card(1), card(2), card(3)] })
       .mockImplementationOnce(() => new Promise((resolve) => (resolvePage = resolve)));
-    api.swipeRight.mockResolvedValue({ ok: true });
+    api.swipeRight.mockResolvedValue({ ok: true, liked: true, replayed: false, balance: 3 });
     useDeckStore.getState().start('viewer');
     await flush();
 
@@ -120,6 +131,60 @@ describe('discovery deck', () => {
     await flush();
     expect(useDeckStore.getState().status).toBe('ready');
     expect(useDeckStore.getState().cards.map((c) => c.id)).toEqual([card(4).id]);
+  });
+
+  it('shows a like in the balance at once, then takes the server balance', async () => {
+    api.fetchFeed.mockResolvedValue({ ok: true, cards: [card(1), card(2)] });
+    api.swipeRight.mockResolvedValue({ ok: true, liked: true, replayed: false, balance: 2 });
+    useDeckStore.getState().start('viewer');
+    await flush();
+
+    const promise = useDeckStore.getState().decide(card(1), 'like');
+    expect(swipes.spendOneLocally).toHaveBeenCalledWith('viewer');
+    await promise;
+    expect(swipes.setServerBalance).toHaveBeenCalledWith('viewer', 2);
+  });
+
+  it('does not touch the balance for a pass', async () => {
+    api.fetchFeed.mockResolvedValue({ ok: true, cards: [card(1), card(2)] });
+    api.swipeLeft.mockResolvedValue({ ok: true });
+    useDeckStore.getState().start('viewer');
+    await flush();
+
+    await useDeckStore.getState().decide(card(1), 'pass');
+    expect(swipes.spendOneLocally).not.toHaveBeenCalled();
+    expect(swipes.setServerBalance).not.toHaveBeenCalled();
+  });
+
+  it('returns the card and asks for the plans page when the server has no like to spend', async () => {
+    api.fetchFeed.mockResolvedValue({ ok: true, cards: [card(1), card(2)] });
+    api.swipeRight.mockResolvedValue({ ok: false, reason: 'no_swipes', balance: 0 });
+    useDeckStore.getState().start('viewer');
+    await flush();
+
+    await useDeckStore.getState().decide(card(1), 'like');
+    const state = useDeckStore.getState();
+    expect(state.cards[0]!.id).toBe(card(1).id);
+    expect(state.decided[card(1).id]).toBeUndefined();
+    expect(state.outOfLikes).toBe(true);
+    expect(state.message).toBeNull();
+    expect(swipes.setServerBalance).toHaveBeenCalledWith('viewer', 0);
+
+    state.acknowledgeOutOfLikes();
+    expect(useDeckStore.getState().outOfLikes).toBe(false);
+  });
+
+  it('re-reads the balance when a like fails or the profile is gone', async () => {
+    api.fetchFeed.mockResolvedValue({ ok: true, cards: [card(1), card(2), card(3)] });
+    api.swipeRight
+      .mockResolvedValueOnce({ ok: false, reason: 'not_available' })
+      .mockRejectedValueOnce(new Error('network'));
+    useDeckStore.getState().start('viewer');
+    await flush();
+
+    await useDeckStore.getState().decide(card(1), 'like');
+    await useDeckStore.getState().decide(card(2), 'like');
+    expect(swipes.refreshSwipes).toHaveBeenCalledTimes(2);
   });
 
   it('ignores a page that arrives after the deck was refreshed', async () => {

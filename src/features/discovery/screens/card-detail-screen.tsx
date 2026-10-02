@@ -14,7 +14,9 @@ import {
   type DiscoveryCard,
   type SwipeDirection,
 } from '@/features/discovery/model/card';
+import { useCurrentUserId } from '@/features/auth/account-status-provider';
 import { useDeckStore } from '@/features/discovery/store/deck-store';
+import { useSwipeBalance } from '@/features/swipes/api/swipes';
 import { usePhotoUrls } from '@/features/profile/api/profile';
 import { ProfileView } from '@/features/profile/components/profile-view';
 import { spacing } from '@/theme';
@@ -62,8 +64,14 @@ function CardDetail({ card, fromDeck }: { card: DiscoveryCard; fromDeck: boolean
   const decide = useDeckStore((state) => state.decide);
   const urls = usePhotoUrls(cardBucket(card), cardPhotoPaths(card));
   const chosen = useRef(false);
+  const swipes = useSwipeBalance(useCurrentUserId());
 
   function choose(direction: SwipeDirection) {
+    // Out of likes: offer plans and keep the profile open (passing still works).
+    if (direction === 'like' && swipes.data?.balance === 0) {
+      router.push('/paywall');
+      return;
+    }
     // One decision per visit: a double tap must not save twice or go back twice.
     if (chosen.current) return;
     chosen.current = true;

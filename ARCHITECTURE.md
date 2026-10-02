@@ -86,7 +86,7 @@ Location never gates the app (spec v2: no geofence). Only the Instant tab asks f
 | Photos | `profile_photos` (moderation state, order, blurred derivative ref) | upload-intent + moderation functions |
 | Location (Instant Meet only) | `instant_presence`, `instant_location_private` (no client policies) | 1 km `ST_DWithin` candidacy, proximity buckets (D-030, D-031) |
 | Discovery | `preferences`, `passes`, `likes` | `discovery_feed()` (filters, privacy, blocks, ranking) |
-| Economy | `plans`, `plan_entitlements`, `subscriptions`, `purchase_records`, `swipe_credit_ledger`, `entitlement_state` | `swipe_right()` transaction, billing functions |
+| Economy | `plans`, `subscriptions`, `swipe_credit_ledger` (Phase 7, D-047); `purchase_records` (Phase 12) | `swipe_right()` transaction, `get_my_swipes()`, `activate_plan()`; app code in `src/features/swipes` |
 | Matching | `matches` | inside `swipe_right()`; `unmatch()` |
 | Chat | `conversations`, `conversation_members`, `messages`, `message_receipts` | `send_message()` + broadcast trigger, typing via Presence |
 | Instant | `instant_presence`, `instant_sessions`, `instant_participants`, `meeting_points`, `meeting_point_votes` | `instant-*` functions, `instant_proximity()` |

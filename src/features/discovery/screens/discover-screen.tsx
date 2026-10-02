@@ -13,6 +13,8 @@ import { useCurrentUserId } from '@/features/auth/account-status-provider';
 import { SwipeCard, type SwipeCardHandle } from '@/features/discovery/components/swipe-card';
 import type { DiscoveryCard, SwipeDirection } from '@/features/discovery/model/card';
 import { useDeckStore } from '@/features/discovery/store/deck-store';
+import { useSwipeBalance } from '@/features/swipes/api/swipes';
+import { BalancePill } from '@/features/swipes/components/balance-pill';
 import { createThemedStyles, layout, radii, sizes, spacing } from '@/theme';
 
 /** Discover (spec 21): location-independent, one decision at a time, photography first. */
@@ -26,6 +28,11 @@ export function DiscoverScreen() {
   const start = useDeckStore((state) => state.start);
   const refresh = useDeckStore((state) => state.refresh);
   const decide = useDeckStore((state) => state.decide);
+  const outOfLikes = useDeckStore((state) => state.outOfLikes);
+  const acknowledgeOutOfLikes = useDeckStore((state) => state.acknowledgeOutOfLikes);
+  const swipes = useSwipeBalance(userId);
+  // Until the balance is known, likes go through; the server refuses them if there are none.
+  const canLike = swipes.data ? swipes.data.balance > 0 : true;
   const topRef = useRef<SwipeCardHandle>(null);
   const progress = useSharedValue(0);
 
@@ -43,6 +50,14 @@ export function DiscoverScreen() {
   const onOpen = useCallback((card: DiscoveryCard) => {
     router.push({ pathname: '/profile/[id]', params: { id: card.id } });
   }, []);
+  const openPlans = useCallback(() => router.push('/paywall'), []);
+
+  // The server said a like had no credit behind it (the balance here was out of date).
+  useEffect(() => {
+    if (!outOfLikes) return;
+    acknowledgeOutOfLikes();
+    openPlans();
+  }, [outOfLikes, acknowledgeOutOfLikes, openPlans]);
 
   const [top, next] = cards;
 
@@ -52,6 +67,7 @@ export function DiscoverScreen() {
         <SoulText variant="title" accessibilityRole="header" style={styles.title}>
           Discover
         </SoulText>
+        {swipes.data ? <BalancePill balance={swipes.data.balance} onPress={openPlans} /> : null}
         <PressableScale
           accessibilityRole="button"
           accessibilityLabel="Discovery filters"
@@ -94,6 +110,8 @@ export function DiscoverScreen() {
                 progress={progress}
                 onDecide={onDecide}
                 onOpen={onOpen}
+                canLike={canLike}
+                onLikeBlocked={openPlans}
               />
             ) : null}
             <SwipeCard
@@ -104,6 +122,8 @@ export function DiscoverScreen() {
               progress={progress}
               onDecide={onDecide}
               onOpen={onOpen}
+              canLike={canLike}
+              onLikeBlocked={openPlans}
             />
           </>
         )}
@@ -143,7 +163,12 @@ const ACTION_SIZE = sizes.avatar.md + spacing.xs;
 const useStyles = createThemedStyles(({ colors }) =>
   StyleSheet.create({
     root: { flex: 1, backgroundColor: colors.background, paddingHorizontal: layout.screenGutter },
-    header: { flexDirection: 'row', alignItems: 'center', marginBottom: spacing.md },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.xs,
+      marginBottom: spacing.md,
+    },
     title: { flex: 1 },
     iconButton: {
       width: sizes.touchTarget,

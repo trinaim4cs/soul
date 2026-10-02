@@ -7,6 +7,7 @@ import {
   swipeRight,
 } from '@/features/discovery/api/discovery';
 import type { DiscoveryCard, SwipeDirection } from '@/features/discovery/model/card';
+import { refreshSwipes, setServerBalance, spendOneLocally } from '@/features/swipes/api/swipes';
 
 export type DeckStatus = 'idle' | 'loading' | 'ready' | 'empty' | 'error' | 'not_eligible';
 
@@ -22,6 +23,8 @@ type DeckState = {
   /** Ids swiped this session, kept out of later pages even before the server confirms. */
   decided: Record<string, true>;
   message: string | null;
+  /** The server refused a like for lack of credits; the screen opens the plans page. */
+  outOfLikes: boolean;
   /** Bumped on every reset so late responses from an older deck are ignored. */
   generation: number;
   start: (userId: string) => void;
@@ -30,6 +33,7 @@ type DeckState = {
   decide: (card: DiscoveryCard, direction: SwipeDirection) => Promise<void>;
   cardById: (id: string) => DiscoveryCard | undefined;
   clearMessage: () => void;
+  acknowledgeOutOfLikes: () => void;
   reset: () => void;
 };
 
@@ -41,6 +45,7 @@ const EMPTY = {
   exhausted: false,
   decided: {},
   message: null,
+  outOfLikes: false,
 };
 
 export const useDeckStore = create<DeckState>((set, get) => ({
@@ -64,6 +69,7 @@ export const useDeckStore = create<DeckState>((set, get) => ({
       loadingMore: false,
       status: 'loading',
       message: null,
+      outOfLikes: false,
       generation,
     });
     await get().loadMore();
@@ -102,6 +108,8 @@ export const useDeckStore = create<DeckState>((set, get) => ({
 
   async decide(card, direction) {
     const generation = get().generation;
+    const userId = get().userId;
+    const liking = direction === 'like' && userId !== null;
     // Optimistic: the card leaves at once; the next one is already underneath. If the queue
     // runs dry before the next page arrives, show loading, not "all caught up".
     set((state) => {
@@ -114,11 +122,34 @@ export const useDeckStore = create<DeckState>((set, get) => ({
       };
     });
     if (get().cards.length <= LOW_WATER) void get().loadMore();
+    // The balance drops at once; the server's own number replaces it when the like lands.
+    if (liking) spendOneLocally(userId);
 
     try {
       // "not_available" means the profile changed (hidden, blocked, paused): it simply leaves.
-      await (direction === 'like' ? swipeRight(card.id) : swipeLeft(card.id));
+      if (direction === 'pass') {
+        await swipeLeft(card.id);
+      } else {
+        const result = await swipeRight(card.id);
+        if (liking && 'balance' in result) setServerBalance(userId, result.balance);
+        else if (liking) void refreshSwipes(userId);
+        if (!result.ok && result.reason === 'no_swipes') {
+          if (get().generation !== generation) return;
+          // Nothing was saved or charged: the card returns and the plans page opens.
+          set((state) => {
+            const { [card.id]: _removed, ...decided } = state.decided;
+            return {
+              cards: [card, ...state.cards.filter((item) => item.id !== card.id)],
+              decided,
+              status: 'ready',
+              outOfLikes: true,
+            };
+          });
+          return;
+        }
+      }
     } catch {
+      if (liking) void refreshSwipes(userId);
       if (get().generation !== generation) return;
       // Network failure: put the card back on top so nothing is lost silently.
       set((state) => {
@@ -139,5 +170,6 @@ export const useDeckStore = create<DeckState>((set, get) => ({
 
   cardById: (id) => get().cards.find((card) => card.id === id),
   clearMessage: () => set({ message: null }),
+  acknowledgeOutOfLikes: () => set({ outOfLikes: false }),
   reset: () => set({ ...EMPTY, generation: get().generation + 1 }),
 }));

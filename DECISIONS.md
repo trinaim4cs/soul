@@ -6,6 +6,25 @@ Status values: `accepted` · `default, confirm` · `open`.
 
 ---
 
+## Phase 7 swipes and plans (2026-10-02)
+
+### D-047 Swipe ledger, plans and the plans screen
+- **Catalog:** one `plans` table holds price (paise), right swipes, period and Instant inclusion for the four plans and three top-ups, exactly as the owner priced them (D-013). There is no separate `plan_entitlements` table: every entitlement is a column of the plan. The app renders whatever the catalog returns.
+- **Ledger:** `swipe_credit_ledger` is append-only (a trigger refuses edits and deletes; rows go only with the account).
+  - A `grant` row is a lot with its own validity window. Plan lots end with the plan period, so nothing rolls over; free and top-up lots never expire (C-12).
+  - Every other row draws from one lot.
+  - The balance is the sum of what is left in the lots valid now, computed on the server each time.
+- **A like** runs in one transaction under a per-account lock. A replay, or liking someone already liked, charges nothing. A new like takes one credit, and with none left nothing is saved (`no_swipes`). Passes are free.
+- **Which credit is used:** the lot that expires soonest. So plan swipes go first, then free swipes, then top-ups. This closes the D-013 default: it never wastes swipes that would expire.
+- **Free swipes:** 4 from `app_config.free_right_swipes`, granted once when the account first becomes eligible. The grant is remembered by a fingerprint of the SRMIST address, so deleting the account and signing up again does not refill them (C-10).
+- **Buying while a plan is active [DEFAULT, confirm]:** a new plan starts at once and runs beside the old one. Each plan's swipes last for its own period, nothing is forfeited, and Instant Meet is on while any active plan includes it. Top-ups are added at once.
+- **Granting:** only `activate_plan(user, plan, payment key)` grants anything. It runs as the service role and is idempotent on the payment key. The Phase 12 webhook will call it after verifying the provider's signature and amount. The app cannot call it.
+- **Words in the app:** the app says "likes" ("3 likes left", "25 likes"). The spec and the legal drafts say "right swipes"; they are the same thing.
+- **Plans screen:** one screen (`/paywall`) lists plans and top-ups; there is no separate top-up screen. Nothing is preselected and there are no "popular" badges or countdowns. It opens from the balance pill on Discover, from Settings, and when a like is refused.
+- **Checkout:** `payments.checkout()` returns `unavailable` until Phase 12, and the screen says "Payments aren't open yet. Nothing was charged."
+
+---
+
 ## Hardening of earlier phases (2026-09-28)
 
 ### D-043 Server-side photo intake
@@ -270,7 +289,7 @@ Verification is layered. Each step records a server-side status. The client neve
 - `swipe_credit_ledger` is append-only, with entries `grant`, `consume`, `refund`, `reverse` and `expire`. Each entry has a source bucket (`free`, `plan`, `topup`), a unique idempotency key and a reference to its purchase or like.
 - The balance is always computed on the server.
 - A right swipe is one SECURITY DEFINER function transaction that locks the user's entitlement row, inserts the like (unique per pair), consumes one credit only if the like is new, and creates the match if reciprocal. Replays with the same idempotency key return the original result without charging again.
-- Bucket consumption order: soonest-to-expire first (free, then plan, then top-up). **[DEFAULT, confirm]**
+- Bucket consumption order: the lot that expires soonest first, so plan, then free, then top-up (settled in D-047).
 - Passes are not metered.
 
 Known values:

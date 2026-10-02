@@ -4,8 +4,11 @@ import { StyleSheet, View } from 'react-native';
 import { SoulButton } from '@/components/soul-button';
 import { SoulScreen } from '@/components/soul-screen';
 import { SoulText } from '@/components/soul-text';
+import { useCurrentUserId } from '@/features/auth/account-status-provider';
 import { signOut } from '@/features/auth/api/auth';
 import { SettingsRow } from '@/features/settings/components/settings-row';
+import { useSwipeBalance } from '@/features/swipes/api/swipes';
+import { balanceSummary } from '@/features/swipes/model/swipes';
 import { spacing } from '@/theme';
 
 /**
@@ -13,6 +16,7 @@ import { spacing } from '@/theme';
  * swipes (7, 12), blocked users (13), notifications (14), delete account (13).
  */
 export function SettingsScreen() {
+  const swipes = useSwipeBalance(useCurrentUserId());
   return (
     <SoulScreen scroll edges={{ top: false, bottom: true }}>
       <SoulText variant="title" accessibilityRole="header">
@@ -29,6 +33,12 @@ export function SettingsScreen() {
           label="Discovery preferences"
           detail="Age, who you see, zodiac"
           onPress={() => router.push('/filters')}
+        />
+        <SettingsRow
+          icon="favorite"
+          label="Plans and likes"
+          detail={swipes.data ? balanceSummary(swipes.data) : undefined}
+          onPress={() => router.push('/paywall')}
         />
         <SettingsRow
           icon="visibility_off"

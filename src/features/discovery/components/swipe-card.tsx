@@ -35,6 +35,9 @@ type Props = {
   progress: SharedValue<number>;
   onDecide: (card: DiscoveryCard, direction: SwipeDirection) => void;
   onOpen: (card: DiscoveryCard) => void;
+  /** False when the like balance is known to be empty: a like springs back instead. */
+  canLike: boolean;
+  onLikeBlocked: () => void;
 };
 
 /** Where a flick would come to rest if it kept decelerating (Apple's decay form). */
@@ -49,7 +52,7 @@ function project(velocity: number) {
  * the card up from where it is.
  */
 export const SwipeCard = forwardRef<SwipeCardHandle, Props>(function SwipeCard(
-  { card, position, progress, onDecide, onOpen },
+  { card, position, progress, onDecide, onOpen, canLike, onLikeBlocked },
   ref,
 ) {
   const reducedMotion = useReducedMotion();
@@ -66,6 +69,13 @@ export const SwipeCard = forwardRef<SwipeCardHandle, Props>(function SwipeCard(
   function flyOut(direction: SwipeDirection, velocityX: number, velocityY: number) {
     'worklet';
     if (leaving.get()) return;
+    if (direction === 'like' && !canLike) {
+      // Out of likes: the card comes home and the plans page opens. Passing still works.
+      x.set(withSpring(0, { ...springs.release, velocity: velocityX }));
+      y.set(withSpring(0, { ...springs.release, velocity: velocityY }));
+      scheduleOnRN(onLikeBlocked);
+      return;
+    }
     leaving.set(true);
     const sign = direction === 'like' ? 1 : -1;
     const target = sign * width.get() * 1.5;
@@ -141,7 +151,7 @@ export const SwipeCard = forwardRef<SwipeCardHandle, Props>(function SwipeCard(
     return Gesture.Exclusive(pan, tap);
     // Handlers read shared values; only the card, position and callbacks change them.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isTop, card, onOpen, onDecide]);
+  }, [isTop, card, onOpen, onDecide, canLike, onLikeBlocked]);
 
   const animatedStyle = useAnimatedStyle(() => {
     if (!isTop) {

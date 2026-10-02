@@ -14,7 +14,7 @@ Skills per phase come from `skills/SOUL_SKILL_MAP.md`. `soul-audit` is enabled o
 | P | Platform amendment: web/PWA target, service adapters, icon font, `/download` + `/install` | done |
 | 5 | Profile | done (Android emulator + iPhone-size web) |
 | 6 | Discovery (location-independent) | done (web + Android verified; icon font rebuilt 2026-09-28) |
-| 7 | Swipes + plans | todo |
+| 7 | Swipes + plans | done (Android + web verified; checkout itself is Phase 12) |
 | 8 | Matching | todo |
 | 9 | Chat | todo |
 | 10 | Instant Meet (the only location feature, 1 km) | todo |
@@ -263,6 +263,38 @@ Skills per phase come from `skills/SOUL_SKILL_MAP.md`. `soul-audit` is enabled o
 
 **Closed 2026-09-28:** the Android rebuild embeds the new `remove` icon (verified in Filters).
 
+## Phase 7: Swipes and plans (2026-10-02)
+
+**Server:** migration `…1002000100_swipe_credits.sql` (D-047):
+- `plans` catalog with the owner's prices, `subscriptions`, and the append-only `swipe_credit_ledger`.
+- `swipe_right` is now metered: one credit per new like, nothing for replays or repeat likes, `no_swipes` when empty.
+- `get_my_swipes` (balance, plan, Instant entitlement) and the one-time free grant, remembered per SRMIST address.
+- `activate_plan` (service role only) is the single way anything is granted; Phase 12's webhook will call it.
+
+**App:**
+- Discover shows likes left in a pill; a like updates it at once and the server's number replaces it.
+- With no likes, the Like button or a right swipe springs the card back and opens the plans screen. Passing still works.
+- Plans screen (`/paywall`): four plans and three top-ups from the catalog, one choice, price on the button.
+- Settings → "Plans and likes" shows the balance and the plan's end date.
+- `payments.checkout()` is a stub that reports `unavailable` until Phase 12.
+
+**Verified:**
+- pgTAP 193/193 (45 new), `db:verify` 50/50, 100 unit tests, typecheck, lint and format clean.
+- Races over real HTTP: 7 parallel likes with 3 left charged exactly 3; 10 parallel requests for 2 people cost exactly 2.
+- Android emulator:
+  - 4 free likes counted down to 0.
+  - A fifth like by button and by flick was refused without saving, and the plans screen opened.
+  - A pass still saved at zero.
+  - After a server-side `activate_plan` (monthly), the pill showed 25, then 24 after one like, with "Monthly until 2 Nov" on the plans screen and in Settings.
+  - Dark mode holds.
+- Web (phone size): the same balance, the plans screen, and a like going from 24 to 23.
+
+**Open:**
+- Buying is not possible until Phase 12 (Razorpay checkout and webhook). The button says so.
+- Overlapping plans when buying while one is active is a default that needs the owner's confirmation (D-047).
+
+---
+
 ## Hardening of earlier phases (2026-09-28)
 
 The owner asked for no compromises left behind in finished phases. Found and fixed:
@@ -423,3 +455,4 @@ Release build config, signing workflow (owner keystore, C-20), launcher icon (C-
 - 2026-09-27: Phase 5 done: Android verified after a clean rebuild (camera upload, cross-platform sign-in, privacy, deep link). Freed 3 GB on C: by removing the Gradle 9.3.1 cache my first builds left in the user profile (builds now use D:).
 - 2026-09-27: Phase 6 built and verified on web (pane and real mobile Chrome in the emulator) and on Android; web footers now stay above the on-screen keyboard.
 - 2026-09-28: Hardening of earlier phases: server-side photo intake (D-043), Edge Function CORS and key handling (D-044), dev status override removed (D-045), verification bypass through password sign-up closed (D-046), two Discover UI bugs fixed.
+- 2026-10-02: Phase 7 done: plan catalog, swipe ledger, metered likes, balance and plans screen; race tests pass over HTTP. Checkout waits for Phase 12.

@@ -126,6 +126,7 @@ check(
 );
 if (pwUser.data?.user) await admin.auth.admin.deleteUser(pwUser.data.user.id);
 
+const extraUsers = [];
 const userA = await makeUser('test.user.a');
 const userB = await makeUser('test.user.b');
 
@@ -383,14 +384,125 @@ try {
     p_idempotency_key: randomUUID(),
   });
   check('a like is recorded through the API', like.data?.ok === true, JSON.stringify(like.data));
+
+  // Phase 7: swipe credits. Parallel requests over real HTTP must never overspend.
+  check(
+    'the first like used one of the 4 free swipes',
+    like.data?.balance === 3,
+    JSON.stringify(like.data),
+  );
+  const catalog = await userA.client.from('plans').select('id, price_paise, right_swipes');
+  check(
+    'the app can read the plan catalog',
+    (catalog.data ?? []).length === 7 &&
+      catalog.data.find((plan) => plan.id === 'monthly')?.price_paise === 19900,
+  );
+  const selfGrant = await userA.client.rpc('activate_plan', {
+    p_user: userA.id,
+    p_plan: 'half_year',
+    p_key: 'self-granted',
+  });
+  check('the app cannot activate a plan itself', Boolean(selfGrant.error), selfGrant.error?.code);
+
+  // Seven more profiles User A may like, written the way the server would publish them.
+  const targets = [];
+  for (let n = 0; n < 7; n += 1) {
+    const created = await admin.auth.admin.createUser({
+      email: `test.user.t${n}.${hex()}@srmist.edu.in`,
+      email_confirm: true,
+    });
+    const id = created.data.user.id;
+    extraUsers.push(id);
+    targets.push(id);
+    await admin
+      .from('account_private')
+      .update({
+        terms_version: terms,
+        terms_accepted_at: today.toISOString(),
+        date_of_birth: dob,
+        profile_completed_at: today.toISOString(),
+      })
+      .eq('id', id);
+    await admin
+      .from('profiles')
+      .update({ display_name: 'Test User', hook: 'Hook', gender: 'man' })
+      .eq('id', id);
+    await admin
+      .from('preferences')
+      .update({ show_me: ['woman'] })
+      .eq('user_id', id);
+    const photo = randomUUID();
+    const path = `${id}/${photo}.jpg`;
+    await admin.storage.from('profile-photos').upload(path, tinyJpeg, jpegType);
+    await admin.storage.from('profile-photos-blurred').upload(path, tinyJpeg, jpegType);
+    await admin.from('profile_photos').insert({
+      id: photo,
+      user_id: id,
+      storage_path: path,
+      blurred_path: path,
+      position: 0,
+      status: 'approved',
+      source: 'camera',
+      width: 1080,
+      height: 1350,
+    });
+  }
+
+  const burst = await Promise.all(
+    targets.map((target) =>
+      userA.client.rpc('swipe_right', { p_target: target, p_idempotency_key: randomUUID() }),
+    ),
+  );
+  const charged = burst.filter((r) => r.data?.ok === true).length;
+  const refused = burst.filter((r) => r.data?.reason === 'no_swipes').length;
+  check(
+    '7 parallel likes with 3 swipes left: exactly 3 go through',
+    charged === 3 && refused === 4,
+    `${charged} charged, ${refused} refused`,
+  );
+  const afterBurst = await userA.client.rpc('get_my_swipes');
+  const likeCount = async () =>
+    (await admin.from('likes').select('*', { count: 'exact', head: true }).eq('liker_id', userA.id))
+      .count;
+  check(
+    'the balance is 0 and only charged likes were saved',
+    afterBurst.data?.balance === 0 && (await likeCount()) === 4,
+    `balance ${afterBurst.data?.balance}, likes ${await likeCount()}`,
+  );
+
+  const paid = await admin.rpc('activate_plan', {
+    p_user: userA.id,
+    p_plan: 'topup_5',
+    p_key: `verify-${hex()}`,
+  });
+  check('a verified payment adds a top-up', paid.data?.ok === true, JSON.stringify(paid.data));
+  const unliked = targets.filter((_, index) => burst[index].data?.reason === 'no_swipes');
+  const sameKey = randomUUID();
+  const replays = await Promise.all(
+    Array.from({ length: 5 }, () =>
+      userA.client.rpc('swipe_right', { p_target: unliked[0], p_idempotency_key: sameKey }),
+    ),
+  );
+  const differentKeys = await Promise.all(
+    Array.from({ length: 5 }, () =>
+      userA.client.rpc('swipe_right', { p_target: unliked[1], p_idempotency_key: randomUUID() }),
+    ),
+  );
+  const afterReplays = await userA.client.rpc('get_my_swipes');
+  check(
+    '10 parallel requests for 2 people cost exactly 2 swipes (no double charge)',
+    afterReplays.data?.balance === 3 &&
+      [...replays, ...differentKeys].every((r) => r.data?.ok === true),
+    `balance ${afterReplays.data?.balance}`,
+  );
 } finally {
-  for (const user of [userA, userB]) {
+  for (const id of [userA.id, userB.id, ...extraUsers]) {
     for (const bucket of ['profile-photos', 'profile-photos-blurred', 'photo-uploads']) {
-      const listed = await admin.storage.from(bucket).list(user.id);
-      const names = (listed.data ?? []).map((o) => `${user.id}/${o.name}`);
+      const listed = await admin.storage.from(bucket).list(id);
+      const names = (listed.data ?? []).map((o) => `${id}/${o.name}`);
       if (names.length) await admin.storage.from(bucket).remove(names);
     }
-    await admin.auth.admin.deleteUser(user.id);
+    await admin.auth.admin.deleteUser(id);
   }
 }
 
