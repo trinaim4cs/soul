@@ -43,9 +43,9 @@ Tokens are in `src/theme/motion.ts`. The values follow the `expo-animation` skil
 | Swipe card | 7 | `Gesture.Pan` → shared translate/rotate. Release: distance **or** velocity decides; `springs.release` with velocity; rubber-band at the edges; one light haptic when the decision threshold is crossed |
 | Filter and safety sheets | 7, 14 | `@expo/ui` BottomSheet or Router `formSheet` (native), else `springs.sheet` |
 | Match reveal | 8 (built) | a 360 ms fade and 0.96→1 scale of the black moment, then staggered text; no confetti |
-| Floating chat composer | 10 | `react-native-keyboard-controller` keyboard position on the UI thread; composer height changes via layout transition |
-| Typing indicator | 10 | three dots, staggered opacity CSS animation, `durations.base` |
-| New message entry | 10 | the list container animates, never row `entering` inside virtualized cells |
+| Floating chat composer | 9 (built) | `react-native-keyboard-controller` keyboard position on the UI thread; composer height changes via layout transition |
+| Typing indicator | 9 (built) | three dots, staggered opacity CSS animation, `durations.base` |
+| New message entry | 9 (built) | the list container animates, never row `entering` inside virtualized cells |
 | Instant compass | 11 | heading and bearing into a shared value; shortest-angle unwrap; `springs.compass`; the arrow is hidden below 100 m |
 | Distance changes | 11 | cross-fade of bucketed text only (no counting animation) |
 
@@ -75,4 +75,12 @@ Feel is judged on a **release build** on the slowest available Android device. D
 - **Reduced motion:** every element only fades.
 - **Haptic:** none yet (`expo-haptics` needs a rebuild); planned as one success notification on the same frame, never the only feedback.
 - **Verified:** Android emulator and web at phone size; the title is full-width so the centred italic serif never loses its last word.
+
+## Chat (Phase 9)
+
+- **Composer:** `KeyboardAvoidingView` from react-native-keyboard-controller follows the keyboard on the UI thread; the list shrinks with it, so the newest messages stay in view and nothing jumps. The field grows with its text up to five lines.
+- **Messages:** no per-bubble entrance. The list is anchored to the bottom and scrolls to a new message only when the reader is already near the newest one (`autoscrollToBottomThreshold`).
+- **Typing indicator:** three dots, a CSS opacity animation staggered by half of `durations.base`, in the shape of the other person's bubble. Still under reduced motion. It is the list's footer and is scrolled into view when it appears, again only for someone at the bottom.
+- **Sending:** the bubble appears at once at 60 % opacity and becomes solid when the server confirms.
+- **Verified on the Android emulator:** keyboard open and close with the composer flush above it, live messages with the keyboard open, typing indicator, reply, failed send and retry, dark mode.
 

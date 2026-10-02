@@ -22,6 +22,9 @@ const match = (over: Partial<Match> = {}): Match => ({
   created_at: new Date(2026, 9, 2, 10).toISOString(),
   seen: false,
   person: person(),
+  conversation_id: '0000000c-0000-4000-8000-000000000001',
+  last_message: null,
+  unread: 0,
   ...over,
 });
 
@@ -29,6 +32,7 @@ describe('matches', () => {
   it('counts the matches not seen yet', () => {
     expect(unseenCount(undefined)).toBe(0);
     expect(unseenCount([match(), match({ seen: true }), match()])).toBe(2);
+    expect(unseenCount([match({ seen: true, unread: 3 }), match({ seen: true })])).toBe(1);
   });
 
   it('names the person, or stays neutral when they remain anonymous', () => {

@@ -6,8 +6,11 @@ import { supabase } from '@/lib/supabase';
 
 export const matchesQueryKey = (userId: string) => ['matches', userId] as const;
 
-/** How often an open app looks for matches made by the other person (until realtime, Phase 9). */
-const MATCH_POLL_MS = 60_000;
+/**
+ * The account's Realtime topic keeps this list current (`useAccountRealtime`). This slow
+ * re-read is only a safety net for a socket that dropped without noticing.
+ */
+const MATCH_POLL_MS = 5 * 60_000;
 
 /** The caller's active matches, newest first. Matches are created only by the server. */
 export function useMatches(userId: string | null) {

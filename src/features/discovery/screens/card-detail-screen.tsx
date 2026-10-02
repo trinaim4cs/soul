@@ -16,7 +16,7 @@ import {
 } from '@/features/discovery/model/card';
 import { useCurrentUserId } from '@/features/auth/account-status-provider';
 import { useDeckStore } from '@/features/discovery/store/deck-store';
-import { unmatch } from '@/features/matching/api/matches';
+import { unmatch, useMatches } from '@/features/matching/api/matches';
 import { UnmatchButton, UnmatchConfirm } from '@/features/matching/components/unmatch-control';
 import { personName } from '@/features/matching/model/match';
 import { useSwipeBalance } from '@/features/swipes/api/swipes';
@@ -75,14 +75,18 @@ function CardDetail({ card, fromDeck, matchId }: DetailProps) {
   const chosen = useRef(false);
   const swipes = useSwipeBalance(userId);
   const [confirmingUnmatch, setConfirmingUnmatch] = useState(false);
+  const conversationId =
+    useMatches(matchId ? userId : null).data?.find((match) => match.id === matchId)
+      ?.conversation_id ?? null;
 
   async function endMatch() {
     if (!userId || !matchId) return;
     await unmatch(userId, matchId);
     // The server no longer shows this person to the caller.
     queryClient.removeQueries({ queryKey: ['profile-card', card.id] });
-    if (router.canGoBack()) router.back();
-    else router.replace('/chats');
+    // Straight to the chat list: the chat this profile was opened from no longer exists.
+    if (router.canDismiss()) router.dismissAll();
+    router.navigate('/chats');
   }
 
   function choose(direction: SwipeDirection) {
@@ -128,6 +132,14 @@ function CardDetail({ card, fromDeck, matchId }: DetailProps) {
             name={personName(card)}
             onCancel={() => setConfirmingUnmatch(false)}
             onUnmatch={endMatch}
+          />
+        ) : conversationId ? (
+          <SoulButton
+            label="Message"
+            block
+            onPress={() =>
+              router.navigate({ pathname: '/chat/[id]', params: { id: conversationId } })
+            }
           />
         ) : null
       }>

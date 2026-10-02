@@ -49,6 +49,7 @@ Semantic tokens with light and dark values, following the system appearance (D-0
 - Display roles shrink by 12 % on screens narrower than 360 dp.
 - `numeric` turns on tabular figures for timers, distances, balances and prices. Prices always use the body family (Instrument Serif has no `₹`).
 - Android: centered serif text must span the full width (`alignSelf: 'stretch'`). Shrink-wrapped centered text can clip its last word (seen and fixed in Phase 2).
+- Android: a shrink-wrapped **single-line** text box (a chat bubble) can also lose its last word, because the box is rounded to whole pixels. End such text with a hair space (`\u200A`): trailing whitespace is measured but never forces a wrap (`message-bubble.tsx`, Phase 9).
 
 ## Spacing, shape, size
 

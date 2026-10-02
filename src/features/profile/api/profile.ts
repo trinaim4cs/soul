@@ -52,6 +52,7 @@ export type ProfileFields = Partial<{
   zodiac_visible: boolean;
   privacy_mode: PrivacyMode;
   reveal_on_match: boolean;
+  read_receipts: boolean;
 }>;
 
 /** Only the editable columns can change; the server enforces lengths (column grants + checks). */

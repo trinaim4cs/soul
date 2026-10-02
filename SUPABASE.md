@@ -37,6 +37,7 @@ Then in the dashboard:
   - Authentication → Sign In / Providers → Email: **Confirm email** is on.
   - Authentication → Hooks: *Before User Created* → `public.hook_before_user_created`, and *Customize Access Token (JWT) Claims* → `public.hook_custom_access_token`.
   - Without the second hook, password sign-in would be possible again.
+- **Realtime → Settings: turn off "Allow public access"**, so only private, authorized topics work (D-049).
 - Check that `get_my_status` exists: `POST /rest/v1/rpc/get_my_status` with the publishable key returns 401 or a status, not `PGRST202`.
 
 Never apply schema changes by hand; every change is a migration.

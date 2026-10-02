@@ -6,6 +6,25 @@ Status values: `accepted` · `default, confirm` · `open`.
 
 ---
 
+## Phase 9 chat (2026-10-02)
+
+### D-049 Chat
+- **Model:** one conversation per match, created with it. `conversation_members` holds each person's read position. `messages` are written only by `send_message()`. No table is readable or writable by the app; every function re-checks that the match is still active and visible.
+- **Sending:** the body is trimmed and must be 1 to 2000 characters. The device picks a `client_id`, so a retry is stored once. A reply must point at a message in the same conversation. At most 15 messages go through in any 10 seconds.
+- **Realtime (settles D-012):** private topics only, authorized by RLS on `realtime.messages`.
+  - `chat:<conversation>` carries `message`, `read` and `closed`, published by database triggers and functions. Clients can listen but never publish there, so a message on the wire is always one the server stored.
+  - `typing:<conversation>` is the only topic a client may publish on, and it carries nothing but a typing flag.
+  - `user:<account>` nudges that account's chat list and tab count when a match or message changes. It replaces the Phase 8 polling; a 5-minute re-read stays as a safety net.
+- **Delivery states:** Sending, Sent (stored by the server), Read, and "Not sent. Tap to try again." There is no separate "delivered to the device" state until push exists (Phase 14).
+- **Read receipts (settles C-19):** on by default, switched in Privacy. They are mutual: shown only when both people keep them on, and no receipt is broadcast otherwise. A read position only moves forward and cannot pass the newest real message.
+- **Unmatch:** closes the conversation, tells both devices (`closed`), and keeps the messages as moderation evidence that neither person can read.
+- **Screen:** messages are anchored to the bottom in a FlashList; older pages of 40 load when scrolling up. Bubbles do not animate one by one. The composer floats above the keyboard, grows to five lines and keeps the keyboard open after sending. Long-press replies.
+- **Send button:** the word "Send". The icon font has no send glyph, and adding one needs a native rebuild.
+- **Not in this phase:** photos in chat (spec: "photo if moderation is ready", so with Phase 13), and report and block from the chat header (Phase 13).
+- **Known limitation:** Realtime authorizes a topic when it is joined and again when the token refreshes. After an unmatch the server stops publishing at once, and the app leaves the topic when it receives `closed`; a tampered client could keep an idle socket until its token refreshes, but it receives nothing.
+
+---
+
 ## Phase 8 matching (2026-10-02)
 
 ### D-048 Matching
@@ -431,7 +450,7 @@ The owner felt the strict monochrome direction read "too X" (too much like a soc
 | C-16 | Push credentials. Android: Firebase Cloud Messaging (works for APKs outside Play); owner creates the Firebase project, Android app `com.soul.srm`, `google-services.json` and a service account key (BUILD_ANDROID.md). iPhone PWA: standards Web Push, no Apple account; VAPID keys generated for the project. Push is never required for chat or matching | Phase 14 (push only) | In-app realtime only |
 | C-17 | ~~Supabase projects~~ **closed 2026-09-27**: cloud project `bdwuhrkgrwzpwqhgsngi` for beta/production (URL + publishable key in `.env.production`, git-ignored); local Docker for development. Schema not yet pushed: needs the owner's `supabase login` and DB password (SUPABASE.md) | - | - |
 | C-18 | Message handling on account deletion | Phase 14 | Deleted user's message bodies purged; counterpart sees "Message removed" |
-| C-19 | Read receipts default (user toggle exists) | Phase 10 | On by default, user can turn off **[DEFAULT, confirm]** |
+| C-19 | ~~Read receipts default~~ **built 2026-10-02 (D-049)**: on by default, mutual, switch in Privacy. The owner can still ask for off by default | - | - |
 | C-20 | Production release keystore for `com.soul.srm`: generated **only** when release signing is needed, after the owner sees the exact command (BUILD_ANDROID.md "Signing"). Never committed; passwords only in local secure config; debug builds use the separate debug key; every production APK uses the same identity | First release APK (Phase 20) | Debug key for dev builds; release builds fail without the production key |
 | C-21 | **RELEASE_BLOCKER.** Compact app-icon mark: the wide wordmark is never squeezed into the launcher icon (full logo = splash/branding; compact mark = app icon). The final mark needs an owner-approved original or licensed asset | **Public release** | Temporary monochrome placeholder (white ring on black, `scripts/make-placeholder-icons.py`) for Android and the PWA |
 | C-22 | ~~Logo licensing~~ **closed 2026-09-27 by owner statement**: the owner states the logo (from a Pinterest pin) is free for public use and grants full permission to use it; no need to hide it. Recommended: keep a saved copy of the source page or licence note as proof. (The separate compact app-icon mark, C-21, stays a release blocker) | - | - |

@@ -1,5 +1,6 @@
 import { Stack } from 'expo-router';
 
+import { useAccountRealtime } from '@/features/chat/hooks/use-account-realtime';
 import { fontFamily, radii, useTheme } from '@/theme';
 
 /**
@@ -9,6 +10,7 @@ import { fontFamily, radii, useTheme } from '@/theme';
  */
 export default function AppLayout() {
   const { colors } = useTheme();
+  useAccountRealtime();
   const pageHeader = {
     headerShown: true,
     headerTitle: '',
@@ -43,6 +45,7 @@ export default function AppLayout() {
           contentStyle: { backgroundColor: colors.moment },
         }}
       />
+      <Stack.Screen name="chat/[id]" options={{ headerShown: false }} />
       <Stack.Screen name="settings/index" options={pageHeader} />
       <Stack.Screen name="settings/privacy" options={pageHeader} />
     </Stack>

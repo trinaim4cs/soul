@@ -135,6 +135,64 @@ export type Database = {
         };
         Relationships: [];
       };
+      conversation_members: {
+        Row: {
+          conversation_id: string;
+          last_read_message_id: number;
+          user_id: string;
+        };
+        Insert: {
+          conversation_id: string;
+          last_read_message_id?: number;
+          user_id: string;
+        };
+        Update: {
+          conversation_id?: string;
+          last_read_message_id?: number;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'conversation_members_conversation_id_fkey';
+            columns: ['conversation_id'];
+            isOneToOne: false;
+            referencedRelation: 'conversations';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      conversations: {
+        Row: {
+          closed_at: string | null;
+          created_at: string;
+          id: string;
+          last_message_at: string | null;
+          match_id: string;
+        };
+        Insert: {
+          closed_at?: string | null;
+          created_at?: string;
+          id?: string;
+          last_message_at?: string | null;
+          match_id: string;
+        };
+        Update: {
+          closed_at?: string | null;
+          created_at?: string;
+          id?: string;
+          last_message_at?: string | null;
+          match_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'conversations_match_id_fkey';
+            columns: ['match_id'];
+            isOneToOne: true;
+            referencedRelation: 'matches';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       feature_flags: {
         Row: {
           description: string;
@@ -212,6 +270,51 @@ export type Database = {
           user_b?: string;
         };
         Relationships: [];
+      };
+      messages: {
+        Row: {
+          body: string;
+          client_id: string;
+          conversation_id: string;
+          created_at: string;
+          id: number;
+          reply_to_id: number | null;
+          sender_id: string;
+        };
+        Insert: {
+          body: string;
+          client_id: string;
+          conversation_id: string;
+          created_at?: string;
+          id?: never;
+          reply_to_id?: number | null;
+          sender_id: string;
+        };
+        Update: {
+          body?: string;
+          client_id?: string;
+          conversation_id?: string;
+          created_at?: string;
+          id?: never;
+          reply_to_id?: number | null;
+          sender_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'messages_conversation_id_fkey';
+            columns: ['conversation_id'];
+            isOneToOne: false;
+            referencedRelation: 'conversations';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'messages_reply_to_id_fkey';
+            columns: ['reply_to_id'];
+            isOneToOne: false;
+            referencedRelation: 'messages';
+            referencedColumns: ['id'];
+          },
+        ];
       };
       passes: {
         Row: {
@@ -351,6 +454,7 @@ export type Database = {
           hook: string | null;
           id: string;
           privacy_mode: Database['public']['Enums']['privacy_mode'];
+          read_receipts: boolean;
           reveal_on_match: boolean;
           updated_at: string;
           zodiac_visible: boolean;
@@ -363,6 +467,7 @@ export type Database = {
           hook?: string | null;
           id: string;
           privacy_mode?: Database['public']['Enums']['privacy_mode'];
+          read_receipts?: boolean;
           reveal_on_match?: boolean;
           updated_at?: string;
           zodiac_visible?: boolean;
@@ -375,6 +480,7 @@ export type Database = {
           hook?: string | null;
           id?: string;
           privacy_mode?: Database['public']['Enums']['privacy_mode'];
+          read_receipts?: boolean;
           reveal_on_match?: boolean;
           updated_at?: string;
           zodiac_visible?: boolean;
@@ -495,6 +601,10 @@ export type Database = {
       };
       discovery_feed: { Args: { p_exclude?: string[]; p_limit?: number }; Returns: Json };
       get_match: { Args: { p_match: string }; Returns: Json };
+      get_messages: {
+        Args: { p_before?: number; p_conversation: string; p_limit?: number };
+        Returns: Json;
+      };
       get_my_matches: { Args: Record<PropertyKey, never>; Returns: Json };
       get_my_profile: { Args: Record<PropertyKey, never>; Returns: Json };
       get_my_status: { Args: Record<PropertyKey, never>; Returns: Json };
@@ -502,9 +612,17 @@ export type Database = {
       get_profile_card: { Args: { p_target: string }; Returns: Json };
       hook_before_user_created: { Args: { event: Json }; Returns: Json };
       hook_custom_access_token: { Args: { event: Json }; Returns: Json };
+      mark_conversation_read: {
+        Args: { p_conversation: string; p_message: number };
+        Returns: Json;
+      };
       mark_match_seen: { Args: { p_match: string }; Returns: Json };
       remove_profile_photo: { Args: { p_id: string; p_user: string }; Returns: Json };
       reorder_profile_photos: { Args: { p_ids: string[] }; Returns: Json };
+      send_message: {
+        Args: { p_body: string; p_client_id: string; p_conversation: string; p_reply_to?: number };
+        Returns: Json;
+      };
       set_date_of_birth: { Args: { p_dob: string }; Returns: Json };
       submit_profile: { Args: Record<PropertyKey, never>; Returns: Json };
       swipe_left: { Args: { p_target: string }; Returns: Json };

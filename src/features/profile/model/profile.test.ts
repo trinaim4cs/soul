@@ -16,6 +16,7 @@ const base: MyProfile = {
   gender: 'woman',
   privacy_mode: 'normal',
   reveal_on_match: true,
+  read_receipts: true,
   zodiac_visible: false,
   zodiac: 'gemini',
   age: 22,

@@ -17,8 +17,8 @@ import { createThemedStyles, layout, radii, sizes, spacing, useTheme } from '@/t
 const mainPhoto = (match: Match) => match.person.photos[0]!.path;
 
 /**
- * Chats tab. Phase 8 lists matches; Phase 9 adds the conversations to the same screen.
- * A match that has not been seen yet opens its reveal first.
+ * Chats tab: every match, most recent activity first, with its last message and unread
+ * count. A match that has not been seen yet opens its reveal first; the rest open the chat.
  */
 export function MatchesScreen() {
   const styles = useStyles();
@@ -48,8 +48,10 @@ export function MatchesScreen() {
     (cardBucket(match.person) === PHOTO_BUCKET ? originals : blurred).data?.[mainPhoto(match)];
 
   function open(match: Match) {
-    if (match.seen) router.push({ pathname: '/profile/[id]', params: { id: match.person.id } });
-    else router.push({ pathname: '/match/[id]', params: { id: match.id } });
+    if (!match.seen) router.push({ pathname: '/match/[id]', params: { id: match.id } });
+    else if (match.conversation_id) {
+      router.push({ pathname: '/chat/[id]', params: { id: match.conversation_id } });
+    } else router.push({ pathname: '/profile/[id]', params: { id: match.person.id } });
   }
 
   return (
@@ -65,7 +67,7 @@ export function MatchesScreen() {
         </View>
       ) : matches.isError ? (
         <ErrorState
-          title="Couldn't load your matches"
+          title="Couldn't load your chats"
           body="Check your connection and try again."
           onRetry={() => void matches.refetch()}
         />
@@ -83,11 +85,6 @@ export function MatchesScreen() {
           renderItem={({ item }) => (
             <MatchRow match={item} photoUrl={photoUrl(item)} onPress={() => open(item)} />
           )}
-          ListHeaderComponent={
-            <SoulText variant="label" tone="secondary" style={styles.section}>
-              Matches
-            </SoulText>
-          }
           contentContainerStyle={styles.content}
           showsVerticalScrollIndicator={false}
           refreshControl={
@@ -109,7 +106,6 @@ const useStyles = createThemedStyles(({ colors }) =>
   StyleSheet.create({
     root: { flex: 1, backgroundColor: colors.background, paddingHorizontal: layout.screenGutter },
     title: { marginBottom: spacing.md },
-    section: { marginBottom: spacing.xs },
     loading: { gap: spacing.md, marginTop: spacing.md },
     content: { paddingBottom: spacing.xl },
   }),

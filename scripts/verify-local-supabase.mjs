@@ -560,6 +560,154 @@ try {
       cardAfter.data?.reason === 'not_available',
     `list ${listAfter.data?.matches?.length}, card ${JSON.stringify(cardAfter.data)}`,
   );
+
+  // Phase 9: chat over real Realtime sockets, with two signed-in clients and one outsider.
+  const chatMatch = listAfter.data.matches[0];
+  const conversation = chatMatch.conversation_id;
+  const partner = mutual[1].other;
+  const partnerId = mutual[1].target;
+  const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+  /** Joins a private topic and collects every broadcast event it receives. */
+  async function join(client, topic) {
+    const events = [];
+    const channel = client.channel(topic, { config: { private: true } });
+    for (const event of ['message', 'read', 'closed', 'typing', 'refresh']) {
+      channel.on('broadcast', { event }, (received) => events.push(received));
+    }
+    const status = await new Promise((resolve) => {
+      const timer = setTimeout(() => resolve('TIMED_OUT'), 8000);
+      channel.subscribe((state) => {
+        if (state === 'SUBSCRIBED' || state === 'CHANNEL_ERROR' || state === 'TIMED_OUT') {
+          clearTimeout(timer);
+          resolve(state);
+        }
+      });
+    });
+    return { channel, events, status };
+  }
+  const received = async (events, test, ms = 5000) => {
+    const deadline = Date.now() + ms;
+    while (Date.now() < deadline) {
+      if (events.some(test)) return true;
+      await sleep(100);
+    }
+    return false;
+  };
+
+  const mine = await join(userA.client, `chat:${conversation}`);
+  const theirs = await join(partner.client, `chat:${conversation}`);
+  const theirInbox = await join(partner.client, `user:${partnerId}`);
+  check(
+    'both people can join their private chat topic',
+    mine.status === 'SUBSCRIBED' && theirs.status === 'SUBSCRIBED',
+    `${mine.status}, ${theirs.status}`,
+  );
+  const outsider = await join(userB.client, `chat:${conversation}`);
+  check(
+    'an outsider cannot join the chat topic',
+    outsider.status !== 'SUBSCRIBED',
+    outsider.status,
+  );
+  const spy = await join(userB.client, `user:${userA.id}`);
+  check("nobody can join another account's topic", spy.status !== 'SUBSCRIBED', spy.status);
+
+  const clientId = randomUUID();
+  const sentMessage = await userA.client.rpc('send_message', {
+    p_conversation: conversation,
+    p_body: '  hello from the test  ',
+    p_client_id: clientId,
+  });
+  check(
+    'a message is stored and returned trimmed',
+    sentMessage.data?.ok === true && sentMessage.data.message.body === 'hello from the test',
+    JSON.stringify(sentMessage.data),
+  );
+  check(
+    'the other person receives it over Realtime',
+    await received(
+      theirs.events,
+      (e) =>
+        e.event === 'message' &&
+        e.payload.client_id === clientId &&
+        e.payload.sender_id === userA.id,
+    ),
+  );
+  check(
+    "the other person's account topic is nudged (chat list and unread)",
+    await received(
+      theirInbox.events,
+      (e) => e.event === 'refresh' && e.payload.reason === 'message',
+    ),
+  );
+  const again = await userA.client.rpc('send_message', {
+    p_conversation: conversation,
+    p_body: 'hello from the test',
+    p_client_id: clientId,
+  });
+  check(
+    'a retry of the same message is not stored twice',
+    again.data?.replayed === true && again.data.message.id === sentMessage.data.message.id,
+  );
+
+  // A client cannot publish on the chat topic: a forged "message" never reaches the other person.
+  await mine.channel.send({
+    type: 'broadcast',
+    event: 'message',
+    payload: { body: 'forged', sender_id: partnerId, client_id: 'forged' },
+  });
+  check(
+    'a forged message broadcast is not delivered',
+    !(await received(theirs.events, (e) => e.payload?.client_id === 'forged', 2000)),
+  );
+
+  const myTyping = await join(userA.client, `typing:${conversation}`);
+  const theirTyping = await join(partner.client, `typing:${conversation}`);
+  await myTyping.channel.send({ type: 'broadcast', event: 'typing', payload: { typing: true } });
+  check(
+    'typing reaches the other person on the typing topic',
+    myTyping.status === 'SUBSCRIBED' &&
+      (await received(
+        theirTyping.events,
+        (e) => e.event === 'typing' && e.payload.typing === true,
+      )),
+    `${myTyping.status}, ${theirTyping.status}`,
+  );
+
+  const readNow = await partner.client.rpc('mark_conversation_read', {
+    p_conversation: conversation,
+    p_message: sentMessage.data.message.id,
+  });
+  check(
+    'a read receipt reaches the sender',
+    readNow.data?.ok === true &&
+      (await received(
+        mine.events,
+        (e) => e.event === 'read' && e.payload.message_id === sentMessage.data.message.id,
+      )),
+  );
+  const page = await partner.client.rpc('get_messages', { p_conversation: conversation });
+  check(
+    'the conversation history is readable by its members only',
+    page.data?.messages?.[0]?.body === 'hello from the test' &&
+      (await userB.client.rpc('get_messages', { p_conversation: conversation })).data?.reason ===
+        'not_available',
+  );
+
+  await partner.client.rpc('unmatch', { p_match: chatMatch.id });
+  check(
+    'unmatching closes the conversation for both devices',
+    (await received(mine.events, (e) => e.event === 'closed')) &&
+      (
+        await userA.client.rpc('send_message', {
+          p_conversation: conversation,
+          p_body: 'after',
+          p_client_id: randomUUID(),
+        })
+      ).data?.reason === 'not_available',
+  );
+  for (const client of [userA.client, partner.client, userB.client])
+    await client.removeAllChannels();
 } finally {
   for (const id of [userA.id, userB.id, ...extraUsers]) {
     for (const bucket of ['profile-photos', 'profile-photos-blurred', 'photo-uploads']) {

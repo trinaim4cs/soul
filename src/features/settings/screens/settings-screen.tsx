@@ -43,7 +43,7 @@ export function SettingsScreen() {
         <SettingsRow
           icon="visibility_off"
           label="Privacy"
-          detail="Visibility, anonymous mode, zodiac"
+          detail="Visibility, read receipts, zodiac"
           onPress={() => router.push('/settings/privacy')}
         />
         <SettingsRow

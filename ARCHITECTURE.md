@@ -88,7 +88,7 @@ Location never gates the app (spec v2: no geofence). Only the Instant tab asks f
 | Discovery | `preferences`, `passes`, `likes` | `discovery_feed()` (filters, privacy, blocks, ranking) |
 | Economy | `plans`, `subscriptions`, `swipe_credit_ledger` (Phase 7, D-047); `purchase_records` (Phase 12) | `swipe_right()` transaction, `get_my_swipes()`, `activate_plan()`; app code in `src/features/swipes` |
 | Matching | `matches` (Phase 8, D-048) | inside `swipe_right()`; `get_my_matches()`, `get_match()`, `mark_match_seen()`, `unmatch()`; app code in `src/features/matching` |
-| Chat | `conversations`, `conversation_members`, `messages`, `message_receipts` | `send_message()` + broadcast trigger, typing via Presence |
+| Chat | `conversations`, `conversation_members`, `messages` (Phase 9, D-049) | `send_message()` + broadcast trigger, `get_messages()`, `mark_conversation_read()`; typing via Broadcast on a client topic; app code in `src/features/chat` |
 | Instant | `instant_presence`, `instant_sessions`, `instant_participants`, `meeting_points`, `meeting_point_votes` | `instant-*` functions, `instant_proximity()` |
 | Dates and badges | `date_rounds`, `date_confirmations`, `date_events`, `badges` | confirmation function, `recompute_hot_person()` + pg_cron |
 | Safety | `blocks`, `reports`, `report_attachments`, `moderation_actions`, `risk_signals`, `appeals` | report/block functions, admin functions |

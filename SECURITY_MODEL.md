@@ -52,6 +52,7 @@ The client can request these; only the server decides them. Each is a SECURITY D
 | Eligibility for the app | `get_my_status()`: email verified + current terms + 18+ DOB + profile complete + account active. **No location involved (spec v2: no geofence)** |
 | Instant Meet 1 km candidacy | server-side `ST_DWithin` on `geography` (D-031); the only location use |
 | Like, credit consumption, match creation | `swipe_right` transaction under a per-account lock, then a pair lock (D-013, D-015, D-047, D-048); the balance is computed from an append-only ledger; one match row per pair |
+| Message stored and delivered | `send_message()` (membership, active match, length, reply target, rate limit, idempotent per device id); a trigger broadcasts it. Clients cannot publish on the chat topic (D-049) |
 | Unmatch, anonymous reveal to a match | `unmatch()` (participants only; the pair never sees each other again); `reveal_on_match` applied by the card function and by Storage signing |
 | Plan or top-up granted | `activate_plan` (service role only, once per payment key), called by the payment webhook after it verifies the signature and amount |
 | Subscription active, top-up granted, refunds | `payments-webhook` after verifying the provider signature and the amount against the server catalog (D-037); idempotent on the provider payment ID |
@@ -117,7 +118,7 @@ Automated face, lighting and one-subject checks are C-30 (Phase 13, with the rev
 
 ## 8. Realtime
 
-Private channels only, authorized by RLS on `realtime.messages` (D-012). Topic names include IDs that the policy checks against membership plus not-blocked. Presence payloads contain only a typing flag and user ID, never location. Instant proximity updates are **not** broadcast peer-to-peer; each client polls or receives server-computed buckets over its own authorized session topic.
+Private channels only, authorized by RLS on `realtime.messages` (D-012, built in Phase 9 as D-049): `chat:<conversation>` and `user:<account>` are server-to-client, and `typing:<conversation>` is the only topic a client may publish on. "Allow public access" must be off in the hosted Realtime settings (SUPABASE.md). Topic names include IDs that the policy checks against membership plus not-blocked. Presence payloads contain only a typing flag and user ID, never location. Instant proximity updates are **not** broadcast peer-to-peer; each client polls or receives server-computed buckets over its own authorized session topic.
 
 **Known limitation:** Realtime re-authorizes on join and token refresh. After a block, the server immediately stops writing to the channel and sends a revoke event. A tampered client could keep an idle socket open until its next token refresh, but it would receive nothing further because no new messages are written for that pair.
 

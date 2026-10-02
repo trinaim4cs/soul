@@ -8,6 +8,13 @@ export const matchSchema = z.object({
   created_at: z.string(),
   seen: z.boolean(),
   person: cardSchema,
+  conversation_id: z.string().uuid().nullable(),
+  /** The newest message of the conversation, already shortened by the server. */
+  last_message: z
+    .object({ id: z.number().int(), body: z.string(), mine: z.boolean(), created_at: z.string() })
+    .nullable(),
+  /** Messages from the other person the caller has not read. */
+  unread: z.number().int().nonnegative(),
 });
 export type Match = z.infer<typeof matchSchema>;
 
@@ -25,8 +32,9 @@ export const matchResultSchema = z.discriminatedUnion('ok', [
 export const announcedMatchSchema = z.object({ id: z.string().uuid(), person: cardSchema });
 export type AnnouncedMatch = z.infer<typeof announcedMatchSchema>;
 
+/** What the Chats tab counts: new matches and conversations with unread messages. */
 export function unseenCount(matches: Match[] | undefined): number {
-  return (matches ?? []).filter((match) => !match.seen).length;
+  return (matches ?? []).filter((match) => !match.seen || match.unread > 0).length;
 }
 
 /** A person's first name, or a neutral word when they stay anonymous after matching. */

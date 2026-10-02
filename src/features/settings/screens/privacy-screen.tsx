@@ -130,6 +130,29 @@ function PrivacyForm({ profile, userId }: { profile: MyProfile; userId: string }
 
       <View style={styles.section}>
         <SoulText variant="label" tone="secondary">
+          Chats
+        </SoulText>
+        <View style={styles.switchRow}>
+          <View style={styles.optionText}>
+            <SoulText variant="bodyStrong">Read receipts</SoulText>
+            <SoulText variant="supporting" tone="secondary">
+              Matches see when you have read their messages. If you turn this off, you won&apos;t
+              see when they have read yours either.
+            </SoulText>
+          </View>
+          <Switch
+            value={profile.read_receipts}
+            disabled={saving}
+            onValueChange={(value) => void save({ read_receipts: value })}
+            trackColor={{ false: colors.border, true: colors.inverseSurface }}
+            thumbColor={colors.background}
+            accessibilityLabel="Read receipts"
+          />
+        </View>
+      </View>
+
+      <View style={styles.section}>
+        <SoulText variant="label" tone="secondary">
           Zodiac
         </SoulText>
         <View style={styles.switchRow}>

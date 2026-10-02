@@ -111,9 +111,12 @@ function Reveal({ match }: { match: Match }) {
   });
 
   function message() {
-    // Phase 9 opens the conversation; until then the match is waiting in Chats.
-    close();
-    router.navigate('/chats');
+    if (match.conversation_id) {
+      router.replace({ pathname: '/chat/[id]', params: { id: match.conversation_id } });
+    } else {
+      close();
+      router.navigate('/chats');
+    }
   }
 
   return (

@@ -15,8 +15,8 @@ Skills per phase come from `skills/SOUL_SKILL_MAP.md`. `soul-audit` is enabled o
 | 5 | Profile | done (Android emulator + iPhone-size web) |
 | 6 | Discovery (location-independent) | done (web + Android verified; icon font rebuilt 2026-09-28) |
 | 7 | Swipes + plans | done (Android + web verified; checkout itself is Phase 12) |
-| 8 | Matching | done (Android + web verified; Message opens the chat in Phase 9) |
-| 9 | Chat | todo |
+| 8 | Matching | done (Android + web verified) |
+| 9 | Chat | done (Android + web verified, two live clients) |
 | 10 | Instant Meet (the only location feature, 1 km) | todo |
 | 11 | Date confirmation + Hot Person | todo |
 | 12 | Billing (SOUL web checkout, D-037) | todo |
@@ -263,6 +263,47 @@ Skills per phase come from `skills/SOUL_SKILL_MAP.md`. `soul-audit` is enabled o
 
 **Closed 2026-09-28:** the Android rebuild embeds the new `remove` icon (verified in Filters).
 
+## Phase 9: Chat (2026-10-02)
+
+**Server:** migration `…1002000300_chat.sql` (D-049):
+- `conversations` (one per match), `conversation_members` (read positions), `messages`.
+- `send_message`, `get_messages`, `mark_conversation_read`; the match list now carries the conversation, its last message and the unread count.
+- Private Realtime topics authorized by RLS on `realtime.messages`: the server publishes messages, read receipts and closes; clients may publish only typing.
+- Unmatch closes the conversation and tells both devices.
+
+**App:**
+- Chat screen (`/chat/[id]`, also the `com.soul.srm://chat/<id>` deep link): bottom-anchored FlashList, older pages on scroll, day separators, grouped bubbles, reply by long-press, typing indicator, delivery line under the newest own message.
+- Floating composer above the keyboard, growing to five lines.
+- Optimistic sending with retry ("Not sent. Tap to try again.").
+- Chats tab: last message, time, unread count; the tab count covers new matches and unread chats; both update live from the account's Realtime topic.
+- The match reveal's Message button and a match's profile open the conversation.
+- Privacy → Read receipts switch.
+
+**Verified:**
+- pgTAP 286/286 (47 new), `db:verify` 68/68, 125 unit tests, typecheck, lint and format clean.
+- Realtime over real sockets (script): members join; an outsider and another account's topic are refused; a message arrives live; a forged client broadcast is not delivered; typing and read receipts arrive; unmatch closes.
+- Two live clients, Android emulator and a browser, signed in as the two people of one match:
+  - Messages arrived live in both directions, including with the Android keyboard open.
+  - "Read" appeared on the sender's side without a reload.
+  - The typing indicator showed on Android while the other person typed.
+  - A long-press reply carried the quoted message.
+  - With the API gateway stopped, a message showed "Not sent. Tap to try again."; after restart, one tap sent it, stored once.
+  - Unmatching in the browser turned the open Android chat into "This conversation isn't available" by itself.
+  - The composer sat flush above the keyboard and the newest messages stayed in view.
+  - Dark mode holds.
+
+**Fixed during testing:**
+- **A bubble could lose its last word on Android** ("Yes! 5 pm at the" for "…canteen?") the second time a chat was opened. The view was the right size but drew a two-line layout. A trailing hair space gives single-line text the slack it needs (DESIGN_SYSTEM). Four opens in a row then rendered correctly.
+- The typing indicator appeared below the fold; the list now scrolls to it for someone at the bottom.
+- The browser composer was two lines tall when empty and did not grow; fixed.
+- After unmatching from a profile opened from a chat, the app returned to the dead chat; it now goes to Chats.
+
+**Open:**
+- Photos in chat, report and block from the chat header: Phase 13.
+- The emulator's keyboard showed its own "Try out your stylus" promo on first focus after a cold start; it is Gboard's, not SOUL's.
+
+---
+
 ## Phase 8: Matching (2026-10-02)
 
 **Server:** migration `…1002000200_matching.sql` (D-048):
@@ -296,9 +337,9 @@ Skills per phase come from `skills/SOUL_SKILL_MAP.md`. `soul-audit` is enabled o
 - The badge did not update while staying on Discover; matches are now re-read every 60 seconds while the app is open.
 
 **Open:**
-- Message opens Chats, not a conversation, until Phase 9.
+- ~~Message opens Chats until Phase 9~~ done in Phase 9.
 - No haptic on the reveal yet (needs a native rebuild; Phase 17).
-- Realtime replaces the 60-second refresh in Phase 9.
+- ~~Realtime replaces the 60-second refresh~~ done in Phase 9.
 
 ---
 
@@ -496,3 +537,4 @@ Release build config, signing workflow (owner keystore, C-20), launcher icon (C-
 - 2026-09-28: Hardening of earlier phases: server-side photo intake (D-043), Edge Function CORS and key handling (D-044), dev status override removed (D-045), verification bypass through password sign-up closed (D-046), two Discover UI bugs fixed.
 - 2026-10-02: Phase 7 done: plan catalog, swipe ledger, metered likes, balance and plans screen; race tests pass over HTTP. Checkout waits for Phase 12.
 - 2026-10-02: Phase 8 done: matches created inside the like transaction under a pair lock, reveal, matches list with unseen count, unmatch, anonymous reveal setting (D-048).
+- 2026-10-02: Phase 9 done: chat with private Realtime topics, read receipts, typing, reply, retry; verified with two live clients (D-049). C: drive filled to 2 GB free because the page file grew to 32 GB under memory pressure; the emulator now runs only during Android checks.
