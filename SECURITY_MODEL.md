@@ -51,7 +51,8 @@ The client can request these; only the server decides them. Each is a SECURITY D
 | Rules/Terms accepted | recorded at sign-up from the ticked version, or `accept_terms()`; the server checks the current version (D-029) |
 | Eligibility for the app | `get_my_status()`: email verified + current terms + 18+ DOB + profile complete + account active. **No location involved (spec v2: no geofence)** |
 | Instant Meet 1 km candidacy | server-side `ST_DWithin` on `geography` (D-031); the only location use |
-| Like, credit consumption, match creation | `swipe_right` transaction under a per-account lock (D-013, D-015, D-047); the balance is computed from an append-only ledger |
+| Like, credit consumption, match creation | `swipe_right` transaction under a per-account lock, then a pair lock (D-013, D-015, D-047, D-048); the balance is computed from an append-only ledger; one match row per pair |
+| Unmatch, anonymous reveal to a match | `unmatch()` (participants only; the pair never sees each other again); `reveal_on_match` applied by the card function and by Storage signing |
 | Plan or top-up granted | `activate_plan` (service role only, once per payment key), called by the payment webhook after it verifies the signature and amount |
 | Subscription active, top-up granted, refunds | `payments-webhook` after verifying the provider signature and the amount against the server catalog (D-037); idempotent on the provider payment ID |
 | Instant entitlement, Instant visibility, session start/end | Instant functions |

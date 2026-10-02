@@ -9,6 +9,8 @@ export const sizes = {
   badge: 24,
   /** Portrait photo ratio used for profile photography (width / height). */
   photoAspect: 4 / 5,
+  /** Extra softening on the tiny anonymous-mode copies (they are 24 px wide already). */
+  anonymousBlur: 16,
 } as const;
 
 /** Material Symbols sizes (single icon family, DECISIONS D-005 / Phase 2). */

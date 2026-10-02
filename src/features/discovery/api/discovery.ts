@@ -20,18 +20,26 @@ export async function fetchFeed(exclude: string[]): Promise<FeedResult> {
   return { ok: false, reason: parsed.reason === 'not_eligible' ? 'not_eligible' : 'unknown' };
 }
 
-export async function fetchProfileCard(target: string): Promise<DiscoveryCard | null> {
+/** A profile opened directly. `matchId` is set when the person is one of the caller's matches. */
+export async function fetchProfileCard(
+  target: string,
+): Promise<{ card: DiscoveryCard; matchId: string | null } | null> {
   const { data, error } = await supabase.rpc('get_profile_card', { p_target: target });
   if (error) throw error;
-  const result = data as { ok: boolean; card?: unknown };
-  return result.ok ? cardSchema.parse(result.card) : null;
+  const result = data as { ok: boolean; card?: unknown; match_id?: string | null };
+  return result.ok
+    ? { card: cardSchema.parse(result.card), matchId: result.match_id ?? null }
+    : null;
 }
 
 export type SwipeResult = { ok: true } | { ok: false; reason: 'not_available' | 'invalid' };
 
-/** `balance` is the like balance after this request, when the server reports one. */
+/**
+ * `balance` is the like balance after this request, when the server reports one. `match` is set
+ * when this like made a match (or one exists that the caller has not seen yet).
+ */
 export type LikeResult =
-  | { ok: true; liked: true; replayed: boolean; balance: number }
+  | { ok: true; liked: true; replayed: boolean; balance: number; match: { id: string } | null }
   | { ok: false; reason: 'no_swipes'; balance: number }
   | { ok: false; reason: 'not_available' | 'invalid' };
 

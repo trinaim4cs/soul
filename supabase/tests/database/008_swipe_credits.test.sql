@@ -68,9 +68,9 @@ select is(public.get_my_swipes() -> 'buckets', '{"free": 4, "plan": 0, "topup": 
 select is(public.get_my_swipes() -> 'instant', 'false'::jsonb, 'no plan means no Instant Meet');
 
 select is(public.swipe_right('00000070-0000-4000-8000-0000000000a1', '10000070-0000-4000-8000-000000000001')
-          - 'replayed', '{"ok": true, "liked": true, "balance": 3}'::jsonb, 'a new like costs one swipe');
+          - 'replayed' - 'match', '{"ok": true, "liked": true, "balance": 3}'::jsonb, 'a new like costs one swipe');
 select is(public.swipe_right('00000070-0000-4000-8000-0000000000a1', '10000070-0000-4000-8000-000000000001'),
-  '{"ok": true, "liked": true, "replayed": true, "balance": 3}'::jsonb,
+  '{"ok": true, "liked": true, "replayed": true, "balance": 3, "match": null}'::jsonb,
   'replaying the same request charges nothing');
 select is(public.swipe_right('00000070-0000-4000-8000-0000000000a1', '10000070-0000-4000-8000-000000000099')
           -> 'balance', '3'::jsonb, 'liking someone already liked charges nothing');

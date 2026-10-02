@@ -4,7 +4,8 @@ import { fontFamily, radii, useTheme } from '@/theme';
 
 /**
  * Tabs at the root; profile and settings screens push over them with a plain back header.
- * Filters is a sheet and the paywall a modal with its own close button.
+ * Filters is a sheet, the paywall a modal with its own close button, and the match reveal a
+ * full-screen fade onto the black brand surface.
  */
 export default function AppLayout() {
   const { colors } = useTheme();
@@ -33,6 +34,15 @@ export default function AppLayout() {
         }}
       />
       <Stack.Screen name="paywall" options={{ presentation: 'modal', headerShown: false }} />
+      <Stack.Screen
+        name="match/[id]"
+        options={{
+          presentation: 'fullScreenModal',
+          animation: 'fade',
+          headerShown: false,
+          contentStyle: { backgroundColor: colors.moment },
+        }}
+      />
       <Stack.Screen name="settings/index" options={pageHeader} />
       <Stack.Screen name="settings/privacy" options={pageHeader} />
     </Stack>

@@ -7,7 +7,7 @@ import { SoulPhoto } from '@/components/soul-photo';
 import { SoulText } from '@/components/soul-text';
 import { usePhotoUrls } from '@/features/profile/api/profile';
 import { cardBucket, type DiscoveryCard } from '@/features/discovery/model/card';
-import { borders, createThemedStyles, layout, radii, spacing } from '@/theme';
+import { borders, createThemedStyles, layout, radii, sizes, spacing } from '@/theme';
 
 type Props = {
   card: DiscoveryCard;
@@ -31,7 +31,7 @@ export function CardFace({ card, likeStampStyle, passStampStyle }: Props) {
         source={uri ? { uri } : null}
         rounded={false}
         aspectRatio={null}
-        blurRadius={card.anonymous ? 16 : undefined}
+        blurRadius={card.anonymous ? sizes.anonymousBlur : undefined}
         recyclingKey={card.id}
         style={StyleSheet.absoluteFill}
         accessibilityLabel={card.anonymous ? 'Blurred photo' : 'Main photo'}

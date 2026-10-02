@@ -6,6 +6,24 @@ Status values: `accepted` · `default, confirm` · `open`.
 
 ---
 
+## Phase 8 matching (2026-10-02)
+
+### D-048 Matching
+- **Creation:** a match is created only inside `swipe_right`, when the other person's like already exists. The transaction holds the caller's credit lock and then a lock on the pair, so two people liking each other at the same moment still produce exactly one match, and each like is charged once (D-015).
+- **One row per pair, ever:** `matches` stores the pair in order with a unique constraint. Unmatching sets the row inactive and records who ended it; the row stays as moderation evidence.
+- **After an unmatch:** the two never see each other again. Their likes keep them out of each other's Discover, the profile can no longer be opened, photos can no longer be signed, and they cannot like each other again.
+- **Who sees a match:** both accounts must still be eligible and neither may have blocked the other. Discovery preferences stop mattering once two people have matched, so a match stays visible if either changes their filters.
+- **Seen state:** each person has their own "seen" time.
+  - The person whose like completes the match gets the reveal at once.
+  - The other person gets a count on the Chats tab and a "NEW" row, and the reveal plays when they open it.
+- **Anonymous mode after a match (settles D-016):** `profiles.reveal_on_match`, on by default, and shown in Privacy only when Anonymous is selected. When on, matches see the person's name and original photos. When off, matches still see the blurred copies and no name. Discover is always blurred. Storage applies the same rule when signing photos.
+- **Reveal screen:** the black brand surface, both main photos, "It's a match", then **Message** and **Continue** (spec 24). A 360 ms settle and staggered text; no confetti, nothing loops; reduced motion fades only. No haptic yet: `expo-haptics` is a native module and needs a rebuild, so it is left for the Phase 17 polish pass.
+- **Message, until Phase 9:** the button closes the reveal and opens Chats, where the match is listed. Phase 9 points it at the conversation.
+- **Unmatch:** from the match's profile, with an in-place second step in the pinned footer (no system dialog, so Android and the browser behave the same).
+- **Freshness, until realtime (Phase 9):** the app re-reads matches every 60 seconds while open, on returning to the foreground, and whenever Chats is opened.
+
+---
+
 ## Phase 7 swipes and plans (2026-10-02)
 
 ### D-047 Swipe ledger, plans and the plans screen

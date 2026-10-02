@@ -177,6 +177,42 @@ export type Database = {
         };
         Relationships: [];
       };
+      matches: {
+        Row: {
+          a_seen_at: string | null;
+          active: boolean;
+          b_seen_at: string | null;
+          created_at: string;
+          ended_at: string | null;
+          ended_by: string | null;
+          id: string;
+          user_a: string;
+          user_b: string;
+        };
+        Insert: {
+          a_seen_at?: string | null;
+          active?: boolean;
+          b_seen_at?: string | null;
+          created_at?: string;
+          ended_at?: string | null;
+          ended_by?: string | null;
+          id?: string;
+          user_a: string;
+          user_b: string;
+        };
+        Update: {
+          a_seen_at?: string | null;
+          active?: boolean;
+          b_seen_at?: string | null;
+          created_at?: string;
+          ended_at?: string | null;
+          ended_by?: string | null;
+          id?: string;
+          user_a?: string;
+          user_b?: string;
+        };
+        Relationships: [];
+      };
       passes: {
         Row: {
           passed_at: string;
@@ -315,6 +351,7 @@ export type Database = {
           hook: string | null;
           id: string;
           privacy_mode: Database['public']['Enums']['privacy_mode'];
+          reveal_on_match: boolean;
           updated_at: string;
           zodiac_visible: boolean;
         };
@@ -326,6 +363,7 @@ export type Database = {
           hook?: string | null;
           id: string;
           privacy_mode?: Database['public']['Enums']['privacy_mode'];
+          reveal_on_match?: boolean;
           updated_at?: string;
           zodiac_visible?: boolean;
         };
@@ -337,6 +375,7 @@ export type Database = {
           hook?: string | null;
           id?: string;
           privacy_mode?: Database['public']['Enums']['privacy_mode'];
+          reveal_on_match?: boolean;
           updated_at?: string;
           zodiac_visible?: boolean;
         };
@@ -455,18 +494,22 @@ export type Database = {
         Returns: Json;
       };
       discovery_feed: { Args: { p_exclude?: string[]; p_limit?: number }; Returns: Json };
+      get_match: { Args: { p_match: string }; Returns: Json };
+      get_my_matches: { Args: Record<PropertyKey, never>; Returns: Json };
       get_my_profile: { Args: Record<PropertyKey, never>; Returns: Json };
       get_my_status: { Args: Record<PropertyKey, never>; Returns: Json };
       get_my_swipes: { Args: Record<PropertyKey, never>; Returns: Json };
       get_profile_card: { Args: { p_target: string }; Returns: Json };
       hook_before_user_created: { Args: { event: Json }; Returns: Json };
       hook_custom_access_token: { Args: { event: Json }; Returns: Json };
+      mark_match_seen: { Args: { p_match: string }; Returns: Json };
       remove_profile_photo: { Args: { p_id: string; p_user: string }; Returns: Json };
       reorder_profile_photos: { Args: { p_ids: string[] }; Returns: Json };
       set_date_of_birth: { Args: { p_dob: string }; Returns: Json };
       submit_profile: { Args: Record<PropertyKey, never>; Returns: Json };
       swipe_left: { Args: { p_target: string }; Returns: Json };
       swipe_right: { Args: { p_idempotency_key: string; p_target: string }; Returns: Json };
+      unmatch: { Args: { p_match: string }; Returns: Json };
     };
     Enums: {
       account_state: 'active' | 'suspended' | 'banned' | 'deletion_pending';

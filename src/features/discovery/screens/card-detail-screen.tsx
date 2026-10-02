@@ -16,15 +16,20 @@ import {
 } from '@/features/discovery/model/card';
 import { useCurrentUserId } from '@/features/auth/account-status-provider';
 import { useDeckStore } from '@/features/discovery/store/deck-store';
+import { unmatch } from '@/features/matching/api/matches';
+import { UnmatchButton, UnmatchConfirm } from '@/features/matching/components/unmatch-control';
+import { personName } from '@/features/matching/model/match';
 import { useSwipeBalance } from '@/features/swipes/api/swipes';
 import { usePhotoUrls } from '@/features/profile/api/profile';
 import { ProfileView } from '@/features/profile/components/profile-view';
+import { queryClient } from '@/lib/query-client';
 import { spacing } from '@/theme';
 
 /**
  * A candidate's full profile, opened from the card (spec 16: vertical, photography first).
  * Uses the card already in the deck; if the app was reopened on this page, the server
- * checks visibility again (`get_profile_card`).
+ * checks visibility again (`get_profile_card`). A match's profile opens the same way and
+ * offers Unmatch instead of Pass and Like.
  */
 export function CardDetailScreen({ id }: { id: string }) {
   // The card as it was when the page opened. Liking or passing removes it from the deck,
@@ -35,7 +40,8 @@ export function CardDetailScreen({ id }: { id: string }) {
     queryFn: () => fetchProfileCard(id),
     enabled: !cached,
   });
-  const card = cached ?? remote.data ?? null;
+  const card = cached ?? remote.data?.card ?? null;
+  const matchId = remote.data?.matchId ?? null;
 
   if (!cached && remote.isPending) return <LoadingState />;
   if (!cached && remote.isError) {
@@ -57,14 +63,27 @@ export function CardDetailScreen({ id }: { id: string }) {
       />
     );
   }
-  return <CardDetail card={card} fromDeck={Boolean(cached)} />;
+  return <CardDetail card={card} fromDeck={Boolean(cached)} matchId={matchId} />;
 }
 
-function CardDetail({ card, fromDeck }: { card: DiscoveryCard; fromDeck: boolean }) {
+type DetailProps = { card: DiscoveryCard; fromDeck: boolean; matchId: string | null };
+
+function CardDetail({ card, fromDeck, matchId }: DetailProps) {
+  const userId = useCurrentUserId();
   const decide = useDeckStore((state) => state.decide);
   const urls = usePhotoUrls(cardBucket(card), cardPhotoPaths(card));
   const chosen = useRef(false);
-  const swipes = useSwipeBalance(useCurrentUserId());
+  const swipes = useSwipeBalance(userId);
+  const [confirmingUnmatch, setConfirmingUnmatch] = useState(false);
+
+  async function endMatch() {
+    if (!userId || !matchId) return;
+    await unmatch(userId, matchId);
+    // The server no longer shows this person to the caller.
+    queryClient.removeQueries({ queryKey: ['profile-card', card.id] });
+    if (router.canGoBack()) router.back();
+    else router.replace('/chats');
+  }
 
   function choose(direction: SwipeDirection) {
     // Out of likes: offer plans and keep the profile open (passing still works).
@@ -104,9 +123,18 @@ function CardDetail({ card, fromDeck }: { card: DiscoveryCard; fromDeck: boolean
               onPress={() => choose('like')}
             />
           </View>
+        ) : matchId && confirmingUnmatch ? (
+          <UnmatchConfirm
+            name={personName(card)}
+            onCancel={() => setConfirmingUnmatch(false)}
+            onUnmatch={endMatch}
+          />
         ) : null
       }>
       <ProfileView profile={toProfileView(card, urls.data)} />
+      {matchId && !confirmingUnmatch ? (
+        <UnmatchButton onPress={() => setConfirmingUnmatch(true)} />
+      ) : null}
     </SoulScreen>
   );
 }

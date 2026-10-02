@@ -30,6 +30,8 @@ export function DiscoverScreen() {
   const decide = useDeckStore((state) => state.decide);
   const outOfLikes = useDeckStore((state) => state.outOfLikes);
   const acknowledgeOutOfLikes = useDeckStore((state) => state.acknowledgeOutOfLikes);
+  const newMatch = useDeckStore((state) => state.newMatch);
+  const acknowledgeMatch = useDeckStore((state) => state.acknowledgeMatch);
   const swipes = useSwipeBalance(userId);
   // Until the balance is known, likes go through; the server refuses them if there are none.
   const canLike = swipes.data ? swipes.data.balance > 0 : true;
@@ -58,6 +60,13 @@ export function DiscoverScreen() {
     acknowledgeOutOfLikes();
     openPlans();
   }, [outOfLikes, acknowledgeOutOfLikes, openPlans]);
+
+  // A like just made a match: show the reveal over Discover.
+  useEffect(() => {
+    if (!newMatch) return;
+    acknowledgeMatch();
+    router.push({ pathname: '/match/[id]', params: { id: newMatch } });
+  }, [newMatch, acknowledgeMatch]);
 
   const [top, next] = cards;
 

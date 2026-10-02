@@ -17,6 +17,11 @@ jest.mock('@/features/swipes/api/swipes', () => ({
   spendOneLocally: jest.fn(),
 }));
 
+jest.mock('@/features/matching/api/matches', () => ({ refreshMatches: jest.fn() }));
+
+const matching = jest.requireMock('@/features/matching/api/matches') as {
+  refreshMatches: jest.Mock;
+};
 const swipes = jest.requireMock('@/features/swipes/api/swipes') as {
   refreshSwipes: jest.Mock;
   setServerBalance: jest.Mock;
@@ -185,6 +190,30 @@ describe('discovery deck', () => {
     await useDeckStore.getState().decide(card(1), 'like');
     await useDeckStore.getState().decide(card(2), 'like');
     expect(swipes.refreshSwipes).toHaveBeenCalledTimes(2);
+  });
+
+  it('announces a match the like just made, once', async () => {
+    api.fetchFeed.mockResolvedValue({ ok: true, cards: [card(1), card(2)] });
+    api.swipeRight
+      .mockResolvedValueOnce({
+        ok: true,
+        liked: true,
+        replayed: false,
+        balance: 2,
+        match: { id: 'match-1' },
+      })
+      .mockResolvedValueOnce({ ok: true, liked: true, replayed: false, balance: 1, match: null });
+    useDeckStore.getState().start('viewer');
+    await flush();
+
+    await useDeckStore.getState().decide(card(1), 'like');
+    expect(useDeckStore.getState().newMatch).toBe('match-1');
+    expect(matching.refreshMatches).toHaveBeenCalledWith('viewer');
+
+    useDeckStore.getState().acknowledgeMatch();
+    await useDeckStore.getState().decide(card(2), 'like');
+    expect(useDeckStore.getState().newMatch).toBeNull();
+    expect(matching.refreshMatches).toHaveBeenCalledTimes(1);
   });
 
   it('ignores a page that arrives after the deck was refreshed', async () => {

@@ -25,7 +25,7 @@ const MODES: { mode: PrivacyMode; title: string; body: string }[] = [
   {
     mode: 'anonymous',
     title: 'Anonymous',
-    body: 'Shown in Discover with blurred photos and no name. Your age, verified badge, hook, About Me and zodiac (if on) still show.',
+    body: 'Shown with blurred photos and no name. Your age, verified badge, hook, About Me and zodiac (if on) still show.',
   },
 ];
 
@@ -103,6 +103,30 @@ function PrivacyForm({ profile, userId }: { profile: MyProfile; userId: string }
           );
         })}
       </View>
+
+      {profile.privacy_mode === 'anonymous' ? (
+        <View style={styles.section}>
+          <SoulText variant="label" tone="secondary">
+            After a match
+          </SoulText>
+          <View style={styles.switchRow}>
+            <View style={styles.optionText}>
+              <SoulText variant="bodyStrong">Show my name and photos to matches</SoulText>
+              <SoulText variant="supporting" tone="secondary">
+                Only people you match with see them. Everyone else still sees you blurred.
+              </SoulText>
+            </View>
+            <Switch
+              value={profile.reveal_on_match}
+              disabled={saving}
+              onValueChange={(value) => void save({ reveal_on_match: value })}
+              trackColor={{ false: colors.border, true: colors.inverseSurface }}
+              thumbColor={colors.background}
+              accessibilityLabel="Show my name and photos to matches"
+            />
+          </View>
+        </View>
+      ) : null}
 
       <View style={styles.section}>
         <SoulText variant="label" tone="secondary">

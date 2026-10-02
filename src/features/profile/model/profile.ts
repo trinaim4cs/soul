@@ -63,6 +63,7 @@ export const myProfileSchema = z.object({
   about: z.string().nullable(),
   gender: z.enum(GENDERS).nullable(),
   privacy_mode: z.enum(PRIVACY_MODES),
+  reveal_on_match: z.boolean(),
   zodiac_visible: z.boolean(),
   zodiac: z.enum(ZODIAC_SIGNS).nullable(),
   age: z.number().int().nullable(),

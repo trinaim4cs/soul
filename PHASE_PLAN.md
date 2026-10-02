@@ -15,7 +15,7 @@ Skills per phase come from `skills/SOUL_SKILL_MAP.md`. `soul-audit` is enabled o
 | 5 | Profile | done (Android emulator + iPhone-size web) |
 | 6 | Discovery (location-independent) | done (web + Android verified; icon font rebuilt 2026-09-28) |
 | 7 | Swipes + plans | done (Android + web verified; checkout itself is Phase 12) |
-| 8 | Matching | todo |
+| 8 | Matching | done (Android + web verified; Message opens the chat in Phase 9) |
 | 9 | Chat | todo |
 | 10 | Instant Meet (the only location feature, 1 km) | todo |
 | 11 | Date confirmation + Hot Person | todo |
@@ -263,6 +263,45 @@ Skills per phase come from `skills/SOUL_SKILL_MAP.md`. `soul-audit` is enabled o
 
 **Closed 2026-09-28:** the Android rebuild embeds the new `remove` icon (verified in Filters).
 
+## Phase 8: Matching (2026-10-02)
+
+**Server:** migration `…1002000200_matching.sql` (D-048):
+- `matches`: one row per ordered pair, created only inside `swipe_right` under a pair lock.
+- `get_my_matches`, `get_match`, `mark_match_seen`, `unmatch`.
+- A match stays visible when filters change; an unmatched pair never sees each other again.
+- `profiles.reveal_on_match` decides whether an anonymous person's name and photos show to matches; Storage signing follows the same rule.
+
+**App:**
+- Match reveal (`/match/[id]`) on the black brand surface: both photos, "It's a match", Message and Continue.
+- Chats tab lists matches, newest first, with a "NEW" pill and a count on the tab for unseen ones. Opening an unseen match plays its reveal.
+- A match's profile offers Unmatch, confirmed in the pinned footer.
+- Privacy → Anonymous shows the "Show my name and photos to matches" switch.
+
+**Verified:**
+- pgTAP 239/239 (46 new), `db:verify` 56/56, 106 unit tests, typecheck, lint and format clean.
+- Concurrency over real HTTP: two people liking each other at the same moment made exactly one match per pair, announced to one of the two requests, and each like was charged once.
+- Android emulator:
+  - Liking someone who had already liked the account opened the reveal and marked it seen.
+  - Message opened Chats with the match listed.
+  - A like-back from the other side showed "1" on the Chats tab and a "NEW" row; opening it played the reveal.
+  - The `com.soul.srm://match/<id>` deep link opened the reveal.
+  - Unmatch confirmed in the footer, removed the row from the list, and left the match inactive on the server with who ended it.
+  - The anonymous reveal switch saved both ways.
+- Web (phone size): the list, the "NEW" pill, the tab count and the reveal.
+
+**Fixed during testing:**
+- The tab badge drew "0" on Android (`hidden` is not honoured); it now renders only when there is something to count.
+- The reveal title could lose its last word ("It's a") when the centred italic serif was shrink-wrapped; it now spans the full width.
+- The unmatch confirmation opened below the fold; it moved to the pinned footer.
+- The badge did not update while staying on Discover; matches are now re-read every 60 seconds while the app is open.
+
+**Open:**
+- Message opens Chats, not a conversation, until Phase 9.
+- No haptic on the reveal yet (needs a native rebuild; Phase 17).
+- Realtime replaces the 60-second refresh in Phase 9.
+
+---
+
 ## Phase 7: Swipes and plans (2026-10-02)
 
 **Server:** migration `…1002000100_swipe_credits.sql` (D-047):
@@ -456,3 +495,4 @@ Release build config, signing workflow (owner keystore, C-20), launcher icon (C-
 - 2026-09-27: Phase 6 built and verified on web (pane and real mobile Chrome in the emulator) and on Android; web footers now stay above the on-screen keyboard.
 - 2026-09-28: Hardening of earlier phases: server-side photo intake (D-043), Edge Function CORS and key handling (D-044), dev status override removed (D-045), verification bypass through password sign-up closed (D-046), two Discover UI bugs fixed.
 - 2026-10-02: Phase 7 done: plan catalog, swipe ledger, metered likes, balance and plans screen; race tests pass over HTTP. Checkout waits for Phase 12.
+- 2026-10-02: Phase 8 done: matches created inside the like transaction under a pair lock, reveal, matches list with unseen count, unmatch, anonymous reveal setting (D-048).

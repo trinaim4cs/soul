@@ -7,6 +7,7 @@ import {
   swipeRight,
 } from '@/features/discovery/api/discovery';
 import type { DiscoveryCard, SwipeDirection } from '@/features/discovery/model/card';
+import { refreshMatches } from '@/features/matching/api/matches';
 import { refreshSwipes, setServerBalance, spendOneLocally } from '@/features/swipes/api/swipes';
 
 export type DeckStatus = 'idle' | 'loading' | 'ready' | 'empty' | 'error' | 'not_eligible';
@@ -25,6 +26,8 @@ type DeckState = {
   message: string | null;
   /** The server refused a like for lack of credits; the screen opens the plans page. */
   outOfLikes: boolean;
+  /** A like just made a match: the screen opens its reveal. */
+  newMatch: string | null;
   /** Bumped on every reset so late responses from an older deck are ignored. */
   generation: number;
   start: (userId: string) => void;
@@ -34,6 +37,7 @@ type DeckState = {
   cardById: (id: string) => DiscoveryCard | undefined;
   clearMessage: () => void;
   acknowledgeOutOfLikes: () => void;
+  acknowledgeMatch: () => void;
   reset: () => void;
 };
 
@@ -46,6 +50,7 @@ const EMPTY = {
   decided: {},
   message: null,
   outOfLikes: false,
+  newMatch: null,
 };
 
 export const useDeckStore = create<DeckState>((set, get) => ({
@@ -133,6 +138,11 @@ export const useDeckStore = create<DeckState>((set, get) => ({
         const result = await swipeRight(card.id);
         if (liking && 'balance' in result) setServerBalance(userId, result.balance);
         else if (liking) void refreshSwipes(userId);
+        if (result.ok && result.match) {
+          // Announced even if the deck was refreshed meanwhile: the match is real.
+          set({ newMatch: result.match.id });
+          if (userId) void refreshMatches(userId);
+        }
         if (!result.ok && result.reason === 'no_swipes') {
           if (get().generation !== generation) return;
           // Nothing was saved or charged: the card returns and the plans page opens.
@@ -171,5 +181,6 @@ export const useDeckStore = create<DeckState>((set, get) => ({
   cardById: (id) => get().cards.find((card) => card.id === id),
   clearMessage: () => set({ message: null }),
   acknowledgeOutOfLikes: () => set({ outOfLikes: false }),
+  acknowledgeMatch: () => set({ newMatch: null }),
   reset: () => set({ ...EMPTY, generation: get().generation + 1 }),
 }));

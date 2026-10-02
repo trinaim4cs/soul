@@ -1,5 +1,8 @@
 import { NativeTabs } from 'expo-router/unstable-native-tabs';
 
+import { useCurrentUserId } from '@/features/auth/account-status-provider';
+import { useMatches } from '@/features/matching/api/matches';
+import { unseenCount } from '@/features/matching/model/match';
 import { TAB_ITEMS } from '@/features/shell/tab-items';
 import { fontFamily, typeScale, useTheme } from '@/theme';
 
@@ -9,9 +12,13 @@ import { fontFamily, typeScale, useTheme } from '@/theme';
 export default function TabsLayout() {
   const { colors } = useTheme();
   const label = { fontFamily: fontFamily.body, fontSize: typeScale.caption.fontSize };
+  // New matches show as a count on Chats (monochrome, like the rest of the chrome).
+  const newMatches = unseenCount(useMatches(useCurrentUserId()).data);
   return (
     <NativeTabs
       backgroundColor={colors.background}
+      badgeBackgroundColor={colors.inverseSurface}
+      badgeTextColor={colors.inverseText}
       indicatorColor={colors.surfaceSubtle}
       rippleColor={colors.surfaceSubtle}
       labelVisibilityMode="labeled"
@@ -24,6 +31,10 @@ export default function TabsLayout() {
         <NativeTabs.Trigger key={tab.name} name={tab.name}>
           <NativeTabs.Trigger.Label>{tab.label}</NativeTabs.Trigger.Label>
           <NativeTabs.Trigger.Icon md={tab.icon} />
+          {/* Rendered only when there is something to count: `hidden` still draws "0" on Android. */}
+          {tab.name === 'chats' && newMatches > 0 ? (
+            <NativeTabs.Trigger.Badge>{String(newMatches)}</NativeTabs.Trigger.Badge>
+          ) : null}
         </NativeTabs.Trigger>
       ))}
     </NativeTabs>

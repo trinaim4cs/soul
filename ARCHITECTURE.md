@@ -87,7 +87,7 @@ Location never gates the app (spec v2: no geofence). Only the Instant tab asks f
 | Location (Instant Meet only) | `instant_presence`, `instant_location_private` (no client policies) | 1 km `ST_DWithin` candidacy, proximity buckets (D-030, D-031) |
 | Discovery | `preferences`, `passes`, `likes` | `discovery_feed()` (filters, privacy, blocks, ranking) |
 | Economy | `plans`, `subscriptions`, `swipe_credit_ledger` (Phase 7, D-047); `purchase_records` (Phase 12) | `swipe_right()` transaction, `get_my_swipes()`, `activate_plan()`; app code in `src/features/swipes` |
-| Matching | `matches` | inside `swipe_right()`; `unmatch()` |
+| Matching | `matches` (Phase 8, D-048) | inside `swipe_right()`; `get_my_matches()`, `get_match()`, `mark_match_seen()`, `unmatch()`; app code in `src/features/matching` |
 | Chat | `conversations`, `conversation_members`, `messages`, `message_receipts` | `send_message()` + broadcast trigger, typing via Presence |
 | Instant | `instant_presence`, `instant_sessions`, `instant_participants`, `meeting_points`, `meeting_point_votes` | `instant-*` functions, `instant_proximity()` |
 | Dates and badges | `date_rounds`, `date_confirmations`, `date_events`, `badges` | confirmation function, `recompute_hot_person()` + pg_cron |

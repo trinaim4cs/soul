@@ -25,19 +25,23 @@ const anonClient = () => createClient(url, status.ANON_KEY, { auth: { persistSes
 
 // Sessions come only from emailed codes (D-046), so test users sign in with a one-time
 // token from a generated sign-in link instead of a password.
+async function signIn(email) {
+  const link = await admin.auth.admin.generateLink({ type: 'magiclink', email });
+  if (link.error) throw link.error;
+  const client = anonClient();
+  const session = await client.auth.verifyOtp({
+    token_hash: link.data.properties.hashed_token,
+    type: 'email',
+  });
+  if (session.error) throw session.error;
+  return { client, token: session.data.session.access_token };
+}
+
 async function makeUser(label) {
   const email = `${label}.${randomBytes(4).toString('hex')}@srmist.edu.in`;
   const { data, error } = await admin.auth.admin.createUser({ email, email_confirm: true });
   if (error) throw error;
-  const link = await admin.auth.admin.generateLink({ type: 'magiclink', email });
-  if (link.error) throw link.error;
-  const client = anonClient();
-  const signIn = await client.auth.verifyOtp({
-    token_hash: link.data.properties.hashed_token,
-    type: 'email',
-  });
-  if (signIn.error) throw signIn.error;
-  return { id: data.user.id, client, token: signIn.data.session.access_token };
+  return { id: data.user.id, ...(await signIn(email)) };
 }
 
 // Real Auth service: SRMIST-only sign-up (before-user-created hook) and email OTP.
@@ -406,14 +410,14 @@ try {
 
   // Seven more profiles User A may like, written the way the server would publish them.
   const targets = [];
+  const targetEmail = new Map();
   for (let n = 0; n < 7; n += 1) {
-    const created = await admin.auth.admin.createUser({
-      email: `test.user.t${n}.${hex()}@srmist.edu.in`,
-      email_confirm: true,
-    });
+    const email = `test.user.t${n}.${hex()}@srmist.edu.in`;
+    const created = await admin.auth.admin.createUser({ email, email_confirm: true });
     const id = created.data.user.id;
     extraUsers.push(id);
     targets.push(id);
+    targetEmail.set(id, email);
     await admin
       .from('account_private')
       .update({
@@ -494,6 +498,67 @@ try {
     afterReplays.data?.balance === 3 &&
       [...replays, ...differentKeys].every((r) => r.data?.ok === true),
     `balance ${afterReplays.data?.balance}`,
+  );
+
+  // Phase 8: two people liking each other at the same moment make exactly one match.
+  const matchRows = async (one, other) =>
+    (
+      await admin
+        .from('matches')
+        .select('id, active')
+        .or(`and(user_a.eq.${one},user_b.eq.${other}),and(user_a.eq.${other},user_b.eq.${one})`)
+    ).data ?? [];
+  const mutual = [];
+  for (const target of [unliked[2], unliked[3]]) {
+    const other = await signIn(targetEmail.get(target));
+    const [mine, theirs] = await Promise.all([
+      userA.client.rpc('swipe_right', { p_target: target, p_idempotency_key: randomUUID() }),
+      other.client.rpc('swipe_right', { p_target: userA.id, p_idempotency_key: randomUUID() }),
+    ]);
+    const rows = await matchRows(userA.id, target);
+    mutual.push({
+      target,
+      other,
+      rows: rows.length,
+      announced: [mine, theirs].filter((r) => r.data?.match).length,
+      bothLiked: mine.data?.ok === true && theirs.data?.ok === true,
+      id: rows[0]?.id,
+    });
+  }
+  check(
+    'simultaneous mutual likes create exactly one match per pair',
+    mutual.every((m) => m.rows === 1 && m.bothLiked),
+    mutual.map((m) => `${m.rows} row(s)`).join(', '),
+  );
+  check(
+    'the match is announced to exactly one of the two requests (the later one)',
+    mutual.every((m) => m.announced === 1),
+    mutual.map((m) => `${m.announced} announced`).join(', '),
+  );
+  const afterMatches = await userA.client.rpc('get_my_swipes');
+  check(
+    'each matching like cost one swipe, once',
+    afterMatches.data?.balance === 1,
+    `balance ${afterMatches.data?.balance}`,
+  );
+  const myMatches = await userA.client.rpc('get_my_matches');
+  check(
+    'both matches are in the match list, unseen',
+    myMatches.data?.matches?.length === 2 && myMatches.data.matches.every((m) => m.seen === false),
+    JSON.stringify(myMatches.data?.matches?.map((m) => m.seen)),
+  );
+  const directRead = await userA.client.from('matches').select('id');
+  check('the app cannot read the matches table directly', Boolean(directRead.error));
+
+  const ended = await mutual[0].other.client.rpc('unmatch', { p_match: mutual[0].id });
+  const listAfter = await userA.client.rpc('get_my_matches');
+  const cardAfter = await userA.client.rpc('get_profile_card', { p_target: mutual[0].target });
+  check(
+    'either person can unmatch; the other no longer sees them',
+    ended.data?.ok === true &&
+      listAfter.data?.matches?.length === 1 &&
+      cardAfter.data?.reason === 'not_available',
+    `list ${listAfter.data?.matches?.length}, card ${JSON.stringify(cardAfter.data)}`,
   );
 } finally {
   for (const id of [userA.id, userB.id, ...extraUsers]) {

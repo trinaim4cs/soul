@@ -1,5 +1,5 @@
-import { ShellPlaceholder } from '@/components/shell-placeholder';
+import { MatchesScreen } from '@/features/matching/screens/matches-screen';
 
 export default function ChatsRoute() {
-  return <ShellPlaceholder title="Chats" phase={9} />;
+  return <MatchesScreen />;
 }

@@ -42,7 +42,7 @@ Tokens are in `src/theme/motion.ts`. The values follow the `expo-animation` skil
 |---|---|---|
 | Swipe card | 7 | `Gesture.Pan` → shared translate/rotate. Release: distance **or** velocity decides; `springs.release` with velocity; rubber-band at the edges; one light haptic when the decision threshold is crossed |
 | Filter and safety sheets | 7, 14 | `@expo/ui` BottomSheet or Router `formSheet` (native), else `springs.sheet` |
-| Match reveal | 9 | a 360 ms fade and 0.96→1 scale of the black moment, then staggered text; no confetti |
+| Match reveal | 8 (built) | a 360 ms fade and 0.96→1 scale of the black moment, then staggered text; no confetti |
 | Floating chat composer | 10 | `react-native-keyboard-controller` keyboard position on the UI thread; composer height changes via layout transition |
 | Typing indicator | 10 | three dots, staggered opacity CSS animation, `durations.base` |
 | New message entry | 10 | the list container animates, never row `entering` inside virtualized cells |
@@ -65,4 +65,14 @@ Feel is judged on a **release build** on the slowest available Android device. D
 - **Buttons** send the card off the same way; screen readers get Like/Pass actions and a tap to open.
 - **Reduced motion:** no tilt; the leaving card disappears instead of flying.
 - **Verified on the Android emulator:** follows, springs back short of the line, left and right commits, fast flicks, mid-drag state, buttons.
+
+## Match reveal (Phase 8)
+
+- **Gate:** rare, purpose **delight**. The one moment that spends the budget.
+- **Tool:** Reanimated CSS animations that play once on mount (no gesture, no state change).
+- **Sequence:** the screen fades in on the black brand surface (native stack `fade`); the two photos settle from 0.96 scale and 0 opacity over `durations.reveal` (360 ms); the title and line rise 12 dp 140 ms later; the actions 260 ms later. All use `cssEasings.out`.
+- **Never:** confetti, loops, bounces, or `scale(0)`.
+- **Reduced motion:** every element only fades.
+- **Haptic:** none yet (`expo-haptics` needs a rebuild); planned as one success notification on the same frame, never the only feedback.
+- **Verified:** Android emulator and web at phone size; the title is full-width so the centred italic serif never loses its last word.
 
