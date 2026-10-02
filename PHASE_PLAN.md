@@ -297,6 +297,7 @@ The owner asked for no compromises left behind in finished phases. Found and fix
   - A camera photo went through the inbox and the function: the server read 1080 × 1350 and emptied the inbox. Removing it deleted the row and both files.
   - A double tap on Like in the full profile saved one like and went back once.
   - Dark mode at 1.3× font scale holds on Discover, Filters, the full profile and You.
+  - With email confirmations on, a returning account signed out and back in through the app with an emailed code (2026-10-02).
   - First gesture after a cold start (launched from the icon), after the fix:
 
     | Gesture | Committed |
