@@ -137,6 +137,8 @@ Logs never contain message bodies, coordinates, ID data, face images, OTPs, toke
 
 ## 11. Verification of this model
 
+`017_structure` (pgTAP) checks the rules of section 5 across the whole schema on every run, so a new table or function that forgets one fails CI (D-056).
+
 - Phase 3: RLS framework + first pgTAP deny tests.
 - Phase 10: location-leak audit done (D-050): `011_instant_meet.test.sql` and `db:verify` prove no client access to positions, acceptances or sessions, no coordinate in any Instant output, nothing before both accept, and End Meet revoking everything; verified on Android and the PWA build in the browser.
 - Phase 16: full RLS, constraint and race test suites.

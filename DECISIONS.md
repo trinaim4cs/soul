@@ -6,6 +6,17 @@ Status values: `accepted` · `default, confirm` · `open`.
 
 ---
 
+## Phase 16 testing (2026-10-03)
+
+### D-056 Testing and continuous checks
+- **One command:** `npm run test:all` runs types, lint, format, unit tests, the Deno check of every Edge Function, pgTAP and the HTTP checks against the local stack. It stops at the first failure.
+- **CI:** GitHub Actions runs the same steps on every push to `main` and on pull requests: an app job, an Edge Functions job and a database job that starts a throwaway local Supabase stack. **No secrets are used**: the mock payment provider and freshly generated Web Push keys.
+- **Structural tests (`017_structure`)** guard the whole schema rather than one feature: forced RLS on every table, no anonymous access to any table or function, no direct table writes by the app (only its own profile and preference columns), pinned search paths on every security-definer function, a closed private schema, service-only payment, push and deletion functions, and no public buckets. A new table or function that forgets a rule fails the build.
+- They found one gap: five private trigger functions were still executable by anyone (PostgreSQL's default). They could not be used (private schema, trigger-only), but PUBLIC now loses execute on the whole private schema, now and for future functions.
+- **Spec 70 map:** TESTING.md lists, for every item, the pgTAP file, the HTTP check and the device run. What is not covered yet, and why, is listed there too.
+
+---
+
 ## Phase 15 admin (2026-10-03)
 
 ### D-055 Admin and operations

@@ -23,7 +23,7 @@ Skills per phase come from `skills/SOUL_SKILL_MAP.md`. `soul-audit` is enabled o
 | 13 | Safety + moderation | done (Android + web verified) |
 | 14 | Push (FCM + Web Push) | done (Web Push verified for real; Android FCM awaits C-16) |
 | 15 | Admin | done (Android + web verified) |
-| 16 | Testing (incl. the cross-platform matrix in `PLATFORM_MATRIX.md`) | todo |
+| 16 | Testing (incl. the cross-platform matrix in `PLATFORM_MATRIX.md`) | done (`npm run test:all`, CI, TESTING.md) |
 | 17 | Visual QA (Android + iPhone-size web) | todo |
 | 18 | Security audit | todo |
 | 19 | Performance | todo |
@@ -262,6 +262,25 @@ Skills per phase come from `skills/SOUL_SKILL_MAP.md`. `soul-audit` is enabled o
   - A `visualViewport` keyboard inset in `SoulScreen` (iPhone Safari keeps the page size). Verified in Chrome; the iPhone path needs a real iPhone.
 
 **Closed 2026-09-28:** the Android rebuild embeds the new `remove` icon (verified in Filters).
+
+## Phase 16: Testing (2026-10-03)
+
+**Added (D-056):**
+- `npm run test:all` and GitHub Actions CI (app, Edge Functions, database with a throwaway local stack; no secrets).
+- `017_structure` pgTAP: schema-wide guarantees (RLS forced everywhere, no anonymous access, no direct writes, pinned search paths, closed private schema, service-only functions, no public buckets).
+- Migration `…1003000700_hardening.sql`: PUBLIC loses execute on the private schema (five trigger functions still had it).
+- TESTING.md: every spec 70 item mapped to its pgTAP file, HTTP check and device run; the cross-platform matrix in PLATFORM_MATRIX.md now records evidence instead of phase numbers.
+
+**Verified:**
+- pgTAP 672/672 across 17 files, `db:verify` 109/109, 185 unit tests, Deno check of 11 functions, types, lint and format: all through `npm run test:all`.
+- **Cross-platform, live (Android emulator as Test User 01, the web as Test User 02):**
+  - a message from Android appeared on the web at once, and the web's reply appeared on Android;
+  - "Read" showed on both sides without a reload;
+  - a block from the web account turned the open Android chat into "This conversation isn't available" (the block itself stays invisible).
+
+**Not covered yet (TESTING.md):** Android FCM delivery (C-16), live Razorpay (C-25), a real iPhone, one Android and one PWA in the same Instant Meet, socket recovery after real network loss (Phase 19).
+
+---
 
 ## Phase 15: Admin (2026-10-03)
 
@@ -741,3 +760,4 @@ Release build config, signing workflow (owner keystore, C-20), launcher icon (C-
 - 2026-10-03: Phase 13 done: block (invisible to the blocked person), report with message evidence, moderator functions with an action log, bans that stop re-sign-up, immediate account deletion that keeps purchase and safety records, hourly retention (D-053).
 - 2026-10-03: Phase 14 done: push for matches, messages (never the text), Instant Meet and payments; per-person choices; an outbox drained by `push-send` (FCM HTTP v1 and Web Push with RFC 8291 and VAPID); real Web Push verified on the emulator; Android FCM waits for the owner's Firebase project (D-054, C-16).
 - 2026-10-03: Phase 15 done: a role-gated Admin section (reports with evidence, photos, appeals, flagged dates, exact account lookup, suspend, ban, restore; admins also plans, support grants and feature flags including an Instant Meet pause), every action checked by the server and logged (D-055).
+- 2026-10-03: Phase 16 done: `npm run test:all`, GitHub Actions CI with no secrets, schema-wide structural tests (which closed a PUBLIC execute gap in the private schema), TESTING.md mapping every spec 70 item, live Android ↔ web chat, receipts and block (D-056).

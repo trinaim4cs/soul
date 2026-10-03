@@ -39,15 +39,17 @@ Screens call the service interface. Platform branching lives only inside these a
 
 ## Cross-platform test matrix (spec amendment section 25)
 
+Status after Phase 16 (TESTING.md). "Scripted" means the other person acted through the API with their own session, which is the same server path the app uses.
+
 | Scenario | Status |
 |---|---|
-| Android ↔ Android match | Phase 8 |
-| Android ↔ PWA match (both directions) | Phase 8 |
-| Chat across platforms | Phase 9 |
-| Same account on both platforms | Phase 4: sign-in verified on Android and in the web build separately; one account signed in on both at once is checked in Phase 5 |
-| Same subscription and swipe balance across platforms | Phase 7 / 12 |
-| Block and unmatch across platforms | Phase 8 / 13 |
-| Hot Person consistency | Phase 11 |
-| Instant ≤ 1 km and > 1 km; Android ↔ PWA; PWA without heading; permission denied on each | Phase 10 |
-| Realtime reconnect | Phase 9 |
-| Payment entitlement propagation | Phase 12 |
+| Android ↔ Android match | **Verified with one emulator and a scripted second account** (Phase 8, 16); simultaneous likes from two clients make one match (`db:verify`). Two physical Android phones: not yet |
+| Android ↔ PWA match (both directions) | **Verified:** matches made on Android show on the web account and the other way round; both people then used Android and the web together (Phase 8, 9, 16) |
+| Chat across platforms | **Verified:** Android ↔ browser live both ways, read receipts, typing, retry after a dropped gateway, replies (Phase 9); again in Phase 16 with live "Read" on both sides |
+| Same account on both platforms | **Verified:** the web test account signed in on Android and landed in the tabs (Phase 5) |
+| Same subscription and swipe balance across platforms | **Verified:** one balance on the server; likes granted from the Android admin appeared on the web account's Discover (Phase 15); a plan bought on Android is the account's plan everywhere (Phase 12) |
+| Block and unmatch across platforms | **Verified:** a browser unmatch turned the open Android chat into "This conversation isn't available" (Phase 9); a block from the web account did the same, live (Phase 16) |
+| Hot Person consistency | **Verified:** the fire on cards and profiles on the web and Android (Phase 11) |
+| Instant ≤ 1 km and > 1 km; Android ↔ PWA; PWA without heading; permission denied on each | **Partly:** ≤ 1 km and > 1 km on both platforms, the PWA without a compass ("Direction unavailable on this device"), denied permission on Android (Phase 10). One Android and one PWA in the same meet: not yet |
+| Realtime reconnect | **Partly:** a message sent while the gateway was down was retried and stored once (Phase 9). Socket recovery after real network loss: Phase 19 |
+| Payment entitlement propagation | **Verified on the mock provider:** the signed webhook grants and nudges every device of the account (Phase 12). Live Razorpay: C-25 |

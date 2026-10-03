@@ -11,6 +11,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "jest",
+    "test:all": "bash scripts/test-all.sh",
     "doctor": "expo-doctor",
     "db:start": "supabase start -x studio,logflare,vector,imgproxy",
     "db:stop": "supabase stop",

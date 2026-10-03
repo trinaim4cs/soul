@@ -34,6 +34,7 @@ npx expo install <package>   # always, so versions match SDK 57
 npm run typecheck            # tsc --noEmit
 npm run lint                 # expo lint
 npm test                     # jest (jest-expo)
+npm run test:all             # every check incl. pgTAP and db:verify (TESTING.md); CI runs the same
 npm run format:check
 npx expo prebuild --platform android   # regenerate ./android (git-ignored, never hand-edited)
 npm run android:build        # memory-capped dev build (emulator + Docker stopped), installs if a device is up
