@@ -20,7 +20,7 @@ Skills per phase come from `skills/SOUL_SKILL_MAP.md`. `soul-audit` is enabled o
 | 10 | Instant Meet (the only location feature, 1 km) | done (Android + web verified; location-leak audit passed) |
 | 11 | Date confirmation + Hot Person | done (Android + web verified) |
 | 12 | Billing (SOUL web checkout, D-037) | done (Android + web verified on the mock provider; live Razorpay needs the owner's keys) |
-| 13 | Safety + moderation | todo |
+| 13 | Safety + moderation | done (Android + web verified) |
 | 14 | Push (FCM + Web Push) | todo |
 | 15 | Admin | todo |
 | 16 | Testing (incl. the cross-platform matrix in `PLATFORM_MATRIX.md`) | todo |
@@ -262,6 +262,32 @@ Skills per phase come from `skills/SOUL_SKILL_MAP.md`. `soul-audit` is enabled o
   - A `visualViewport` keyboard inset in `SoulScreen` (iPhone Safari keeps the page size). Verified in Chrome; the iPhone path needs a real iPhone.
 
 **Closed 2026-09-28:** the Android rebuild embeds the new `remove` icon (verified in Filters).
+
+## Phase 13: Safety and moderation (2026-10-03)
+
+**Server:** migration `…1003000400_safety.sql` and the `account-delete` Edge Function (D-053):
+- Block and unblock; report with message evidence and email fingerprints.
+- Moderator functions (queue, suspend, ban, restore, photo review, resolve) with an action log; the ban-aware sign-up hook; restriction details in `get_my_status`.
+- Deletion that keeps purchase and safety records without the account; an hourly retention job.
+
+**App:**
+- One safety sheet (Report, Block, Unmatch) from the chat header, a profile ("Report or block"), the Instant Meet session header and an Instant candidate.
+- The report screen (categories, details, "Also block"); Settings → Blocked, Data and privacy, Delete account.
+- The restricted-account screen; status and profile re-read on moderator nudges.
+
+**Verified:**
+- pgTAP 532/532 (62 new). The tests caught a real bug: a variable named like a column made `moderation_set_state` fail; it was fixed before shipping.
+- `db:verify` 101/101 (5 new: moderators only, report unreadable, block invisible to the blocked, deletion needs confirmation, deletion removes the account and its sessions). 163 unit tests; `functions:check` clean.
+- **Web:**
+  - From a chat: the sheet, then a report (stored with the 2 recent messages as evidence).
+  - Blocking returned to an empty Chats; Settings → Blocked listed the person; Unblock emptied it.
+  - A suspended account landed on "Your account is paused … until 6 Oct".
+  - A throwaway account typed DELETE and was deleted (gone from the database, back on the welcome screen).
+- **Android:** the safety sheet (native form sheet) and the report screen render correctly.
+
+**Open:** moderator screens (Phase 15), C-30 automated photo checks, the support address and appeal process (C-23).
+
+---
 
 ## Phase 12: Billing (2026-10-03)
 
@@ -663,3 +689,4 @@ Release build config, signing workflow (owner keystore, C-20), launcher icon (C-
 - 2026-10-03: Phase 10 done: Instant Meet with plan gate, 1 km candidates on a ~110 m grid, mutual acceptance, compass, rounded distance, session chat, End Meet and expiry; location-leak audit and end-session revocation tests pass (D-050). The owner freed C: (198 GB free). Native rebuild for expo-location, expo-haptics and the new icon glyphs.
 - 2026-10-03: Phase 11 done: "Did you meet?" with private answers, cooldown, expiry and review flags; the fire badge (icon only, owner's decision) computed live from 3 dates in a rolling 30 days, with an hourly consistency job (D-051).
 - 2026-10-03: Phase 12 done: Razorpay Payment Links with signed webhooks as the only grant path, frozen order prices, sync/restore, refund revocation and a mock provider that exercises the real webhook locally (D-052). Live payments wait for the owner's Razorpay keys.
+- 2026-10-03: Phase 13 done: block (invisible to the blocked person), report with message evidence, moderator functions with an action log, bans that stop re-sign-up, immediate account deletion that keeps purchase and safety records, hourly retention (D-053).

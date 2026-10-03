@@ -151,6 +151,18 @@ function LiveSession({ session, userId }: { session: InstantSession; userId: str
             {timeLeftLabel(session.expires_at, now)}
           </SoulText>
         </View>
+        <PressableScale
+          accessibilityRole="button"
+          accessibilityLabel={`Safety options for ${name}`}
+          onPress={() =>
+            router.push({
+              pathname: '/safety/[id]',
+              params: { id: session.person.id, name, context: 'instant' },
+            })
+          }
+          style={styles.back}>
+          <SoulIcon name="more_vert" size="md" />
+        </PressableScale>
       </View>
 
       <View style={styles.person}>
@@ -199,7 +211,13 @@ const useStyles = createThemedStyles(() =>
       justifyContent: 'center',
       marginLeft: -spacing.sm,
     },
-    timer: { flexDirection: 'row', alignItems: 'center', gap: spacing.xxs },
+    timer: {
+      flex: 1,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'flex-end',
+      gap: spacing.xxs,
+    },
     tabular: { fontVariant: ['tabular-nums'] },
     person: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginTop: spacing.md },
     personText: { flex: 1 },

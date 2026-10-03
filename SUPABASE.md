@@ -25,7 +25,7 @@ npx supabase link --project-ref bdwuhrkgrwzpwqhgsngi       # asks for the databa
 npx supabase db push                                      # applies supabase/migrations in order
 npx supabase config diff                                  # review auth settings before pushing
 npx supabase config push                                  # OTP length/expiry, confirmations, email template, both auth hooks
-npx supabase functions deploy health profile-photos payments-checkout payments-webhook payments-sync
+npx supabase functions deploy health profile-photos payments-checkout payments-webhook payments-sync account-delete
 ```
 
 Without `profile-photos` deployed, photos cannot be added (D-043).

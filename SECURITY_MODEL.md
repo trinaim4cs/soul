@@ -114,7 +114,7 @@ Automated face, lighting and one-subject checks are C-30 (Phase 13, with the rev
 | Token theft on the web | strict CSP, no third-party scripts, no `dangerouslySetInnerHTML`, short-lived access tokens (section 12) |
 | Tampered APK download | HTTPS only, SHA-256 published on `/download`, the same signing key for every version so Android refuses a mismatched update (D-039, C-20) |
 | Stalking via Instant | mutual acceptance before any proximity; one acceptance is invisible to the other person; unilateral End Meet always on screen; session expiry; a block ends the session at once; positions deleted at the end (D-050) |
-| Admin abuse | role table checked server-side; every admin action writes `moderation_actions` + `audit_events` |
+| Admin abuse | role table checked server-side; moderators cannot act on themselves or on other moderators unless admin; every action writes `moderation_actions` + `audit_events` (D-053) |
 
 ## 8. Realtime
 

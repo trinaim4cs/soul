@@ -48,6 +48,17 @@ export default function AppLayout() {
           sheetCornerRadius: radii.xl,
         }}
       />
+      <Stack.Screen
+        name="safety/[id]"
+        options={{
+          ...pageHeader,
+          presentation: 'formSheet',
+          sheetAllowedDetents: [0.55],
+          sheetGrabberVisible: true,
+          sheetCornerRadius: radii.xl,
+        }}
+      />
+      <Stack.Screen name="report/[id]" options={pageHeader} />
       <Stack.Screen name="paywall" options={{ presentation: 'modal', headerShown: false }} />
       <Stack.Screen name="pay/return" options={{ headerShown: false, gestureEnabled: false }} />
       <Stack.Screen name="pay/mock" options={{ headerShown: false }} />
@@ -66,6 +77,8 @@ export default function AppLayout() {
       <Stack.Screen name="settings/index" options={pageHeader} />
       <Stack.Screen name="settings/privacy" options={pageHeader} />
       <Stack.Screen name="settings/purchases" options={pageHeader} />
+      <Stack.Screen name="settings/blocked" options={pageHeader} />
+      <Stack.Screen name="settings/delete" options={pageHeader} />
     </Stack>
   );
 }

@@ -147,6 +147,22 @@ function CardDetail({ card, fromDeck, matchId }: DetailProps) {
       {matchId && !confirmingUnmatch ? (
         <UnmatchButton onPress={() => setConfirmingUnmatch(true)} />
       ) : null}
+      <SoulButton
+        label="Report or block"
+        variant="ghost"
+        size="sm"
+        onPress={() =>
+          router.push({
+            pathname: '/safety/[id]',
+            params: {
+              id: card.id,
+              name: personName(card),
+              context: fromDeck ? 'discovery' : 'profile',
+              ...(matchId ? { match: matchId } : {}),
+            },
+          })
+        }
+      />
     </SoulScreen>
   );
 }

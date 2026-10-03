@@ -6,6 +6,42 @@ Status values: `accepted` · `default, confirm` · `open`.
 
 ---
 
+## Phase 13 safety and moderation (2026-10-03)
+
+### D-053 Block, report, moderation, deletion and retention
+- **Block (spec 42):** `block_user` ends everything between the two in one transaction:
+  - the match and its chat, any Instant Meet session, pending Instant acceptances and pending dates;
+  - from then on, discovery, profiles, messages, Instant candidacy and the photo storage rules all refuse the pair.
+  - The blocked person is never told. Their side gets the same `unmatch` nudge as an ordinary unmatch, and they cannot read the block row.
+  - Unblocking (Settings → Blocked) lets the two find each other again; it never restores a match or a chat.
+- **Report:** the nine categories of spec 42, optional details (1000 characters), and an option to block in the same step (on by default in the app).
+  - The recent messages between the two (up to 50, with who said what) are copied into the report as evidence. The report screen says so.
+  - Reports keep a one-way fingerprint of the reported person's email, so they outlive an account deletion.
+  - `underage`, `threat` and `stalking` are urgent. Three different reporters in a week make every open report about that person urgent. There are no automatic bans (SECURITY_MODEL: never single-signal bans).
+  - 10 reports per day per account. Nobody is told who reported them.
+- **Moderation (moderators only, `admin_roles`; the screens come with Phase 15):** `moderation_queue` (urgent reports first, photos awaiting review), `moderation_set_state` (suspend with an optional end, ban, restore), `moderation_review_photo`, `moderation_resolve_report`. Every action goes to `moderation_actions` and `audit_events`.
+  - A moderator cannot act on themselves, nor on another moderator unless they are an admin.
+  - A suspension hides the account everywhere and ends Instant Meet. Matches come back if it is lifted, and timed suspensions lift themselves (hourly job).
+  - A ban ends everything and stores the email fingerprint, which the sign-up hook refuses ("This email can't be used for SOUL.").
+  - Restoring removes the fingerprint.
+- **Restricted screen (spec 67):** suspended, banned or being deleted accounts see a plain explanation (until when, for a suspension; never who reported or what the evidence was) and Sign out. Appeals are by email to support for now (the support address is a legal placeholder, C-23).
+- **Account deletion (Settings → Delete account; settles C-18):** `account-delete` runs at once, after the person types DELETE:
+  - it withdraws the account from everything;
+  - it deletes the photo files;
+  - it deletes the account, so everything referencing it goes with it, including matches and their chats for the other person.
+  - Kept without the account link: purchase records (tax law), reports (by fingerprint), Instant Meet session records (who and when, 90 days).
+  - The app signs out; every refresh token is gone with the account.
+  - The retention draft now says this (deletion at once instead of "within 30 days", and chats end for both people).
+- **Retention (C-29 proposed values, server config):** an hourly `pg_cron` job (`soul-retention`) lifts timed suspensions and deletes:
+  - Instant Meet session records after 90 days;
+  - resolved reports and ban fingerprints after 365 days;
+  - unpaid checkout orders after 30 days.
+- **Verification moderation:** verification is the SRMIST email code only (D-027), so there is nothing to review. Fake-account reports lead to suspension or a ban.
+- **Photo moderation:** pending photos (when `photo_review_required` is on, or later from automated checks) appear in the queue, and moderators approve or reject them. The automated face, lighting and one-subject checks remain C-30.
+- **Not in this phase:** screenshots attached to reports (the message snapshot covers chats), photos in chat (still off), and an in-app appeal form.
+
+---
+
 ## Phase 12 billing (2026-10-03)
 
 ### D-052 Billing: Razorpay Payment Links, server-verified (builds D-037; settles C-25 as Razorpay)
@@ -546,7 +582,7 @@ The owner felt the strict monochrome direction read "too X" (too much like a soc
 | C-15 | ~~Google Play Console / Play Billing~~ **deferred**: V1 uses web checkout (D-037) | - | - |
 | C-16 | Push credentials. Android: Firebase Cloud Messaging (works for APKs outside Play); owner creates the Firebase project, Android app `com.soul.srm`, `google-services.json` and a service account key (BUILD_ANDROID.md). iPhone PWA: standards Web Push, no Apple account; VAPID keys generated for the project. Push is never required for chat or matching | Phase 14 (push only) | In-app realtime only |
 | C-17 | ~~Supabase projects~~ **closed 2026-09-27**: cloud project `bdwuhrkgrwzpwqhgsngi` for beta/production (URL + publishable key in `.env.production`, git-ignored); local Docker for development. Schema not yet pushed: needs the owner's `supabase login` and DB password (SUPABASE.md) | - | - |
-| C-18 | Message handling on account deletion | Phase 14 | Deleted user's message bodies purged; counterpart sees "Message removed" |
+| C-18 | ~~Message handling on account deletion~~ **settled in D-053**: deletion is immediate; matches and their chats end for both people and the messages are deleted | - | - |
 | C-19 | ~~Read receipts default~~ **built 2026-10-02 (D-049)**: on by default, mutual, switch in Privacy. The owner can still ask for off by default | - | - |
 | C-20 | Production release keystore for `com.soul.srm`: generated **only** when release signing is needed, after the owner sees the exact command (BUILD_ANDROID.md "Signing"). Never committed; passwords only in local secure config; debug builds use the separate debug key; every production APK uses the same identity | First release APK (Phase 20) | Debug key for dev builds; release builds fail without the production key |
 | C-21 | **RELEASE_BLOCKER.** Compact app-icon mark: the wide wordmark is never squeezed into the launcher icon (full logo = splash/branding; compact mark = app icon). The final mark needs an owner-approved original or licensed asset | **Public release** | Temporary monochrome placeholder (white ring on black, `scripts/make-placeholder-icons.py`) for Android and the PWA |

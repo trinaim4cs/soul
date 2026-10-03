@@ -15,6 +15,9 @@ export const serverStatusSchema = z.object({
   }),
   age_locked: z.boolean(),
   current_terms_version: z.string().nullable(),
+  /** Suspended accounts: until when (null for an open-ended suspension or a ban). */
+  restricted_until: z.string().nullable().default(null),
+  restriction_reason: z.string().nullable().default(null),
 });
 
 export type ServerStatus = z.infer<typeof serverStatusSchema>;

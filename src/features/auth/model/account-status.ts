@@ -7,7 +7,7 @@ export type AccountStatus =
   | 'signed-out'
   | 'onboarding'
   | 'eligible'
-  /** Suspended, banned or pending deletion (screens in Phase 14). */
+  /** Suspended, banned or pending deletion (the restricted screen, D-053). */
   | 'restricted'
   /** The server status could not be fetched (offline or error): show a retry state. */
   | 'unavailable';

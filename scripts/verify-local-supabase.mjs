@@ -810,6 +810,47 @@ try {
     JSON.stringify({ result: refundedNow.data?.result, balance: await balanceOf(userB) }),
   );
   await buyerInbox.channel.unsubscribe();
+  // Phase 13: safety over HTTP.
+  const queueForStudent = await userA.client.rpc('moderation_queue');
+  check('only moderators can open the moderation queue', queueForStudent.error?.code === '42501');
+  const reported = await userA.client.rpc('report_user', {
+    p_target: userB.id,
+    p_category: 'spam',
+    p_details: 'Test report',
+    p_context: 'profile',
+    p_block: false,
+  });
+  const reportsTable = await userA.client.from('reports').select('*');
+  check(
+    'a report is accepted, and reports are unreadable to the app',
+    reported.data?.ok === true && Boolean(reportsTable.error),
+    JSON.stringify(reported.data),
+  );
+  const blocked = await userA.client.rpc('block_user', { p_target: userB.id });
+  const seenByBlocked = await userB.client.rpc('get_profile_card', { p_target: userA.id });
+  const blockRowsSeenByBlocked = await userB.client.from('blocks').select('*');
+  check(
+    'a block hides both people from each other, and the blocked one cannot see it',
+    blocked.data?.ok === true &&
+      seenByBlocked.data?.reason === 'not_available' &&
+      (blockRowsSeenByBlocked.data ?? []).length === 0,
+    JSON.stringify({ card: seenByBlocked.data, rows: blockRowsSeenByBlocked.data?.length }),
+  );
+  await userA.client.rpc('unblock_user', { p_target: userB.id });
+
+  const leaving = await makeUser('test.user.leaving');
+  const noConfirm = await leaving.client.functions.invoke('account-delete', { body: {} });
+  check('deleting an account needs an explicit confirmation', Boolean(noConfirm.error));
+  const deletedNow = await leaving.client.functions.invoke('account-delete', {
+    body: { confirm: 'DELETE' },
+  });
+  const stillThere = await admin.auth.admin.getUserById(leaving.id);
+  const refreshAfter = await leaving.client.auth.refreshSession();
+  check(
+    'deleting an account removes it at once and ends its sessions',
+    deletedNow.data?.ok === true && !stillThere.data?.user && Boolean(refreshAfter.error),
+    JSON.stringify({ deleted: deletedNow.data, refresh: refreshAfter.error?.message }),
+  );
   for (const client of [userA.client, partner.client, userB.client])
     await client.removeAllChannels();
 

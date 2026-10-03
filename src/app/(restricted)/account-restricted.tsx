@@ -1,5 +1,5 @@
-import { ShellPlaceholder } from '@/components/shell-placeholder';
+import { RestrictedScreen } from '@/features/safety/screens/restricted-screen';
 
 export default function AccountRestrictedRoute() {
-  return <ShellPlaceholder title="Account restricted" phase={14} />;
+  return <RestrictedScreen />;
 }

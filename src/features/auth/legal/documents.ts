@@ -313,11 +313,11 @@ export const LEGAL_DOCUMENTS: Record<LegalDocumentId, LegalDocument> = {
     sections: [
       {
         heading: 'Deleting your account',
-        body: 'Go to Settings, then Delete account. Your profile disappears from discovery and matches at once, and you are signed out on every device.',
+        body: 'Go to Settings, then Delete account. Your account is deleted at once and you are signed out on every device.',
       },
       {
         heading: 'What is deleted',
-        body: 'Your profile, photos, likes, matches and preferences are permanently deleted within [30] days. Messages you sent are removed; the other person sees "Message removed". Backups are overwritten within a further [30] days.',
+        body: 'Your profile, photos, likes, matches, chats, dates and preferences are permanently deleted when you confirm. Your matches and chats end for the other person too, and the messages in them are deleted. Backups are overwritten within [30] days.',
       },
       {
         heading: 'What is kept, and why',

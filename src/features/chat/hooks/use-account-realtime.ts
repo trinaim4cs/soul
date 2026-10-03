@@ -7,6 +7,7 @@ import { refreshInstant } from '@/features/instant/api/instant';
 import { refreshMatches } from '@/features/matching/api/matches';
 import { refreshPayments } from '@/features/swipes/api/payments';
 import { refreshSwipes } from '@/features/swipes/api/swipes';
+import { queryClient } from '@/lib/query-client';
 
 /**
  * Listens on the account's private topic while the app is open: the server nudges it when a
@@ -18,8 +19,13 @@ export function useAccountRealtime() {
   useEffect(() => {
     if (!userId) return;
     return joinAccount(userId, (reason) => {
-      if (reason !== 'instant' && reason !== 'date' && reason !== 'payment') {
+      if (!['instant', 'date', 'payment', 'account', 'profile'].includes(reason ?? 'any')) {
         void refreshMatches(userId);
+      }
+      // A moderator changed the account or a photo: status and profile re-read.
+      if (reason === 'account' || reason === 'profile' || reason === null) {
+        void queryClient.invalidateQueries({ queryKey: ['account-status'] });
+        void queryClient.invalidateQueries({ queryKey: ['my-profile'] });
       }
       // A payment confirmed or refunded: likes, plan and the purchase history re-read.
       if (reason === 'payment' || reason === null) {

@@ -12,6 +12,8 @@ export type Database = {
           id: string;
           institutional_email_verified_at: string | null;
           profile_completed_at: string | null;
+          restricted_until: string | null;
+          restriction_reason: string | null;
           terms_accepted_at: string | null;
           terms_version: string | null;
           updated_at: string;
@@ -24,6 +26,8 @@ export type Database = {
           id: string;
           institutional_email_verified_at?: string | null;
           profile_completed_at?: string | null;
+          restricted_until?: string | null;
+          restriction_reason?: string | null;
           terms_accepted_at?: string | null;
           terms_version?: string | null;
           updated_at?: string;
@@ -36,6 +40,8 @@ export type Database = {
           id?: string;
           institutional_email_verified_at?: string | null;
           profile_completed_at?: string | null;
+          restricted_until?: string | null;
+          restriction_reason?: string | null;
           terms_accepted_at?: string | null;
           terms_version?: string | null;
           updated_at?: string;
@@ -348,8 +354,8 @@ export type Database = {
           expires_at: string;
           id: string;
           started_at: string;
-          user_a: string;
-          user_b: string;
+          user_a: string | null;
+          user_b: string | null;
         };
         Insert: {
           end_reason?: string | null;
@@ -358,8 +364,8 @@ export type Database = {
           expires_at: string;
           id?: string;
           started_at?: string;
-          user_a: string;
-          user_b: string;
+          user_a?: string | null;
+          user_b?: string | null;
         };
         Update: {
           end_reason?: string | null;
@@ -368,8 +374,8 @@ export type Database = {
           expires_at?: string;
           id?: string;
           started_at?: string;
-          user_a?: string;
-          user_b?: string;
+          user_a?: string | null;
+          user_b?: string | null;
         };
         Relationships: [];
       };
@@ -475,6 +481,50 @@ export type Database = {
           },
         ];
       };
+      moderation_actions: {
+        Row: {
+          action: string;
+          created_at: string;
+          id: number;
+          moderator_id: string | null;
+          photo_id: string | null;
+          reason: string | null;
+          report_id: string | null;
+          target_fingerprint: string | null;
+          target_user: string | null;
+        };
+        Insert: {
+          action: string;
+          created_at?: string;
+          id?: never;
+          moderator_id?: string | null;
+          photo_id?: string | null;
+          reason?: string | null;
+          report_id?: string | null;
+          target_fingerprint?: string | null;
+          target_user?: string | null;
+        };
+        Update: {
+          action?: string;
+          created_at?: string;
+          id?: never;
+          moderator_id?: string | null;
+          photo_id?: string | null;
+          reason?: string | null;
+          report_id?: string | null;
+          target_fingerprint?: string | null;
+          target_user?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'moderation_actions_report_id_fkey';
+            columns: ['report_id'];
+            isOneToOne: false;
+            referencedRelation: 'reports';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       passes: {
         Row: {
           passed_at: string;
@@ -547,7 +597,7 @@ export type Database = {
           provider_payment_id: string | null;
           refunded_paise: number;
           status: string;
-          user_id: string;
+          user_id: string | null;
         };
         Insert: {
           amount_paise: number;
@@ -564,7 +614,7 @@ export type Database = {
           provider_payment_id?: string | null;
           refunded_paise?: number;
           status?: string;
-          user_id: string;
+          user_id?: string | null;
         };
         Update: {
           amount_paise?: number;
@@ -581,7 +631,7 @@ export type Database = {
           provider_payment_id?: string | null;
           refunded_paise?: number;
           status?: string;
-          user_id?: string;
+          user_id?: string | null;
         };
         Relationships: [
           {
@@ -775,6 +825,57 @@ export type Database = {
         };
         Relationships: [];
       };
+      reports: {
+        Row: {
+          category: Database['public']['Enums']['report_category'];
+          context: string;
+          created_at: string;
+          details: string | null;
+          evidence: NonNullable<Json>;
+          id: string;
+          priority: boolean;
+          reported_fingerprint: string;
+          reported_id: string | null;
+          reporter_id: string | null;
+          resolution: string | null;
+          resolved_at: string | null;
+          resolved_by: string | null;
+          status: string;
+        };
+        Insert: {
+          category: Database['public']['Enums']['report_category'];
+          context: string;
+          created_at?: string;
+          details?: string | null;
+          evidence?: NonNullable<Json>;
+          id?: string;
+          priority?: boolean;
+          reported_fingerprint: string;
+          reported_id?: string | null;
+          reporter_id?: string | null;
+          resolution?: string | null;
+          resolved_at?: string | null;
+          resolved_by?: string | null;
+          status?: string;
+        };
+        Update: {
+          category?: Database['public']['Enums']['report_category'];
+          context?: string;
+          created_at?: string;
+          details?: string | null;
+          evidence?: NonNullable<Json>;
+          id?: string;
+          priority?: boolean;
+          reported_fingerprint?: string;
+          reported_id?: string | null;
+          reporter_id?: string | null;
+          resolution?: string | null;
+          resolved_at?: string | null;
+          resolved_by?: string | null;
+          status?: string;
+        };
+        Relationships: [];
+      };
       subscriptions: {
         Row: {
           created_at: string;
@@ -882,12 +983,14 @@ export type Database = {
     };
     Functions: {
       accept_terms: { Args: { p_version: string }; Returns: Json };
+      account_prepare_deletion: { Args: { p_user: string }; Returns: Json };
       activate_plan: { Args: { p_key: string; p_plan: string; p_user: string }; Returns: Json };
       add_profile_photo: {
         Args: { p_height: number; p_id: string; p_source: string; p_user: string; p_width: number };
         Returns: Json;
       };
       answer_date: { Args: { p_met: boolean; p_other: string }; Returns: Json };
+      block_user: { Args: { p_target: string }; Returns: Json };
       date_state: { Args: { p_other: string }; Returns: Json };
       discovery_feed: { Args: { p_exclude?: string[]; p_limit?: number }; Returns: Json };
       get_match: { Args: { p_match: string }; Returns: Json };
@@ -895,6 +998,7 @@ export type Database = {
         Args: { p_before?: number; p_conversation: string; p_limit?: number };
         Returns: Json;
       };
+      get_my_blocks: { Args: Record<PropertyKey, never>; Returns: Json };
       get_my_dates: { Args: Record<PropertyKey, never>; Returns: Json };
       get_my_matches: { Args: Record<PropertyKey, never>; Returns: Json };
       get_my_payments: { Args: Record<PropertyKey, never>; Returns: Json };
@@ -922,6 +1026,24 @@ export type Database = {
         Returns: Json;
       };
       mark_match_seen: { Args: { p_match: string }; Returns: Json };
+      moderation_queue: { Args: Record<PropertyKey, never>; Returns: Json };
+      moderation_resolve_report: {
+        Args: { p_actioned: boolean; p_note: string; p_report: string };
+        Returns: Json;
+      };
+      moderation_review_photo: {
+        Args: { p_approve: boolean; p_photo: string; p_reason: string };
+        Returns: Json;
+      };
+      moderation_set_state: {
+        Args: {
+          p_reason: string;
+          p_state: Database['public']['Enums']['account_state'];
+          p_until: string;
+          p_user: string;
+        };
+        Returns: Json;
+      };
       payment_attach_link: {
         Args: { p_link_id: string; p_order: string; p_url: string };
         Returns: Json;
@@ -961,6 +1083,16 @@ export type Database = {
       };
       remove_profile_photo: { Args: { p_id: string; p_user: string }; Returns: Json };
       reorder_profile_photos: { Args: { p_ids: string[] }; Returns: Json };
+      report_user: {
+        Args: {
+          p_block: boolean;
+          p_category: Database['public']['Enums']['report_category'];
+          p_context: string;
+          p_details: string;
+          p_target: string;
+        };
+        Returns: Json;
+      };
       send_message: {
         Args: { p_body: string; p_client_id: string; p_conversation: string; p_reply_to?: number };
         Returns: Json;
@@ -969,6 +1101,7 @@ export type Database = {
       submit_profile: { Args: Record<PropertyKey, never>; Returns: Json };
       swipe_left: { Args: { p_target: string }; Returns: Json };
       swipe_right: { Args: { p_idempotency_key: string; p_target: string }; Returns: Json };
+      unblock_user: { Args: { p_target: string }; Returns: Json };
       unmatch: { Args: { p_match: string }; Returns: Json };
     };
     Enums: {
@@ -979,6 +1112,16 @@ export type Database = {
       photo_status: 'pending' | 'approved' | 'rejected';
       plan_kind: 'subscription' | 'topup';
       privacy_mode: 'normal' | 'private' | 'anonymous';
+      report_category:
+        | 'harassment'
+        | 'fake_account'
+        | 'impersonation'
+        | 'threat'
+        | 'stalking'
+        | 'explicit_content'
+        | 'spam'
+        | 'underage'
+        | 'other';
       swipe_bucket: 'free' | 'plan' | 'topup';
     };
     CompositeTypes: {
@@ -1098,6 +1241,17 @@ export const Constants = {
       photo_status: ['pending', 'approved', 'rejected'],
       plan_kind: ['subscription', 'topup'],
       privacy_mode: ['normal', 'private', 'anonymous'],
+      report_category: [
+        'harassment',
+        'fake_account',
+        'impersonation',
+        'threat',
+        'stalking',
+        'explicit_content',
+        'spam',
+        'underage',
+        'other',
+      ],
       swipe_bucket: ['free', 'plan', 'topup'],
     },
   },

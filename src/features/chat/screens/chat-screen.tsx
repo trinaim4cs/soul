@@ -46,6 +46,7 @@ function backToChats() {
  * access on every read, send and Realtime join.
  */
 export function ChatScreen({ id }: { id: string }) {
+  const styles = useStyles();
   const userId = useCurrentUserId();
   const matches = useMatches(userId);
   const match = matches.data?.find((item) => item.conversation_id === id) ?? null;
@@ -79,6 +80,25 @@ export function ChatScreen({ id }: { id: string }) {
       onBack={backToChats}
       onOpenProfile={() =>
         router.push({ pathname: '/profile/[id]', params: { id: match.person.id } })
+      }
+      headerAccessory={
+        <PressableScale
+          accessibilityRole="button"
+          accessibilityLabel={`Safety options for ${personName(match.person)}`}
+          onPress={() =>
+            router.push({
+              pathname: '/safety/[id]',
+              params: {
+                id: match.person.id,
+                name: personName(match.person),
+                context: 'chat',
+                match: match.id,
+              },
+            })
+          }
+          style={styles.more}>
+          <SoulIcon name="more_vert" size="md" />
+        </PressableScale>
       }
       banner={(talked) => (
         <DatePrompt otherId={match.person.id} name={personName(match.person)} talked={talked} />
@@ -307,6 +327,12 @@ const useStyles = createThemedStyles(({ colors }) =>
       paddingVertical: spacing.xs,
       borderBottomWidth: StyleSheet.hairlineWidth,
       borderBottomColor: colors.divider,
+    },
+    more: {
+      width: sizes.touchTarget,
+      height: sizes.touchTarget,
+      alignItems: 'center',
+      justifyContent: 'center',
     },
     back: {
       width: sizes.touchTarget,

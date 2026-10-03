@@ -98,7 +98,7 @@ function RootNavigator() {
         <Stack.Protected guard={status === 'eligible'}>
           <Stack.Screen name="(app)" />
         </Stack.Protected>
-        {/* Suspended/banned/deletion-pending accounts: dedicated screens arrive in Phase 14. */}
+        {/* Suspended, banned or being deleted: the restricted screen (D-053). */}
         <Stack.Protected guard={status === 'restricted'}>
           <Stack.Screen name="(restricted)" />
         </Stack.Protected>

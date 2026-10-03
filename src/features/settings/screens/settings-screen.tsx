@@ -47,6 +47,12 @@ export function SettingsScreen() {
           onPress={() => router.push('/settings/purchases')}
         />
         <SettingsRow
+          icon="block"
+          label="Blocked"
+          detail="People you have blocked"
+          onPress={() => router.push('/settings/blocked')}
+        />
+        <SettingsRow
           icon="visibility_off"
           label="Privacy"
           detail="Visibility, read receipts, zodiac"
@@ -56,6 +62,18 @@ export function SettingsScreen() {
           icon="shield"
           label="Rules and policies"
           onPress={() => router.push('/legal/community')}
+        />
+        <SettingsRow
+          icon="lock"
+          label="Data and privacy"
+          detail="What SOUL keeps, and for how long"
+          onPress={() => router.push('/legal/retention')}
+        />
+        <SettingsRow
+          icon="remove"
+          label="Delete account"
+          detail="Permanently, with everything in it"
+          onPress={() => router.push('/settings/delete')}
         />
       </View>
       <SoulButton

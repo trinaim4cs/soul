@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 
 import { SoulButton } from '@/components/soul-button';
@@ -43,6 +44,19 @@ export function CandidateCard({ candidate, photoUrl, busy, onAccept, onSkip }: P
           ) : null}
           <SoulText variant="micro" tone="tertiary">
             WITHIN 1 KM · INSTANT IS ON
+          </SoulText>
+          <SoulText
+            variant="supporting"
+            tone="tertiary"
+            accessibilityRole="link"
+            style={styles.report}
+            onPress={() =>
+              router.push({
+                pathname: '/safety/[id]',
+                params: { id: candidate.id, name, context: 'instant' },
+              })
+            }>
+            Report or block
           </SoulText>
         </View>
       </View>
@@ -102,5 +116,10 @@ const useStyles = createThemedStyles(({ colors }) =>
     action: { flex: 1 },
     waiting: { gap: spacing.xs, alignItems: 'flex-start' },
     waitingText: { alignSelf: 'stretch' },
+    report: {
+      alignSelf: 'flex-start',
+      paddingVertical: spacing.xxs,
+      textDecorationLine: 'underline',
+    },
   }),
 );
