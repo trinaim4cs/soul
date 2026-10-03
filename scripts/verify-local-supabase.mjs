@@ -601,6 +601,10 @@ try {
         }
       });
     });
+    // A refused channel keeps retrying its join, and while it does, broadcasts to the same
+    // socket's other topics arrive only at the next retry, up to 10 s late (found in Phase 18;
+    // it made a later 5 s check flaky in CI). A refused probe has done its job, so drop it.
+    if (status !== 'SUBSCRIBED') await client.removeChannel(channel);
     return { channel, events, status };
   }
   const received = async (events, test, ms = 5000) => {
@@ -795,15 +799,23 @@ try {
   const afterPay = await userB.client.rpc('get_payment', { p_order: orderId });
   const balancePaid = await balanceOf(userB);
   check(
-    'a signed payment event grants the plan, and the phone is told at once',
+    'a signed payment event grants the plan',
     paidNow.data?.result === 'granted' &&
       afterPay.data?.payment?.status === 'paid' &&
-      balancePaid === balanceBefore + 15 &&
+      balancePaid === balanceBefore + 15,
+    JSON.stringify({ result: paidNow.data?.result, before: balanceBefore, after: balancePaid }),
+  );
+  check(
+    'and the phone is told at once',
+    buyerInbox.status === 'SUBSCRIBED' &&
       (await received(
         buyerInbox.events,
         (e) => e.event === 'refresh' && e.payload.reason === 'payment',
       )),
-    JSON.stringify({ result: paidNow.data?.result, before: balanceBefore, after: balancePaid }),
+    JSON.stringify({
+      inbox: buyerInbox.status,
+      refreshes: buyerInbox.events.map((e) => e.payload?.reason),
+    }),
   );
   const paidAgain = await userB.client.functions.invoke('payments-mock', {
     body: { order_id: orderId, outcome: 'paid' },

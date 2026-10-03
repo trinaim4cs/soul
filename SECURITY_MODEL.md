@@ -123,6 +123,8 @@ Automated face, lighting and one-subject checks are C-30 (Phase 13, with the rev
 
 Private channels only, authorized by RLS on `realtime.messages` (D-012, built in Phase 9 as D-049): `chat:<conversation>` and `user:<account>` are server-to-client, and `typing:<conversation>` is the only topic a client may publish on. "Allow public access" must be off in the hosted Realtime settings (SUPABASE.md). Topic names include IDs that the policy checks against membership plus not-blocked. Presence payloads contain only a typing flag and user ID, never location. Instant proximity updates are **not** broadcast at all: each client re-reads `instant_state` (server-computed buckets for its own session), and the server only nudges `user:<account>` when a session starts or ends. The session chat uses the same `chat:` and `typing:` topics, authorized while the session is live (D-050).
 
+**Refused topics are left:** a channel the server refuses retries its join indefinitely, and while it does, the socket's other topics receive broadcasts only at each retry (up to 10 s late). The app therefore leaves a conversation's topics as soon as it is closed or unavailable (D-057, SECURITY_AUDIT F-11).
+
 **Known limitation:** Realtime re-authorizes on join and token refresh. After a block, the server immediately stops writing to the channel and sends a revoke event. A tampered client could keep an idle socket open until its next token refresh, but it would receive nothing further because no new messages are written for that pair.
 
 ## 9. Secrets and configuration

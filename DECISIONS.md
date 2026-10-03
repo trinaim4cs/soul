@@ -14,6 +14,7 @@ Status values: `accepted` · `default, confirm` · `open`.
 - **Text safety (finding F-1):** names, hooks, About me, messages, report details and appeals refuse C0 and C1 control characters, DEL, bidi embeddings and overrides (U+202A to U+202E) and bidi isolates (U+2066 to U+2069); one-line fields (name, hook) also refuse line breaks. The database enforces it with check constraints; the app removes these characters before saving, so pasted text is cleaned rather than refused. Directional marks (U+200E, U+200F) and the zero-width joiner stay allowed: they cannot reorder neighbouring text, and real scripts and emoji need them.
 - **Mock payments fail closed (F-2):** the mock provider needs `SOUL_ENV=development`; an unset or other value keeps it off.
 - **No invisible characters in the code:** `npm run text:check` fails on control or bidi characters in any tracked text file. Tests and rules that need such characters build them from code points.
+- **Refused Realtime topics are left, not retried (F-11):** a refused channel retries its join forever, and meanwhile the socket's other topics receive broadcasts only at each retry (up to 10 s late). The chat screen leaves a conversation's topics once it is closed or unavailable; any future join that can be refused must do the same.
 - **Accepted (owner may revisit):** `push-send` stays callable without credentials (it takes no input); OTP limits are per IP (CAPTCHA or 8-digit codes if guessing appears); a banned address is told "This email can't be used for SOUL." without a reason.
 
 ---

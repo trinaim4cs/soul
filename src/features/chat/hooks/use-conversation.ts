@@ -48,8 +48,12 @@ export function useConversation(conversationId: string, userId: string | null) {
     void load('loaded');
   }, [load]);
 
+  // Once the conversation has ended the server refuses its topics, and a refused channel keeps
+  // retrying, which holds back the account's other live updates on the same socket by up to
+  // 10 s (Phase 18). Nothing more can arrive on an ended conversation, so leave it.
+  const closed = state.closed;
   useEffect(() => {
-    if (!userId) return;
+    if (!userId || closed) return;
     const joined = joinConversation(conversationId, {
       onMessage: (message) => dispatch({ type: 'stored', message }),
       onRead: (reader, messageId) => {
@@ -75,7 +79,7 @@ export function useConversation(conversationId: string, userId: string | null) {
       if (typingShown.current) clearTimeout(typingShown.current);
       if (typingIdle.current) clearTimeout(typingIdle.current);
     };
-  }, [conversationId, userId, load]);
+  }, [conversationId, userId, load, closed]);
 
   // Reading: whenever a newer message from the other person is on screen, tell the server.
   const newest = userId ? newestFromOther(state.messages, userId) : null;

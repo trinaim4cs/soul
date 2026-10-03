@@ -14,7 +14,7 @@ npm run test:all      # types, lint, format, source text, unit tests, Edge Funct
 **CI notes:**
 - The Edge Function check runs with `--node-modules-dir=none`: the functions resolve their own `npm:` imports, as the hosted runtime does, and CI does not install the app's `node_modules` for that job.
 - A failed `db:verify` or `security:attack` check (or a crash) is printed as a GitHub annotation, so it can be read without signing in to open the log.
-- One early run failed in `db:verify` before annotations existed, and the next runs passed, so it was intermittent and its check is unknown. If it returns, the annotation names it.
+- `db:verify` failed intermittently in CI (Phase 16, and the Phase 17 and 18 pushes) on "the phone is told at once" after a payment. Cause (Phase 18, SECURITY_AUDIT F-11): refused Realtime probe channels kept retrying on the buyer's socket, and that delays the socket's other broadcasts by up to 10 s. Refused probes are now dropped at once, and the check reports the join state.
 
 ## Layers
 
@@ -22,10 +22,10 @@ npm run test:all      # types, lint, format, source text, unit tests, Edge Funct
 |---|---|---|---|
 | Types and lint | `npm run typecheck`, `npm run lint` | whole repo | strict TypeScript; hex colours only in `src/theme` |
 | Source text | `npm run text:check` | every tracked text file | no invisible control or bidi characters in code, SQL or docs (D-057) |
-| Unit tests (Jest) | `npm test` | 189 tests, 25 files | app models (pricing, badges, Instant buckets, chat grouping, payments, safety, admin, notification links) and the Edge Function libraries in `supabase/functions/_shared` (JPEG stripping, Razorpay signatures, **Web Push RFC 8291 test vector**, VAPID, FCM assertions) |
+| Unit tests (Jest) | `npm test` | 192 tests, 26 files | app models (pricing, badges, Instant buckets, chat grouping, payments, safety, admin, notification links) and the Edge Function libraries in `supabase/functions/_shared` (JPEG stripping, Razorpay signatures, **Web Push RFC 8291 test vector**, VAPID, FCM assertions) |
 | Edge Functions | `npm run functions:check` | 11 functions | every function type-checks under Deno |
 | Database (pgTAP) | `npm run db:test` | **689 assertions, 18 files** | every rule enforced by the database, run as the real `authenticated` and `service_role` roles inside a rolled-back transaction |
-| Server over HTTP | `npm run db:verify` | **109 checks** | the real stack end to end: Auth with OTP email, PostgREST, Realtime sockets, Storage, Edge Functions |
+| Server over HTTP | `npm run db:verify` | **110 checks** | the real stack end to end: Auth with OTP email, PostgREST, Realtime sockets, Storage, Edge Functions |
 | Cross-account attacks | `npm run security:attack` | **11 checks** | an ordinary student attacks another account's coordinates, billing, reports, verification details, chat, storage and topics through every route the app's credentials reach (Phase 18, SECURITY_AUDIT.md) |
 | Devices | per phase, PHASE_PLAN "Verified" | | the Android emulator (development build) and an iPhone-size web viewport, plus the cross-platform matrix in PLATFORM_MATRIX.md |
 

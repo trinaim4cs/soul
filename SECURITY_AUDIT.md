@@ -8,7 +8,7 @@ Spec section 72. Done on 2026-10-03 against the local stack (the same migrations
 |---|---|---|
 | Cross-account attack | `npm run security:attack` | User A, an ordinary signed-in student, goes after User B's private data with every route the app's own credentials reach: direct table reads, the private and auth schemas, GraphQL, every RPC given B's ids, Storage, Realtime topics and the Edge Functions. 11 checks, each with B's data really present (a match and chat, an order, a report, a push device, a live Instant position, a confirmed date). |
 | Database rules | `npm run db:test` | 689 pgTAP assertions in 18 files, including `017_structure` (forced RLS, no anonymous access, no client table writes, pinned search paths, a closed private schema, across the whole schema) and the new `018_text_safety` |
-| Server over HTTP | `npm run db:verify` | 109 end-to-end checks through Auth, PostgREST, Realtime, Storage and the Edge Functions |
+| Server over HTTP | `npm run db:verify` | 110 end-to-end checks through Auth, PostgREST, Realtime, Storage and the Edge Functions |
 | Code review | | every migration's security-definer functions, all 11 Edge Functions, `supabase/config.toml`, `vercel.json`, the app's storage and logging |
 | Secrets | `git grep` and `git log -p` | private keys, Razorpay, Google, GitHub and JWT patterns across the tree and the whole history |
 | Bundles | `npx expo export -p web -p android` | the web bundle and the Android Hermes bundle searched for every server secret's **value** (service role key, secret key, JWT secret, S3 secret, VAPID private key, webhook secret) and for secret names |
@@ -63,6 +63,7 @@ All of these run in `npm run test:all` and in CI on every push.
 | F-8 | Info | EAS's `credentials.json` (it can hold keystore passwords) was not git-ignored. No keystore exists yet. | **Fixed:** ignored, with `credentials/` |
 | F-9 | Info | Nothing stopped invisible characters in the code itself. | **Added** `npm run text:check` (CI and `test:all`). The 352 existing files had none; it caught such characters in this phase's own new test files before commit, which now build them from code points |
 | F-10 | Info | Edge Functions answer CORS with `*`. | Safe: they authenticate by bearer token, never cookies |
+| F-11 | Low | **A refused Realtime topic slowed every other topic on the same socket.** A channel the server refuses keeps retrying its join, and while it does, server broadcasts to that socket's other topics arrive only at the next retry: measured 4.6 to 4.7 s instead of about 55 ms. In the app, a chat left open on a conversation that had ended would have held back match, message and Instant updates by up to 10 s. It also made one `db:verify` check fail in CI on two runs (Phases 17 and 18). | **Fixed:** the chat screen leaves its topics once the conversation is closed or unavailable (unit tests); `db:verify` drops refused probe channels and reports the join state. Not a data leak: refused topics never received anything |
 
 Nothing found reached another person's private data.
 

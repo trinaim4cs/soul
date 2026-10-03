@@ -275,10 +275,11 @@ Skills per phase come from `skills/SOUL_SKILL_MAP.md`. `soul-audit` is enabled o
 - F-3: `push-send` logs error names only.
 - F-7, F-8: SECURITY_MODEL claims corrected to what is built; EAS `credentials.json` git-ignored.
 - Added `npm run text:check` (no invisible characters in tracked files) and `security:attack` to `test:all` and CI.
+- F-11: a refused Realtime topic delayed the socket's other topics by up to 10 s (the cause of the intermittent CI failure since Phase 16). The chat screen now leaves an ended conversation's topics; `db:verify` drops refused probes.
 
 **Accepted (Low):** `push-send` callable without credentials (no input, delivers only queued notifications); OTP limits per IP; a banned address is told it can't be used.
 
-**Verified:** all checks green through `npm run test:all` (189 unit tests, pgTAP 689, `db:verify` 109, `security:attack` 11).
+**Verified:** all checks green through `npm run test:all` (192 unit tests, pgTAP 689, `db:verify` 110, `security:attack` 11).
 
 ---
 
@@ -801,4 +802,4 @@ Release build config, signing workflow (owner keystore, C-20), launcher icon (C-
 - 2026-10-03: Phase 15 done: a role-gated Admin section (reports with evidence, photos, appeals, flagged dates, exact account lookup, suspend, ban, restore; admins also plans, support grants and feature flags including an Instant Meet pause), every action checked by the server and logged (D-055).
 - 2026-10-03: Phase 16 done: `npm run test:all`, GitHub Actions CI with no secrets, schema-wide structural tests (which closed a PUBLIC execute gap in the private schema), TESTING.md mapping every spec 70 item, live Android ↔ web chat, receipts and block (D-056).
 - 2026-10-03: Phase 17 done: every spec 71 screen reviewed on Android (light, dark, 1.3× text) and the PWA; seven defects fixed (link alignment, the reveal's wait, Instant's hidden duration choice, web composer focus and keyboard), VISUAL_QA.md with screenshots.
-- 2026-10-03: Phase 18 done: security audit (SECURITY_AUDIT.md); User A shown unable to reach User B's coordinates, billing, reports or verification details; text spoofing characters refused (F-1), mock payments fail closed (F-2); `security:attack` and `text:check` added to `test:all` and CI.
+- 2026-10-03: Phase 18 done: security audit (SECURITY_AUDIT.md); User A shown unable to reach User B's coordinates, billing, reports or verification details; text spoofing characters refused (F-1), mock payments fail closed (F-2); `security:attack` and `text:check` added to `test:all` and CI; the intermittent CI failure traced to refused Realtime channels and fixed (F-11).
