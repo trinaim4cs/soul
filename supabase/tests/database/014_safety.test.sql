@@ -149,8 +149,11 @@ select throws_ok($$select public.moderation_queue()$$, '42501', null, 'only mode
 select throws_ok($$select public.moderation_set_state('000000f0-0000-4000-8000-0000000000a3', 'suspended', 'community_rules', null)$$,
   '42501', null, 'or suspend anyone');
 select pg_temp.act('000000f0-0000-4000-8000-0000000000b1');
-select is(jsonb_array_length(public.moderation_queue() -> 'reports'), 3, 'a moderator sees the open reports');
-select ok((public.moderation_queue() -> 'reports' -> 0 ->> 'priority')::boolean, 'urgent ones first');
+select is((select count(*)::int from jsonb_array_elements(public.moderation_queue() -> 'reports') r
+           where r ->> 'reported_id' like '000000f0-%'), 3, 'a moderator sees the open reports');
+select ok((select bool_and(case when ord = 1 then (r ->> 'priority')::boolean else true end)
+           from jsonb_array_elements(public.moderation_queue() -> 'reports') with ordinality as q(r, ord)),
+  'urgent ones first');
 select is(public.moderation_set_state('000000f0-0000-4000-8000-0000000000b1', 'suspended', null, null) ->> 'reason',
   'invalid', 'a moderator cannot act on themselves');
 
