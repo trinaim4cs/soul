@@ -1,3 +1,5 @@
+import { existsSync } from 'node:fs';
+
 import type { ConfigContext, ExpoConfig } from 'expo/config';
 
 type AppEnv = 'development' | 'production';
@@ -10,6 +12,11 @@ const IS_PRODUCTION = APP_ENV === 'production';
 // the same production signing key (C-20). Never rename it after the public beta without the
 // owner's explicit approval.
 const APPLICATION_ID = 'com.soul.srm';
+
+// Android push (DECISIONS D-054, C-16): the owner's Firebase app config, kept out of git. Without
+// it the app builds and runs normally and simply offers no notifications on Android.
+const GOOGLE_SERVICES_FILE = './google-services.json';
+const HAS_FIREBASE = existsSync(GOOGLE_SERVICES_FILE);
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
@@ -36,6 +43,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       monochromeImage: './assets/images/adaptive-icon-foreground-placeholder.png',
     },
     predictiveBackGestureEnabled: false,
+    ...(HAS_FIREBASE ? { googleServicesFile: GOOGLE_SERVICES_FILE } : {}),
   },
   // iPhone PWA (DECISIONS D-035): a single-page app. The HTML shell with the PWA meta tags is
   // public/index.html; the manifest, icons and app-shell service worker live in public/.
@@ -118,6 +126,16 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         isIosBackgroundLocationEnabled: false,
         isAndroidBackgroundLocationEnabled: false,
         isAndroidForegroundServiceEnabled: false,
+      },
+    ],
+    [
+      // Push (DECISIONS D-054): a white silhouette for the status bar (placeholder until the
+      // compact mark, C-21) and one channel, created by the app with private lock-screen text.
+      'expo-notifications',
+      {
+        icon: './assets/images/notification-icon-placeholder.png',
+        color: '#000000',
+        defaultChannel: 'activity',
       },
     ],
     // Release builds sign only with the production key from local config (DECISIONS C-20).

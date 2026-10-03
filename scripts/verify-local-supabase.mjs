@@ -854,6 +854,45 @@ try {
   for (const client of [userA.client, partner.client, userB.client])
     await client.removeAllChannels();
 
+  // Phase 14: push devices over HTTP (D-054). Registered and removed again at once, so nothing
+  // is ever sent to the push service from this script.
+  const channels = await userA.client.functions.invoke('push-register', { method: 'GET' });
+  check(
+    'the push channels and the public VAPID key are published',
+    channels.data?.ok === true && typeof channels.data?.web?.publicKey === 'string',
+    JSON.stringify(channels.data),
+  );
+  const p256dh = Buffer.concat([Buffer.from([4]), Buffer.alloc(64, 7)]).toString('base64url');
+  const auth = Buffer.alloc(16, 9).toString('base64url');
+  const elsewhere = await userA.client.functions.invoke('push-register', {
+    body: {
+      action: 'register',
+      device: { platform: 'web', endpoint: 'https://example.invalid/push', keys: { p256dh, auth } },
+    },
+  });
+  check('a subscription outside the known push services is refused', Boolean(elsewhere.error));
+  const endpoint = `https://fcm.googleapis.com/fcm/send/verify-${Date.now()}`;
+  const registered = await userA.client.functions.invoke('push-register', {
+    body: { action: 'register', device: { platform: 'web', endpoint, keys: { p256dh, auth } } },
+  });
+  const devicesTable = await userA.client.from('push_devices').select('*');
+  const settingsNow = await userA.client.rpc('get_notification_settings');
+  check(
+    'a device registers through the server only, and the app cannot read devices',
+    registered.data?.ok === true && Boolean(devicesTable.error) && settingsNow.data?.devices >= 1,
+    JSON.stringify({ registered: registered.data, settings: settingsNow.data }),
+  );
+  const unregistered = await userA.client.functions.invoke('push-register', {
+    body: { action: 'unregister', endpoint },
+  });
+  check(
+    'signing out removes the device',
+    unregistered.data?.removed === 1,
+    JSON.stringify(unregistered.data),
+  );
+  const claimByApp = await userA.client.rpc('push_claim', { p_limit: 10 });
+  check('the app cannot take notifications from the outbox', Boolean(claimByApp.error));
+
   // Phase 10: Instant Meet over real HTTP and Realtime. Positions go in; only rounded,
   // derived values come out, and only after both people accept (spec 26 to 34, D-050).
   const base = { lat: 12.823, lng: 80.045 };

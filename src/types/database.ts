@@ -525,6 +525,78 @@ export type Database = {
           },
         ];
       };
+      notification_outbox: {
+        Row: {
+          attempts: number;
+          body: string;
+          claimed_at: string | null;
+          collapse_key: string | null;
+          created_at: string;
+          id: number;
+          kind: string;
+          last_error: string | null;
+          sent_at: string | null;
+          title: string;
+          url: string;
+          user_id: string;
+        };
+        Insert: {
+          attempts?: number;
+          body: string;
+          claimed_at?: string | null;
+          collapse_key?: string | null;
+          created_at?: string;
+          id?: never;
+          kind: string;
+          last_error?: string | null;
+          sent_at?: string | null;
+          title: string;
+          url: string;
+          user_id: string;
+        };
+        Update: {
+          attempts?: number;
+          body?: string;
+          claimed_at?: string | null;
+          collapse_key?: string | null;
+          created_at?: string;
+          id?: never;
+          kind?: string;
+          last_error?: string | null;
+          sent_at?: string | null;
+          title?: string;
+          url?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
+      notification_settings: {
+        Row: {
+          instant: boolean;
+          matches: boolean;
+          messages: boolean;
+          payments: boolean;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          instant?: boolean;
+          matches?: boolean;
+          messages?: boolean;
+          payments?: boolean;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          instant?: boolean;
+          matches?: boolean;
+          messages?: boolean;
+          payments?: boolean;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       passes: {
         Row: {
           passed_at: string;
@@ -825,6 +897,48 @@ export type Database = {
         };
         Relationships: [];
       };
+      push_devices: {
+        Row: {
+          created_at: string;
+          disabled_at: string | null;
+          failures: number;
+          fcm_token: string | null;
+          id: string;
+          platform: string;
+          registered_at: string;
+          user_id: string;
+          web_auth: string | null;
+          web_endpoint: string | null;
+          web_p256dh: string | null;
+        };
+        Insert: {
+          created_at?: string;
+          disabled_at?: string | null;
+          failures?: number;
+          fcm_token?: string | null;
+          id?: string;
+          platform: string;
+          registered_at?: string;
+          user_id: string;
+          web_auth?: string | null;
+          web_endpoint?: string | null;
+          web_p256dh?: string | null;
+        };
+        Update: {
+          created_at?: string;
+          disabled_at?: string | null;
+          failures?: number;
+          fcm_token?: string | null;
+          id?: string;
+          platform?: string;
+          registered_at?: string;
+          user_id?: string;
+          web_auth?: string | null;
+          web_endpoint?: string | null;
+          web_p256dh?: string | null;
+        };
+        Relationships: [];
+      };
       reports: {
         Row: {
           category: Database['public']['Enums']['report_category'];
@@ -1005,6 +1119,7 @@ export type Database = {
       get_my_profile: { Args: Record<PropertyKey, never>; Returns: Json };
       get_my_status: { Args: Record<PropertyKey, never>; Returns: Json };
       get_my_swipes: { Args: Record<PropertyKey, never>; Returns: Json };
+      get_notification_settings: { Args: Record<PropertyKey, never>; Returns: Json };
       get_payment: { Args: { p_order: string }; Returns: Json };
       get_profile_card: { Args: { p_target: string }; Returns: Json };
       hook_before_user_created: { Args: { event: Json }; Returns: Json };
@@ -1081,6 +1196,27 @@ export type Database = {
         Args: { p_event_id: string; p_result: string };
         Returns: undefined;
       };
+      push_claim: { Args: { p_limit: number }; Returns: Json };
+      push_device_failed: { Args: { p_device: string; p_gone: boolean }; Returns: undefined };
+      push_mark: {
+        Args: { p_error: string; p_outbox: number; p_sent: boolean };
+        Returns: undefined;
+      };
+      push_register_device: {
+        Args: {
+          p_auth: string;
+          p_endpoint: string;
+          p_p256dh: string;
+          p_platform: string;
+          p_token: string;
+          p_user: string;
+        };
+        Returns: Json;
+      };
+      push_unregister_device: {
+        Args: { p_endpoint: string; p_token: string; p_user: string };
+        Returns: Json;
+      };
       remove_profile_photo: { Args: { p_id: string; p_user: string }; Returns: Json };
       reorder_profile_photos: { Args: { p_ids: string[] }; Returns: Json };
       report_user: {
@@ -1098,6 +1234,10 @@ export type Database = {
         Returns: Json;
       };
       set_date_of_birth: { Args: { p_dob: string }; Returns: Json };
+      set_notification_settings: {
+        Args: { p_instant: boolean; p_matches: boolean; p_messages: boolean; p_payments: boolean };
+        Returns: Json;
+      };
       submit_profile: { Args: Record<PropertyKey, never>; Returns: Json };
       swipe_left: { Args: { p_target: string }; Returns: Json };
       swipe_right: { Args: { p_idempotency_key: string; p_target: string }; Returns: Json };

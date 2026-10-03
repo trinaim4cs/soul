@@ -2,6 +2,7 @@ import { Stack } from 'expo-router';
 
 import { useAccountRealtime } from '@/features/chat/hooks/use-account-realtime';
 import { useInstantPresence } from '@/features/instant/hooks/use-instant-presence';
+import { usePush } from '@/features/notifications/hooks/use-push';
 import { fontFamily, radii, useTheme } from '@/theme';
 
 /**
@@ -14,6 +15,7 @@ export default function AppLayout() {
   const { colors } = useTheme();
   useAccountRealtime();
   useInstantPresence();
+  usePush();
   const pageHeader = {
     headerShown: true,
     headerTitle: '',
@@ -76,6 +78,7 @@ export default function AppLayout() {
       <Stack.Screen name="instant/chat/[id]" options={{ headerShown: false }} />
       <Stack.Screen name="settings/index" options={pageHeader} />
       <Stack.Screen name="settings/privacy" options={pageHeader} />
+      <Stack.Screen name="settings/notifications" options={pageHeader} />
       <Stack.Screen name="settings/purchases" options={pageHeader} />
       <Stack.Screen name="settings/blocked" options={pageHeader} />
       <Stack.Screen name="settings/delete" options={pageHeader} />

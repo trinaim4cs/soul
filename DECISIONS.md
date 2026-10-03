@@ -6,6 +6,40 @@ Status values: `accepted` · `default, confirm` · `open`.
 
 ---
 
+## Phase 14 push (2026-10-03)
+
+### D-054 Push notifications
+- **What is sent (spec 44), only for something that happened:**
+  - a new match, to both people;
+  - a message, to the recipient: the title is the sender's name as their card shows it, the body is "Sent you a message". **The message text is never in a notification.** Messages in one chat replace each other on the device (collapse key per chat);
+  - an Instant Meet session that started (both said yes), to both;
+  - a payment confirmed or refunded.
+  - No reminders, no "come back", no counts, no false urgency (spec 44).
+- **Interpretations of spec 44:**
+  - *Verification:* verification is the email code inside the app (D-027), so there is nothing to notify.
+  - *Instant candidate:* not notified. A candidate exists only while both people have Instant on with the app open, and a notification would announce that someone is nearby before either said yes. Only the mutual yes is notified.
+- **Names:** the same rule as cards. An anonymous profile is "Anonymous" (its name appears in a match notification only if it reveals itself on match).
+- **Lock screen:** every FCM message is marked `PRIVATE`, so a locked phone shows "Contents hidden" (a channel's own lock-screen setting can only be changed by the system, so it is not relied on). Browsers follow the phone's own lock-screen setting.
+- **Choices (Settings → Notifications):** matches, messages, Instant Meet and payments, each on by default, kept on the server for every device. Blocked or unmatched pairs and suspended accounts get nothing.
+- **Asking:** never at launch. One card on Chats once there is a match ("Know when they reply"), and Settings → Notifications at any time. "Not now" hides the card on that device for good.
+- **Delivery:**
+  - the database queues each notification in an outbox (triggers on matches, messages, Instant sessions and payments) and pings the `push-send` Edge Function through `pg_net`; a `pg_cron` job (`soul-push`) pings once a minute while anything is left;
+  - the ping carries nothing. `push-send` takes no input, so anyone may ping it: it delivers only what the server queued;
+  - claims use `FOR UPDATE SKIP LOCKED`; 5 attempts at most; nothing older than a day is sent; the outbox forgets after 7 days.
+- **Channels (closes D-018):**
+  - Android: FCM HTTP v1 straight from the Edge Function with a Firebase service account (`FCM_SERVICE_ACCOUNT`). No Expo account or Expo push service.
+  - Web (iPhone PWA, desktop and Android browsers): standard Web Push with VAPID. Encryption (RFC 8291) and VAPID signing (RFC 8292) use WebCrypto only and are tested against the RFC test vector.
+- **Devices:**
+  - registered only through `push-register` (a service-role function). A web subscription must point at a known push service (FCM, Mozilla, Apple, Windows), so the server never posts to an address a client made up;
+  - a token moves to whoever signed in last on that phone; sign-out removes the device first; 10 devices per person at most;
+  - a suspension, ban or deletion removes every device at once (spec 45);
+  - a device the push service no longer knows (404, 410, `UNREGISTERED`) stops at once; 5 failures in a row stop it.
+- **While SOUL is open:** the Android app shows no banner (the open screen already updates live). Browsers always show a push (they require it).
+- **iPhone:** Web Push needs the PWA added to the Home Screen (iOS 16.4+). In Safari, Settings → Notifications says so.
+- **Owner action (C-16):** see BUILD_ANDROID.md and SUPABASE.md. Until Firebase is set up, the Android app works normally and Settings → Notifications says "Notifications aren't ready yet".
+
+---
+
 ## Phase 13 safety and moderation (2026-10-03)
 
 ### D-053 Block, report, moderation, deletion and retention
@@ -505,9 +539,9 @@ Open values are listed under Unresolved configuration below.
 - **Anti-farming proposal [DEFAULT, confirm]:** only one date per distinct partner counts toward the rolling 30-day window, so three dates with the same person do not earn the badge on their own. This is interpretation, not a stated product rule, so it needs owner confirmation.
 - The badge is active when qualifying dates in the last 30 days are 3 or more. It is recomputed on confirmation and by a `pg_cron` job. Only a boolean is ever public; the count is visible only to its owner. *Built: the badge is computed live on every card; the hourly job keeps the stored state and audit trail (D-051). Owner: the badge is a fire symbol with no words.*
 
-## D-018 Push notifications (open)
+## D-018 Push notifications (accepted in D-054)
 
-`expo-notifications` on Android needs Firebase Cloud Messaging credentials, either through the Expo Push Service (needs an Expo account and project ID) or through direct FCM HTTP v1 from Edge Functions (needs a Firebase service account). Decided in Phase 15. Both need owner action.
+`expo-notifications` on Android needs Firebase Cloud Messaging credentials, either through the Expo Push Service (needs an Expo account and project ID) or through direct FCM HTTP v1 from Edge Functions (needs a Firebase service account). *Decided in Phase 14 (D-054): direct FCM HTTP v1, no Expo account. Web Push for the PWA.*
 
 ## D-019 Admin and moderation surface (open)
 
@@ -580,7 +614,7 @@ The owner felt the strict monochrome direction read "too X" (too much like a soc
 | C-13 | ~~Gender options~~ **closed 2026-09-27**: Woman / Man / Non-binary; "show me" any combination (owner: ok) | - | - |
 | C-14 | Hot Person anti-farming rule (distinct partners): **built as the default, on** (server config `hot_person_distinct_partners`); the owner can confirm or turn it off | Public release | D-051 |
 | C-15 | ~~Google Play Console / Play Billing~~ **deferred**: V1 uses web checkout (D-037) | - | - |
-| C-16 | Push credentials. Android: Firebase Cloud Messaging (works for APKs outside Play); owner creates the Firebase project, Android app `com.soul.srm`, `google-services.json` and a service account key (BUILD_ANDROID.md). iPhone PWA: standards Web Push, no Apple account; VAPID keys generated for the project. Push is never required for chat or matching | Phase 14 (push only) | In-app realtime only |
+| C-16 | Push credentials. Android: Firebase Cloud Messaging (works for APKs outside Play); owner creates the Firebase project, Android app `com.soul.srm`, `google-services.json` and a service account key (BUILD_ANDROID.md). iPhone PWA: standards Web Push, no Apple account; VAPID keys generated for the project. Push is never required for chat or matching | Android push only (the web is live) | In-app realtime only; the app says "Notifications aren't ready yet" (D-054) |
 | C-17 | ~~Supabase projects~~ **closed 2026-09-27**: cloud project `bdwuhrkgrwzpwqhgsngi` for beta/production (URL + publishable key in `.env.production`, git-ignored); local Docker for development. Schema not yet pushed: needs the owner's `supabase login` and DB password (SUPABASE.md) | - | - |
 | C-18 | ~~Message handling on account deletion~~ **settled in D-053**: deletion is immediate; matches and their chats end for both people and the messages are deleted | - | - |
 | C-19 | ~~Read receipts default~~ **built 2026-10-02 (D-049)**: on by default, mutual, switch in Privacy. The owner can still ask for off by default | - | - |

@@ -451,3 +451,9 @@ verify_jwt = false
 # Account deletion (D-053): checks the caller's token itself.
 [functions.account-delete]
 verify_jwt = false
+
+[functions.push-register]
+verify_jwt = false
+
+[functions.push-send]
+verify_jwt = false

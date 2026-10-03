@@ -1,13 +1,21 @@
 /**
- * Push contract (Phase 14, C-16). `index.ts`: expo-notifications + FCM. `index.web.ts`: Web
- * Push through the service worker (installed PWA on iOS 16.4+). SOUL works without push.
+ * Push contract (Phase 14, DECISIONS D-054). `index.ts`: expo-notifications + FCM on Android.
+ * `index.web.ts`: Web Push through the service worker (installed PWA on iOS 16.4+, desktop and
+ * Android browsers). SOUL works fully without push.
  */
 export type PushPermission = 'granted' | 'denied' | 'undetermined' | 'unavailable';
 
 export type NotificationService = {
   getPermission(): Promise<PushPermission>;
-  /** Asked after the first moment of value (a match), never at launch. */
+  /** Asked after the first moment of value (a match) or from Settings, never at launch. */
   requestPermission(): Promise<PushPermission>;
   /** Registers this device's push subscription with the server; returns false when unavailable. */
   register(): Promise<boolean>;
+  /** Removes this device from the server before signing out, so the next person gets nothing. */
+  unregister(): Promise<void>;
+  /** Whether "Open settings" can help after the person said no (the Android app can). */
+  canOpenSettings: boolean;
+  openSettings(): Promise<void>;
+  /** Calls `handler` with the page a tapped notification points to. Returns the unsubscribe. */
+  onOpen(handler: (url: string) => void): () => void;
 };

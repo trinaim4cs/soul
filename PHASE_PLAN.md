@@ -21,7 +21,7 @@ Skills per phase come from `skills/SOUL_SKILL_MAP.md`. `soul-audit` is enabled o
 | 11 | Date confirmation + Hot Person | done (Android + web verified) |
 | 12 | Billing (SOUL web checkout, D-037) | done (Android + web verified on the mock provider; live Razorpay needs the owner's keys) |
 | 13 | Safety + moderation | done (Android + web verified) |
-| 14 | Push (FCM + Web Push) | todo |
+| 14 | Push (FCM + Web Push) | done (Web Push verified for real; Android FCM awaits C-16) |
 | 15 | Admin | todo |
 | 16 | Testing (incl. the cross-platform matrix in `PLATFORM_MATRIX.md`) | todo |
 | 17 | Visual QA (Android + iPhone-size web) | todo |
@@ -262,6 +262,34 @@ Skills per phase come from `skills/SOUL_SKILL_MAP.md`. `soul-audit` is enabled o
   - A `visualViewport` keyboard inset in `SoulScreen` (iPhone Safari keeps the page size). Verified in Chrome; the iPhone path needs a real iPhone.
 
 **Closed 2026-09-28:** the Android rebuild embeds the new `remove` icon (verified in Filters).
+
+## Phase 14: Push (2026-10-03)
+
+**Server:** migration `…1003000500_push.sql` and the `push-register` and `push-send` Edge Functions (D-054):
+- Devices, per-person choices and an outbox; triggers for matches, messages (never the text), Instant Meet sessions and payments.
+- `pg_net` pings `push-send` on every queued notification; `pg_cron` (`soul-push`) retries each minute.
+- Web Push (RFC 8291 encryption, RFC 8292 VAPID) and FCM HTTP v1, on WebCrypto only; a push-service allowlist for subscriptions.
+- Devices removed at sign-out and on suspension, ban or deletion; dead subscriptions stop.
+
+**App:**
+- `services/notifications` for Android (expo-notifications, one channel, private lock-screen text per message, no banners while open) and the web (the service worker shows the push and routes a tap into the open app).
+- A one-time "Know when they reply" card on Chats after a match; Settings → Notifications (this device, then four choices).
+- A tapped notification opens only an allowed page (a chat, a match, an Instant Meet session or chat, Purchases).
+- `SoulSwitch`: react-native-web painted the "on" thumb teal; switches are now monochrome on the web too (Privacy and Notifications).
+- A placeholder status-bar icon (white ring, C-21) and the web notification badge.
+
+**Verified:**
+- pgTAP 590/590 (58 new). `db:verify` 106/106 (5 new: VAPID key published, a non-push-service endpoint refused, registration only through the server, sign-out removes the device, the outbox closed to the app). 179 unit tests (16 new, including the RFC 8291 test vector byte for byte, VAPID and the FCM assertion signatures); `functions:check` clean.
+- **Real Web Push in Chrome on the Android emulator** (through Google's push service):
+  - the Chats card asked, Chrome and Android allowed, and the device registered;
+  - a message from Test User 02 arrived as "Test User 02 · Sent you a message" (the text was not in it; the lock-screen copy reads "Contents hidden");
+  - tapping it opened that chat;
+  - with Messages turned off, nothing was queued; signing out removed the device.
+- **Android (new native build with expo-notifications):** the Chats card asked, Android 13's own prompt appeared (the channel is created first), and without the owner's Firebase file Settings → Notifications says "Notifications aren't ready yet" while the four choices still work. Android ignores an app-set channel lock-screen visibility, so privacy relies on each FCM message being `PRIVATE`.
+
+**Open:** native FCM delivery needs the owner's Firebase project (C-16); the final notification icon needs the compact mark (C-21).
+
+---
 
 ## Phase 13: Safety and moderation (2026-10-03)
 
@@ -690,3 +718,4 @@ Release build config, signing workflow (owner keystore, C-20), launcher icon (C-
 - 2026-10-03: Phase 11 done: "Did you meet?" with private answers, cooldown, expiry and review flags; the fire badge (icon only, owner's decision) computed live from 3 dates in a rolling 30 days, with an hourly consistency job (D-051).
 - 2026-10-03: Phase 12 done: Razorpay Payment Links with signed webhooks as the only grant path, frozen order prices, sync/restore, refund revocation and a mock provider that exercises the real webhook locally (D-052). Live payments wait for the owner's Razorpay keys.
 - 2026-10-03: Phase 13 done: block (invisible to the blocked person), report with message evidence, moderator functions with an action log, bans that stop re-sign-up, immediate account deletion that keeps purchase and safety records, hourly retention (D-053).
+- 2026-10-03: Phase 14 done: push for matches, messages (never the text), Instant Meet and payments; per-person choices; an outbox drained by `push-send` (FCM HTTP v1 and Web Push with RFC 8291 and VAPID); real Web Push verified on the emulator; Android FCM waits for the owner's Firebase project (D-054, C-16).

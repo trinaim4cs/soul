@@ -2,6 +2,7 @@ import { accountStatusQueryKey } from '@/features/auth/api/account-status';
 import { normalizeEmail } from '@/features/auth/model/email';
 import { queryClient } from '@/lib/query-client';
 import { supabase } from '@/lib/supabase';
+import { notifications } from '@/services/notifications';
 
 /**
  * Sends a 6-digit sign-in code. The server rejects any non-SRMIST domain (D-027).
@@ -48,6 +49,11 @@ export async function setDateOfBirth(isoDate: string): Promise<SetDobResult> {
 }
 
 export async function signOut() {
+  // This device stops receiving the person's notifications first (D-054); never blocks sign-out.
+  await Promise.race([
+    notifications.unregister(),
+    new Promise((resolve) => setTimeout(resolve, 3000)),
+  ]);
   await supabase.auth.signOut();
   queryClient.removeQueries({ queryKey: ['account-status'] });
 }

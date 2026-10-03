@@ -25,8 +25,17 @@ npx supabase link --project-ref bdwuhrkgrwzpwqhgsngi       # asks for the databa
 npx supabase db push                                      # applies supabase/migrations in order
 npx supabase config diff                                  # review auth settings before pushing
 npx supabase config push                                  # OTP length/expiry, confirmations, email template, both auth hooks
-npx supabase functions deploy health profile-photos payments-checkout payments-webhook payments-sync account-delete
+npx supabase functions deploy health profile-photos payments-checkout payments-webhook payments-sync account-delete push-register push-send
 ```
+
+**Push (D-054, C-16).** Web Push works with two keys you generate once for the cloud project (never reuse the local ones):
+```bash
+node -e "const c=require('crypto');const k=c.generateKeyPairSync('ec',{namedCurve:'prime256v1'}).privateKey.export({format:'jwk'});console.log('VAPID_PUBLIC_KEY='+Buffer.concat([Buffer.from([4]),Buffer.from(k.x,'base64url'),Buffer.from(k.y,'base64url')]).toString('base64url'));console.log('VAPID_PRIVATE_KEY='+k.d)"
+```
+```bash
+npx supabase secrets set VAPID_PUBLIC_KEY=<public> VAPID_PRIVATE_KEY=<private> VAPID_SUBJECT=mailto:<support address>
+```
+Keep the private key in your password manager: replacing it later means every browser has to subscribe again. Android push also needs `FCM_SERVICE_ACCOUNT` (BUILD_ANDROID.md). The push migration enables `pg_net`, points `push_dispatch_url` at this project's `push-send` and schedules `soul-push` every minute.
 
 Without `profile-photos` deployed, photos cannot be added (D-043).
 
@@ -72,6 +81,8 @@ Plan ids are `weekly`, `monthly`, `quarter`, `half_year`, `topup_5`, `topup_12` 
 - `_shared/validate.ts`: Zod body parsing that rejects anything unexpected.
 - `health/`: smoke test (authenticated returns 200 with the caller's id; unauthenticated returns 401).
 - `profile-photos/`: `{ action: 'add', id, source }` checks the inbox upload, strips metadata, publishes and registers the photo; `{ action: 'remove', id }` removes the row and both files (D-043).
+- `push-register/`: GET returns the public VAPID key and whether Android push is configured; POST registers or removes this device (D-054).
+- `push-send/`: drains the notification outbox through FCM and Web Push (`_shared/fcm.ts`, `_shared/webpush.ts`); pinged by the database.
 - `verify_jwt` is off for every function in `config.toml`; `requireUser` does the check (D-044). A new function needs its own `[functions.<name>]` entry, and the local stack must be restarted (`npm run db:stop` then `npm run db:start`) to serve it.
 
 ## Secrets

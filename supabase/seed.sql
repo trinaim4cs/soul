@@ -7,3 +7,6 @@ insert into public.feature_flags (key, enabled, description) values
 
 -- Local development only: the mock payment provider (D-052). Production keeps this false.
 update public.app_config set value = 'true' where key = 'payments_allow_mock';
+
+-- Local development only: the database pings the local push-send function (D-054).
+update public.app_config set value = '"http://kong:8000/functions/v1/push-send"' where key = 'push_dispatch_url';

@@ -31,6 +31,8 @@ export const iconGlyphs = {
   logout: 0xe9ba,
   more_vert: 0xe5d4,
   navigation: 0xe55d,
+  notifications: 0xe7f4,
+  notifications_off: 0xe7f6,
   near_me: 0xe569,
   person: 0xe7fd,
   photo_camera: 0xe412,

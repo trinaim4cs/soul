@@ -53,6 +53,12 @@ export function SettingsScreen() {
           onPress={() => router.push('/settings/blocked')}
         />
         <SettingsRow
+          icon="notifications"
+          label="Notifications"
+          detail="Matches, messages, Instant Meet, payments"
+          onPress={() => router.push('/settings/notifications')}
+        />
+        <SettingsRow
           icon="visibility_off"
           label="Privacy"
           detail="Visibility, read receipts, zodiac"

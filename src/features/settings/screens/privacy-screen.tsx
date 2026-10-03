@@ -1,15 +1,16 @@
 import { useState } from 'react';
-import { StyleSheet, Switch, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { PressableScale } from '@/components/pressable-scale';
 import { SoulIcon } from '@/components/soul-icon';
 import { SoulScreen } from '@/components/soul-screen';
+import { SoulSwitch } from '@/components/soul-switch';
 import { SoulText } from '@/components/soul-text';
 import { ErrorState, LoadingState } from '@/components/states';
 import { useCurrentUserId } from '@/features/auth/account-status-provider';
 import { updateProfileFields, useMyProfile } from '@/features/profile/api/profile';
 import { zodiacLabel, type MyProfile, type PrivacyMode } from '@/features/profile/model/profile';
-import { borders, createThemedStyles, radii, spacing, useTheme } from '@/theme';
+import { borders, createThemedStyles, radii, spacing } from '@/theme';
 
 const MODES: { mode: PrivacyMode; title: string; body: string }[] = [
   {
@@ -48,7 +49,6 @@ export function PrivacyScreen() {
 
 function PrivacyForm({ profile, userId }: { profile: MyProfile; userId: string }) {
   const styles = useStyles();
-  const { colors } = useTheme();
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -116,12 +116,10 @@ function PrivacyForm({ profile, userId }: { profile: MyProfile; userId: string }
                 Only people you match with see them. Everyone else still sees you blurred.
               </SoulText>
             </View>
-            <Switch
+            <SoulSwitch
               value={profile.reveal_on_match}
               disabled={saving}
               onValueChange={(value) => void save({ reveal_on_match: value })}
-              trackColor={{ false: colors.border, true: colors.inverseSurface }}
-              thumbColor={colors.background}
               accessibilityLabel="Show my name and photos to matches"
             />
           </View>
@@ -140,12 +138,10 @@ function PrivacyForm({ profile, userId }: { profile: MyProfile; userId: string }
               see when they have read yours either.
             </SoulText>
           </View>
-          <Switch
+          <SoulSwitch
             value={profile.read_receipts}
             disabled={saving}
             onValueChange={(value) => void save({ read_receipts: value })}
-            trackColor={{ false: colors.border, true: colors.inverseSurface }}
-            thumbColor={colors.background}
             accessibilityLabel="Read receipts"
           />
         </View>
@@ -164,12 +160,10 @@ function PrivacyForm({ profile, userId }: { profile: MyProfile; userId: string }
               Worked out from your birthday. Your birthday itself always stays private.
             </SoulText>
           </View>
-          <Switch
+          <SoulSwitch
             value={profile.zodiac_visible}
             disabled={saving}
             onValueChange={(value) => void save({ zodiac_visible: value })}
-            trackColor={{ false: colors.border, true: colors.inverseSurface }}
-            thumbColor={colors.background}
             accessibilityLabel="Show my zodiac"
           />
         </View>

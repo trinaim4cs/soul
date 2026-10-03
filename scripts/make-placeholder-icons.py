@@ -8,7 +8,9 @@ ring on black. It deliberately does not resemble the logo.
 Outputs (Android via app.config.ts, iPhone PWA via public/):
   assets/images/icon-placeholder.png                 1024, black with a white ring
   assets/images/adaptive-icon-foreground-placeholder.png  1024, transparent, ring in the safe zone
+  assets/images/notification-icon-placeholder.png    96, transparent, white ring (Android status bar)
   public/icons/icon-192.png, icon-512.png, icon-maskable-512.png, apple-touch-icon.png, favicon-48.png
+  public/icons/badge-96.png                          96, transparent, white ring (web notification badge)
 
 Usage: python scripts/make-placeholder-icons.py   (needs Pillow)
 """
@@ -58,6 +60,9 @@ def main() -> None:
     save(ring(512, 0.18, 0.045, BLACK), icons / "icon-maskable-512.png")
     save(ring(180, 0.22, 0.05, BLACK), icons / "apple-touch-icon.png")
     save(ring(48, 0.26, 0.08, BLACK), icons / "favicon-48.png")
+    # Notification icons are silhouettes: Android and browsers use only the alpha channel.
+    save(ring(96, 0.3, 0.09, (0, 0, 0, 0)), images / "notification-icon-placeholder.png", keep_alpha=True)
+    save(ring(96, 0.3, 0.09, (0, 0, 0, 0)), icons / "badge-96.png", keep_alpha=True)
 
 
 if __name__ == "__main__":

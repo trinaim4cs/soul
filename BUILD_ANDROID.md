@@ -86,9 +86,9 @@ KEY_PASSWORD=<the password>
 
 FCM works for APKs installed outside Google Play; it needs Google Play services on the phone (most Android phones in India have them), not a Play Store listing. Push is optional: SOUL works fully without it.
 
-What the owner creates (Phase 14):
+What the owner creates (Phase 14 is built; this switches Android push on):
 1. A Firebase project (free) and an **Android app** in it with package name `com.soul.srm`.
-2. Download `google-services.json` and place it at the repo root (git-ignored); `app.config.ts` will reference it.
+2. Download `google-services.json` and place it at the repo root (git-ignored). `app.config.ts` picks it up automatically when the file exists; rebuild with `CLEAN=1 npm run android:build`.
 3. A **service account key** (Project settings → Service accounts → Generate new private key). Never commit it; it goes to the server with `supabase secrets set FCM_SERVICE_ACCOUNT="$(cat key.json)"`, and the Edge Function sends through the FCM HTTP v1 API.
 
 ## Status
