@@ -151,6 +151,7 @@ function CardDetail({ card, fromDeck, matchId }: DetailProps) {
         label="Report or block"
         variant="ghost"
         size="sm"
+        inline
         onPress={() =>
           router.push({
             pathname: '/safety/[id]',

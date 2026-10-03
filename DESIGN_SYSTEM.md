@@ -74,7 +74,7 @@ Semantic tokens with light and dark values, following the system appearance (D-0
 | Component | Notes |
 |---|---|
 | `SoulText` | role-based typography, tone, italic (display family), numeric |
-| `SoulButton` | `primary` ink pill, `secondary` outlined, `ghost` text. Sizes lg/md/sm; loading, disabled, icon, block. Destructive actions use wording, not colour. Never the accent |
+| `SoulButton` | `primary` ink pill, `secondary` outlined, `ghost` text. Sizes lg/md/sm; loading, disabled, icon, block, `inline` (a ghost text link flush with the content edge: no side padding, full touch height). Destructive actions use wording, not colour. Never the accent |
 | `PressableScale` | press feedback for every touchable (see MOTION_SYSTEM) |
 | `SoulInput` | label above, helper, error with icon, live counter (hook: 30), multiline (About Me); focus = strong border |
 | `SoulScreen` | safe areas (top inset on the container, so nothing scrolls under the status bar), gutter, scroll option, pinned footer |

@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 
+import type { DiscoveryCard } from '@/features/discovery/model/card';
 import { matchResultSchema, matchesSchema, type Match } from '@/features/matching/model/match';
 import { queryClient } from '@/lib/query-client';
 import { supabase } from '@/lib/supabase';
@@ -39,6 +40,27 @@ export function useMatch(matchId: string) {
       return parsed.ok ? parsed.match : null;
     },
   });
+}
+
+/**
+ * A like that just made a match already knows the person, so the reveal can draw before the
+ * full match arrives. The query still fetches the real match at once (it is stale on mount);
+ * until then "Message" falls back to Chats, as it would for a match without a conversation.
+ */
+export function seedRevealedMatch(matchId: string, person: DiscoveryCard) {
+  queryClient.setQueryData<Match | null>(
+    ['match', matchId],
+    (current) =>
+      current ?? {
+        id: matchId,
+        created_at: new Date().toISOString(),
+        seen: false,
+        person,
+        conversation_id: null,
+        last_message: null,
+        unread: 0,
+      },
+  );
 }
 
 export function refreshMatches(userId: string) {

@@ -119,12 +119,13 @@ export function VerifyCodeScreen() {
             Send a new code in {minutes}:{seconds}
           </SoulText>
         ) : (
-          <SoulButton label="Send a new code" variant="ghost" size="sm" onPress={resend} />
+          <SoulButton label="Send a new code" variant="ghost" size="sm" inline onPress={resend} />
         )}
         <SoulButton
           label="Use a different email"
           variant="ghost"
           size="sm"
+          inline
           onPress={() => router.back()}
         />
       </View>

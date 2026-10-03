@@ -17,10 +17,14 @@ jest.mock('@/features/swipes/api/swipes', () => ({
   spendOneLocally: jest.fn(),
 }));
 
-jest.mock('@/features/matching/api/matches', () => ({ refreshMatches: jest.fn() }));
+jest.mock('@/features/matching/api/matches', () => ({
+  refreshMatches: jest.fn(),
+  seedRevealedMatch: jest.fn(),
+}));
 
 const matching = jest.requireMock('@/features/matching/api/matches') as {
   refreshMatches: jest.Mock;
+  seedRevealedMatch: jest.Mock;
 };
 const swipes = jest.requireMock('@/features/swipes/api/swipes') as {
   refreshSwipes: jest.Mock;
@@ -208,6 +212,11 @@ describe('discovery deck', () => {
 
     await useDeckStore.getState().decide(card(1), 'like');
     expect(useDeckStore.getState().newMatch).toBe('match-1');
+    // The reveal is seeded with the liked card, so it draws without waiting.
+    expect(matching.seedRevealedMatch).toHaveBeenCalledWith(
+      'match-1',
+      expect.objectContaining({ id: expect.any(String) }),
+    );
     expect(matching.refreshMatches).toHaveBeenCalledWith('viewer');
 
     useDeckStore.getState().acknowledgeMatch();

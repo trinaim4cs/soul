@@ -8,7 +8,14 @@ import { spacing } from '@/theme';
 /** The quiet entry point at the end of a match's profile. */
 export function UnmatchButton({ onPress }: { onPress: () => void }) {
   return (
-    <SoulButton label="Unmatch" variant="ghost" size="md" onPress={onPress} style={styles.start} />
+    <SoulButton
+      label="Unmatch"
+      variant="ghost"
+      size="md"
+      inline
+      onPress={onPress}
+      style={styles.start}
+    />
   );
 }
 
@@ -68,7 +75,7 @@ export function UnmatchConfirm({ name, onCancel, onUnmatch }: ConfirmProps) {
 
 const styles = StyleSheet.create({
   // The ghost button's own padding is pulled back so its label sits on the text gutter.
-  start: { alignSelf: 'flex-start', marginTop: spacing.xl, marginLeft: -spacing.lg },
+  start: { alignSelf: 'flex-start', marginTop: spacing.xl },
   confirm: { gap: spacing.xs },
   actions: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.sm },
   action: { flex: 1 },

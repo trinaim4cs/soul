@@ -157,6 +157,7 @@ function ReportDetail({ report }: { report: QueuedReport }) {
             label="No action needed"
             size="sm"
             variant="ghost"
+            inline
             loading={busy === 'dismiss'}
             onPress={() =>
               void decide('dismiss', () => resolveReport(report.id, false, 'No action'))

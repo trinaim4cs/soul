@@ -24,7 +24,7 @@ Skills per phase come from `skills/SOUL_SKILL_MAP.md`. `soul-audit` is enabled o
 | 14 | Push (FCM + Web Push) | done (Web Push verified for real; Android FCM awaits C-16) |
 | 15 | Admin | done (Android + web verified) |
 | 16 | Testing (incl. the cross-platform matrix in `PLATFORM_MATRIX.md`) | done (`npm run test:all`, CI, TESTING.md) |
-| 17 | Visual QA (Android + iPhone-size web) | todo |
+| 17 | Visual QA (Android + iPhone-size web) | done (Android + PWA on Android; real iPhone pending) |
 | 18 | Security audit | todo |
 | 19 | Performance | todo |
 | 20 | APK + website (`/download`, `/install`, PWA deploy) | todo |
@@ -262,6 +262,25 @@ Skills per phase come from `skills/SOUL_SKILL_MAP.md`. `soul-audit` is enabled o
   - A `visualViewport` keyboard inset in `SoulScreen` (iPhone Safari keeps the page size). Verified in Chrome; the iPhone path needs a real iPhone.
 
 **Closed 2026-09-28:** the Android rebuild embeds the new `remove` icon (verified in Filters).
+
+## Phase 17: Visual QA (2026-10-03)
+
+**Method:** VISUAL_QA.md. Android emulator screenshots of every screen in spec 71 (logo, fonts, typography, spacing, profile, discovery, filters, chat, composer, keyboard, paywall, Instant compass, settings) in light and dark mode and at 1.3× font scale, plus the PWA in Chrome on the emulator. Real images: four neutral test accounts with abstract generated photos. Evidence: `docs/visual-qa/`.
+
+**Fixed (7):**
+- Text links indented by their padding (`SoulButton inline`).
+- The match reveal waiting on a spinner (now drawn from the liked card).
+- Teal web switches (Phase 14's `SoulSwitch`, confirmed).
+- Instant's "Turn off" inset from the edge.
+- Instant's duration choice falling below the fold when the "meet ended" note shows (now pinned with its button).
+- The browser focus outline drawing a square inside the web composer (now the composer border shows focus).
+- The newest chat message hidden when the web keyboard opened (the list returns to the end when it shrinks).
+
+**Verified:** all checks green through `npm run test:all` (185 unit tests, pgTAP 672, `db:verify` 109).
+
+**Not verifiable here:** motion feel on a slow phone (Phase 19), a real iPhone, splash continuity on a release build (Phase 20), deep links from outside a running development client.
+
+---
 
 ## Phase 16: Testing (2026-10-03)
 
@@ -762,3 +781,4 @@ Release build config, signing workflow (owner keystore, C-20), launcher icon (C-
 - 2026-10-03: Phase 14 done: push for matches, messages (never the text), Instant Meet and payments; per-person choices; an outbox drained by `push-send` (FCM HTTP v1 and Web Push with RFC 8291 and VAPID); real Web Push verified on the emulator; Android FCM waits for the owner's Firebase project (D-054, C-16).
 - 2026-10-03: Phase 15 done: a role-gated Admin section (reports with evidence, photos, appeals, flagged dates, exact account lookup, suspend, ban, restore; admins also plans, support grants and feature flags including an Instant Meet pause), every action checked by the server and logged (D-055).
 - 2026-10-03: Phase 16 done: `npm run test:all`, GitHub Actions CI with no secrets, schema-wide structural tests (which closed a PUBLIC execute gap in the private schema), TESTING.md mapping every spec 70 item, live Android ↔ web chat, receipts and block (D-056).
+- 2026-10-03: Phase 17 done: every spec 71 screen reviewed on Android (light, dark, 1.3× text) and the PWA; seven defects fixed (link alignment, the reveal's wait, Instant's hidden duration choice, web composer focus and keyboard), VISUAL_QA.md with screenshots.

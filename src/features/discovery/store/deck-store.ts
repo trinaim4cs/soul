@@ -7,7 +7,7 @@ import {
   swipeRight,
 } from '@/features/discovery/api/discovery';
 import type { DiscoveryCard, SwipeDirection } from '@/features/discovery/model/card';
-import { refreshMatches } from '@/features/matching/api/matches';
+import { refreshMatches, seedRevealedMatch } from '@/features/matching/api/matches';
 import { refreshSwipes, setServerBalance, spendOneLocally } from '@/features/swipes/api/swipes';
 
 export type DeckStatus = 'idle' | 'loading' | 'ready' | 'empty' | 'error' | 'not_eligible';
@@ -139,6 +139,8 @@ export const useDeckStore = create<DeckState>((set, get) => ({
         if (liking && 'balance' in result) setServerBalance(userId, result.balance);
         else if (liking) void refreshSwipes(userId);
         if (result.ok && result.match) {
+          // The reveal draws at once from the card just liked; the full match loads behind it.
+          seedRevealedMatch(result.match.id, card);
           // Announced even if the deck was refreshed meanwhile: the match is real.
           set({ newMatch: result.match.id });
           if (userId) void refreshMatches(userId);

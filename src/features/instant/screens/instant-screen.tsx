@@ -37,7 +37,7 @@ import { personName } from '@/features/matching/model/match';
 import { BLURRED_BUCKET, PHOTO_BUCKET, usePhotoUrls } from '@/features/profile/api/profile';
 import { usePlans } from '@/features/swipes/api/swipes';
 import { location } from '@/services/location';
-import { createThemedStyles, layout, radii, sizes, spacing } from '@/theme';
+import { createThemedStyles, radii, sizes, spacing } from '@/theme';
 
 /** "A", "A and B", "A, B and C". */
 function listJoin(items: string[]): string {
@@ -215,7 +215,20 @@ function Setup({ userId }: { userId: string }) {
       scroll
       edges={{ top: true, bottom: false }}
       footer={
+        // The duration sits with the button it applies to, so it is never below the fold.
         <View style={styles.footer}>
+          <SoulText variant="label">Stay available for</SoulText>
+          <View style={styles.durations} role="radiogroup" accessibilityLabel="Stay available for">
+            {INSTANT_DURATIONS.map((option) => (
+              <SoulChip
+                key={option}
+                label={`${option} min`}
+                selected={minutes === option}
+                onPress={() => setMinutes(option)}
+                fill
+              />
+            ))}
+          </View>
           {problem ? (
             <SoulText variant="supporting" align="center" role="alert">
               {problem === 'unavailable'
@@ -255,20 +268,6 @@ function Setup({ userId }: { userId: string }) {
       <View style={styles.points}>
         {PRIVACY_POINTS.map((point) => (
           <Point key={point.icon} icon={point.icon} text={point.text} />
-        ))}
-      </View>
-      <SoulText variant="label" style={styles.durationLabel}>
-        Stay available for
-      </SoulText>
-      <View style={styles.durations} role="radiogroup" accessibilityLabel="Stay available for">
-        {INSTANT_DURATIONS.map((option) => (
-          <SoulChip
-            key={option}
-            label={`${option} min`}
-            selected={minutes === option}
-            onPress={() => setMinutes(option)}
-            fill
-          />
         ))}
       </View>
     </SoulScreen>
@@ -337,6 +336,7 @@ function Searching({ userId, state }: { userId: string; state: InstantState }) {
           label="Turn off"
           variant="ghost"
           size="sm"
+          inline
           onPress={() => void turnOff()}
           loading={stopping}
           accessibilityHint="Stops Instant Meet and deletes your location"
@@ -440,7 +440,6 @@ const useStyles = createThemedStyles(({ colors }) =>
     points: { gap: spacing.md, marginTop: spacing.lg },
     point: { flexDirection: 'row', gap: spacing.sm, alignItems: 'flex-start' },
     pointText: { flex: 1 },
-    durationLabel: { marginTop: layout.sectionGap, marginBottom: spacing.sm },
     durations: { flexDirection: 'row', gap: spacing.xs },
     footer: { gap: spacing.sm },
     notice: {

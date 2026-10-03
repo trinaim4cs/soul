@@ -37,6 +37,7 @@ export function Composer({ replyingTo, onCancelReply, onSend, onTyping }: Props)
   const [draft, setDraft] = useState('');
   // A browser textarea does not grow with its text, so its height follows the content here.
   const [webHeight, setWebHeight] = useState<number | null>(null);
+  const [focused, setFocused] = useState(false);
   const body = cleanDraft(draft);
 
   function change(text: string) {
@@ -52,7 +53,7 @@ export function Composer({ replyingTo, onCancelReply, onSend, onTyping }: Props)
   }
 
   return (
-    <View style={styles.shell}>
+    <View style={[styles.shell, focused && styles.shellFocused]}>
       {replyingTo ? (
         <View style={styles.reply}>
           <View style={styles.replyText}>
@@ -85,6 +86,8 @@ export function Composer({ replyingTo, onCancelReply, onSend, onTyping }: Props)
           cursorColor={colors.textPrimary}
           accessibilityLabel="Message"
           numberOfLines={1}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
           onContentSizeChange={
             Platform.OS === 'web'
               ? (event) => setWebHeight(Math.ceil(event.nativeEvent.contentSize.height))
@@ -93,6 +96,9 @@ export function Composer({ replyingTo, onCancelReply, onSend, onTyping }: Props)
           style={[
             styles.input,
             webHeight !== null && draft.length > 0 ? { height: webHeight } : null,
+            // The browser's own focus ring drew a rectangle inside the rounded composer; the
+            // composer's border shows focus instead (shellFocused).
+            Platform.OS === 'web' ? styles.noOutline : null,
           ]}
         />
         <PressableScale
@@ -124,6 +130,8 @@ const useStyles = createThemedStyles(({ colors }) =>
       borderColor: colors.border,
       backgroundColor: colors.surface,
     },
+    shellFocused: { borderColor: colors.borderStrong },
+    noOutline: { outlineStyle: 'none' } as object,
     reply: {
       flexDirection: 'row',
       alignItems: 'center',

@@ -20,6 +20,11 @@ type Props = {
   disabled?: boolean;
   /** Stretch to the container width (default for primary actions at the bottom of a screen). */
   block?: boolean;
+  /**
+   * A text link on the content edge (`ghost` only): no side padding, so the label lines up
+   * with the text around it. The touch target keeps its full height.
+   */
+  inline?: boolean;
   accessibilityHint?: string;
   style?: StyleProp<ViewStyle>;
   /** Layout of the touch box itself, e.g. `{ flex: 1 }` for buttons sharing a row. */
@@ -40,6 +45,7 @@ export function SoulButton({
   loading = false,
   disabled = false,
   block = false,
+  inline = false,
   accessibilityHint,
   style,
   containerStyle,
@@ -78,7 +84,7 @@ export function SoulButton({
         styles.base,
         {
           minHeight: sizes.button[size],
-          paddingHorizontal: size === 'sm' ? spacing.md : spacing.lg,
+          paddingHorizontal: inline ? 0 : size === 'sm' ? spacing.md : spacing.lg,
         },
         styles[variant],
         block && styles.block,

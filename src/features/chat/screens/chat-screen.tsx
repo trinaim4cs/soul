@@ -152,6 +152,7 @@ export function Conversation({
   const [replyTo, setReplyTo] = useState<ReplyTarget | null>(null);
   const list = useRef<FlashListRef<ChatRow>>(null);
   const nearBottom = useRef(true);
+  const listHeight = useRef<number | null>(null);
 
   // The typing bubble is the list's footer. Bring it into view when it appears, but only
   // for someone already reading the newest messages (never yank a person out of history).
@@ -261,6 +262,14 @@ export function Conversation({
                 contentSize.height - (contentOffset.y + layoutMeasurement.height) < NEAR_BOTTOM;
             }}
             scrollEventThrottle={64}
+            // The keyboard (or a browser bar) made the list shorter: someone reading the newest
+            // messages keeps seeing them. Chrome on Android resizes the page for the keyboard.
+            onLayout={({ nativeEvent }) => {
+              const height = nativeEvent.layout.height;
+              const shrank = listHeight.current !== null && height < listHeight.current;
+              listHeight.current = height;
+              if (shrank && nearBottom.current) list.current?.scrollToEnd({ animated: false });
+            }}
             renderItem={renderRow}
             keyExtractor={(row) => row.key}
             getItemType={(row) => row.kind}
