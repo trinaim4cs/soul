@@ -6,9 +6,9 @@ type InstantStore = {
   /** Why the device position is not reaching the server, if it is not. */
   locationProblem: LocationProblem | null;
   /** The session that just ended (shown once on the Instant tab). */
-  ended: { name: string } | null;
+  ended: { id: string; name: string } | null;
   setLocationProblem: (problem: LocationProblem | null) => void;
-  noteEnded: (name: string) => void;
+  noteEnded: (id: string, name: string) => void;
   clearEnded: () => void;
 };
 
@@ -17,6 +17,6 @@ export const useInstantStore = create<InstantStore>((set) => ({
   locationProblem: null,
   ended: null,
   setLocationProblem: (locationProblem) => set({ locationProblem }),
-  noteEnded: (name) => set({ ended: { name } }),
+  noteEnded: (id, name) => set({ ended: { id, name } }),
   clearEnded: () => set({ ended: null }),
 }));

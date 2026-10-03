@@ -21,6 +21,7 @@ const base: MyProfile = {
   zodiac: 'gemini',
   age: 22,
   verified: true,
+  hot_person: false,
   complete: false,
   show_me: ['man'],
   photos: [

@@ -24,6 +24,7 @@ export const iconGlyphs = {
   hourglass_empty: 0xe88b,
   info: 0xe88e,
   ios_share: 0xe6b8,
+  local_fire_department: 0xef55,
   location_off: 0xe0c7,
   location_on: 0xe0c8,
   lock: 0xe897,

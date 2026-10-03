@@ -22,7 +22,7 @@ export function useOwnProfileView(profile: MyProfile | undefined): ProfileViewMo
     hook: profile.hook,
     about: profile.about,
     zodiac: profile.zodiac_visible && profile.zodiac ? zodiacLabel(profile.zodiac) : null,
-    hotPerson: false,
+    hotPerson: profile.hot_person,
     photos: paths.map((path) => urls.data?.[path]).filter((url): url is string => Boolean(url)),
     anonymous,
   };

@@ -203,6 +203,122 @@ export type Database = {
           },
         ];
       };
+      date_review_flags: {
+        Row: {
+          created_at: string;
+          date_round_id: string;
+          id: number;
+          reason: string;
+          reviewed_at: string | null;
+          reviewed_by: string | null;
+          user_id: string | null;
+        };
+        Insert: {
+          created_at?: string;
+          date_round_id: string;
+          id?: never;
+          reason: string;
+          reviewed_at?: string | null;
+          reviewed_by?: string | null;
+          user_id?: string | null;
+        };
+        Update: {
+          created_at?: string;
+          date_round_id?: string;
+          id?: never;
+          reason?: string;
+          reviewed_at?: string | null;
+          reviewed_by?: string | null;
+          user_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'date_review_flags_date_round_id_fkey';
+            columns: ['date_round_id'];
+            isOneToOne: false;
+            referencedRelation: 'date_rounds';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      date_rounds: {
+        Row: {
+          a_answer: boolean | null;
+          a_answered_at: string | null;
+          b_answer: boolean | null;
+          b_answered_at: string | null;
+          closed_at: string | null;
+          closes_at: string;
+          confirmed_at: string | null;
+          id: string;
+          instant_session_id: string | null;
+          invalidated_at: string | null;
+          invalidated_by: string | null;
+          invalidated_reason: string | null;
+          match_id: string | null;
+          opened_at: string;
+          source: string;
+          status: string;
+          user_a: string;
+          user_b: string;
+        };
+        Insert: {
+          a_answer?: boolean | null;
+          a_answered_at?: string | null;
+          b_answer?: boolean | null;
+          b_answered_at?: string | null;
+          closed_at?: string | null;
+          closes_at: string;
+          confirmed_at?: string | null;
+          id?: string;
+          instant_session_id?: string | null;
+          invalidated_at?: string | null;
+          invalidated_by?: string | null;
+          invalidated_reason?: string | null;
+          match_id?: string | null;
+          opened_at?: string;
+          source: string;
+          status?: string;
+          user_a: string;
+          user_b: string;
+        };
+        Update: {
+          a_answer?: boolean | null;
+          a_answered_at?: string | null;
+          b_answer?: boolean | null;
+          b_answered_at?: string | null;
+          closed_at?: string | null;
+          closes_at?: string;
+          confirmed_at?: string | null;
+          id?: string;
+          instant_session_id?: string | null;
+          invalidated_at?: string | null;
+          invalidated_by?: string | null;
+          invalidated_reason?: string | null;
+          match_id?: string | null;
+          opened_at?: string;
+          source?: string;
+          status?: string;
+          user_a?: string;
+          user_b?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'date_rounds_instant_session_id_fkey';
+            columns: ['instant_session_id'];
+            isOneToOne: false;
+            referencedRelation: 'instant_sessions';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'date_rounds_match_id_fkey';
+            columns: ['match_id'];
+            isOneToOne: false;
+            referencedRelation: 'matches';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       feature_flags: {
         Row: {
           description: string;
@@ -642,12 +758,15 @@ export type Database = {
         Args: { p_height: number; p_id: string; p_source: string; p_user: string; p_width: number };
         Returns: Json;
       };
+      answer_date: { Args: { p_met: boolean; p_other: string }; Returns: Json };
+      date_state: { Args: { p_other: string }; Returns: Json };
       discovery_feed: { Args: { p_exclude?: string[]; p_limit?: number }; Returns: Json };
       get_match: { Args: { p_match: string }; Returns: Json };
       get_messages: {
         Args: { p_before?: number; p_conversation: string; p_limit?: number };
         Returns: Json;
       };
+      get_my_dates: { Args: Record<PropertyKey, never>; Returns: Json };
       get_my_matches: { Args: Record<PropertyKey, never>; Returns: Json };
       get_my_profile: { Args: Record<PropertyKey, never>; Returns: Json };
       get_my_status: { Args: Record<PropertyKey, never>; Returns: Json };
@@ -666,6 +785,7 @@ export type Database = {
         Args: { p_accuracy: number; p_latitude: number; p_longitude: number };
         Returns: Json;
       };
+      invalidate_date: { Args: { p_reason: string; p_round: string }; Returns: Json };
       mark_conversation_read: {
         Args: { p_conversation: string; p_message: number };
         Returns: Json;

@@ -58,7 +58,7 @@ The client can request these; only the server decides them. Each is a SECURITY D
 | Subscription active, top-up granted, refunds | `payments-webhook` after verifying the provider signature and the amount against the server catalog (D-037); idempotent on the provider payment ID |
 | Instant entitlement, Instant visibility, session start/end | `instant_start` (plan gate), `instant_candidates`, `instant_accept` (both must accept; one transaction under the pair lock), `instant_end_session` / `instant_stop` (unilateral) and the lazy sweep (expiry) (D-050) |
 | Other user's distance and bearing | `instant_state` returns buckets only: 50 m / 100 m distance steps, 15° bearing, only `nearby` under 100 m (D-050) |
-| Date confirmed, Hot Person badge | confirmation function + recompute job |
+| Date confirmed, Hot Person badge | `answer_date` (both must say yes, independently; one counted date per pair per 24 h; answers unreadable), the badge computed live from confirmed dates (only a boolean leaves the server; the count only to its owner via `get_my_dates`), `invalidate_date` for moderators, hourly consistency job (D-051) |
 | Photo published and registered | `profile-photos` Edge Function: JPEG structure, real size read from the file, metadata stripped, clean copy written by the server (D-043) |
 | Suspension, ban, photo or verification rejection | admin functions with role check + audit log |
 

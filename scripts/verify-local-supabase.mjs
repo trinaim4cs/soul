@@ -866,6 +866,57 @@ try {
     rejoin.status !== 'SUBSCRIBED' && (nearAfter.data?.candidates ?? []).length === 0,
     rejoin.status,
   );
+  // Phase 11: "Did you meet?" over HTTP. The pair just met through Instant Meet.
+  const askFirst = await userA.client.rpc('date_state', { p_other: nearId });
+  check(
+    'after an Instant Meet the two can confirm they met',
+    askFirst.data?.state === 'ask' && askFirst.data?.source === 'instant',
+    JSON.stringify({ state: askFirst.data?.state, source: askFirst.data?.source }),
+  );
+  const firstYesDate = await userA.client.rpc('answer_date', { p_other: nearId, p_met: true });
+  const otherView = await nearUser.client.rpc('date_state', { p_other: userA.id });
+  check(
+    'a first yes is invisible to the other person',
+    firstYesDate.data?.state === 'waiting' &&
+      otherView.data?.state === 'ask' &&
+      otherView.data?.closes_at === null &&
+      otherView.data?.last === null,
+    JSON.stringify({ mine: firstYesDate.data?.state, theirs: otherView.data?.state }),
+  );
+  const myInbox = await join(userA.client, `user:${userA.id}`);
+  const secondYesDate = await nearUser.client.rpc('answer_date', {
+    p_other: userA.id,
+    p_met: true,
+  });
+  check(
+    'the second yes confirms the date and nudges the first phone',
+    secondYesDate.data?.state === 'confirmed' &&
+      (await received(myInbox.events, (e) => e.event === 'refresh' && e.payload.reason === 'date')),
+    JSON.stringify(secondYesDate.data),
+  );
+  const repeatDate = await userA.client.rpc('answer_date', { p_other: nearId, p_met: true });
+  const progress = await userA.client.rpc('get_my_dates');
+  check(
+    'the same encounter cannot be counted twice; the owner sees their private count',
+    repeatDate.data?.reason === 'cooldown' &&
+      progress.data?.count === 1 &&
+      progress.data?.active === false,
+    JSON.stringify({ repeat: repeatDate.data, count: progress.data?.count }),
+  );
+  const roundsTable = await userA.client.from('date_rounds').select('*');
+  const outsiderDate = await userB.client.rpc('date_state', { p_other: userA.id });
+  const selfGrantDate = await userA.client.rpc('invalidate_date', {
+    p_round: randomUUID(),
+    p_reason: 'test',
+  });
+  check(
+    'answers are unreadable, outsiders cannot confirm, only moderators invalidate',
+    Boolean(roundsTable.error) &&
+      outsiderDate.data?.reason === 'not_available' &&
+      selfGrantDate.error?.code === '42501',
+    `${roundsTable.error?.code}, ${outsiderDate.data?.reason}, ${selfGrantDate.error?.code}`,
+  );
+  await myInbox.channel.unsubscribe();
   await farUser.client.rpc('instant_stop');
   for (const client of [nearUser.client, farUser.client]) await client.removeAllChannels();
 } finally {

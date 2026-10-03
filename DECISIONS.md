@@ -6,6 +6,33 @@ Status values: `accepted` · `default, confirm` · `open`.
 
 ---
 
+## Phase 11 date confirmation and the fire badge (2026-10-03)
+
+### D-051 "Did you meet?" and the Hot Person badge (refines D-017)
+- **Owner decision (2026-10-03): the badge is a fire symbol, with no words.** It is the Material Symbols `local_fire_department` glyph, monochrome like every badge (D-026), and sits next to the verified mark on cards and profiles. Screen readers announce it as "Hot Person". Nowhere in the app is the badge named in visible text.
+- **Who can confirm:** two people with an active match, or two people whose Instant Meet session started within the last 7 days (spec 35: "after a match or Instant Meet"; "must be a real match"). Not after a block, an unmatch or a suspension.
+- **Answering:** "Yes, we met" or "Not yet", each person on their own. Answers are final for a round.
+  - A first yes opens a round that waits 7 days for the other person.
+  - A second yes confirms the date.
+  - A "no" on a pending round closes it as not counted.
+  - "Not yet" with nothing pending stores nothing.
+- **No reveal before answering (spec 35):** a pending yes from the other person is invisible. Their screen and the chat row look exactly as they did before. Only after both have answered does the first person learn the outcome: confirmed, not counted, or ran out.
+- **Anti-farming:**
+  - One counted date per pair per 24 hours, so the same encounter is never counted twice.
+  - By default only one date per partner counts toward the badge (D-017's proposal, still C-14 for the owner to confirm; server config `hot_person_distinct_partners`).
+  - Repeated confirmations by the same pair, and unusual volume (6 in 7 days), are flagged in `date_review_flags` for moderators. Flags never block the date itself.
+  - Moderators can invalidate a date (`invalidate_date`), and it stops counting at once.
+- **The badge:** active while counted dates in the rolling 30 days reach 3 (both configurable). It is computed live in the card function, so it appears and disappears at the exact moment, and only a true/false ever leaves the server.
+- **Scheduled consistency check (spec 36):** an hourly `pg_cron` job (`soul-dates-consistency`) closes lapsed rounds and records badge changes (`audit_events`: `hot_person_on` / `hot_person_off`) for dates that aged out. The public badge never waits for it.
+- **Private progress (spec 36):** the You tab shows the owner "2 of 3 dates in the last 30 days" and what earns the fire badge. Nobody else ever sees a count.
+- **Where it shows in the app:**
+  - A quiet "Did you meet {name}?" row under a match chat's header, once both people have written. The row changes to "Waiting…" after a yes and "You both said you met" after a date.
+  - A "Did you meet?" button on the Instant tab after a meet ends.
+  - The answer sheet itself (`/date/[id]`).
+  - Both phones update at once on `user:<account>` (`reason: date`).
+
+---
+
 ## Phase 10 Instant Meet (2026-10-03)
 
 ### D-050 Instant Meet
@@ -399,12 +426,12 @@ Open values are listed under Unresolved configuration below.
 - **Anonymous:** the user appears in discovery with the primary photo replaced by a **server-generated blurred derivative**. The original is not downloadable, and only age, verified indicator, zodiac (if enabled), hook and About Me are shown. After a mutual match, the photos reveal according to the user's reveal setting. Anonymous still requires full private verification.
 - Private and anonymous can be combined.
 
-## D-017 Date confirmation and Hot Person (default, confirm)
+## D-017 Date confirmation and Hot Person (built in Phase 11 as D-051; the distinct-partner rule is still C-14)
 
 - After a match, each user can privately answer "Did you meet?". A date event is created only when **both** answer yes within the confirmation window. Neither sees the other's answer before answering.
 - At most one qualifying date is created per match per confirmation round. A new round opens only after a cooldown (proposed 24 h, configurable).
 - **Anti-farming proposal [DEFAULT, confirm]:** only one date per distinct partner counts toward the rolling 30-day window, so three dates with the same person do not earn the badge on their own. This is interpretation, not a stated product rule, so it needs owner confirmation.
-- The badge is active when qualifying dates in the last 30 days are 3 or more. It is recomputed on confirmation and by a `pg_cron` job. Only a boolean is ever public; the count is visible only to its owner.
+- The badge is active when qualifying dates in the last 30 days are 3 or more. It is recomputed on confirmation and by a `pg_cron` job. Only a boolean is ever public; the count is visible only to its owner. *Built: the badge is computed live on every card; the hourly job keeps the stored state and audit trail (D-051). Owner: the badge is a fire symbol with no words.*
 
 ## D-018 Push notifications (open)
 
@@ -479,7 +506,7 @@ The owner felt the strict monochrome direction read "too X" (too much like a soc
 | C-11 | ~~Monthly plan included right swipes~~ **closed 2026-09-27**: **25 right swipes per month** (owner) | - | - |
 | C-12 | ~~Plan swipe rollover / top-up expiry~~ **closed 2026-09-27**: unused plan swipes end with the plan period (no rollover); top-ups never expire (owner: "same like any other") | - | - |
 | C-13 | ~~Gender options~~ **closed 2026-09-27**: Woman / Man / Non-binary; "show me" any combination (owner: ok) | - | - |
-| C-14 | Hot Person anti-farming rule (distinct partners) | Phase 12 release | D-017 proposal |
+| C-14 | Hot Person anti-farming rule (distinct partners): **built as the default, on** (server config `hot_person_distinct_partners`); the owner can confirm or turn it off | Public release | D-051 |
 | C-15 | ~~Google Play Console / Play Billing~~ **deferred**: V1 uses web checkout (D-037) | - | - |
 | C-16 | Push credentials. Android: Firebase Cloud Messaging (works for APKs outside Play); owner creates the Firebase project, Android app `com.soul.srm`, `google-services.json` and a service account key (BUILD_ANDROID.md). iPhone PWA: standards Web Push, no Apple account; VAPID keys generated for the project. Push is never required for chat or matching | Phase 14 (push only) | In-app realtime only |
 | C-17 | ~~Supabase projects~~ **closed 2026-09-27**: cloud project `bdwuhrkgrwzpwqhgsngi` for beta/production (URL + publishable key in `.env.production`, git-ignored); local Docker for development. Schema not yet pushed: needs the owner's `supabase login` and DB password (SUPABASE.md) | - | - |

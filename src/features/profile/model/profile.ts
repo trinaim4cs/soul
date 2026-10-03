@@ -69,6 +69,8 @@ export const myProfileSchema = z.object({
   zodiac: z.enum(ZODIAC_SIGNS).nullable(),
   age: z.number().int().nullable(),
   verified: z.boolean(),
+  /** The owner's own fire badge (D-051); older servers omit it. */
+  hot_person: z.boolean().default(false),
   complete: z.boolean(),
   show_me: z.array(z.enum(GENDERS)),
   photos: z.array(photoSchema),

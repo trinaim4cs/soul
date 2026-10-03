@@ -38,6 +38,16 @@ export default function AppLayout() {
           sheetCornerRadius: radii.xl,
         }}
       />
+      <Stack.Screen
+        name="date/[id]"
+        options={{
+          ...pageHeader,
+          presentation: 'formSheet',
+          sheetAllowedDetents: [0.6],
+          sheetGrabberVisible: true,
+          sheetCornerRadius: radii.xl,
+        }}
+      />
       <Stack.Screen name="paywall" options={{ presentation: 'modal', headerShown: false }} />
       <Stack.Screen
         name="match/[id]"

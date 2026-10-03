@@ -90,7 +90,7 @@ Location never gates the app (spec v2: no geofence). Only the Instant tab asks f
 | Matching | `matches` (Phase 8, D-048) | inside `swipe_right()`; `get_my_matches()`, `get_match()`, `mark_match_seen()`, `unmatch()`; app code in `src/features/matching` |
 | Chat | `conversations`, `conversation_members`, `messages` (Phase 9, D-049) | `send_message()` + broadcast trigger, `get_messages()`, `mark_conversation_read()`; typing via Broadcast on a client topic; app code in `src/features/chat` |
 | Instant | `private.instant_presence`, `private.instant_accepts`, `private.instant_skips`, `instant_sessions`, session `conversations` | `instant_start`, `instant_stop`, `instant_update_location`, `instant_candidates`, `instant_accept`, `instant_skip`, `instant_state`, `instant_end_session` (SQL functions, no Edge Function; D-050) |
-| Dates and badges | `date_rounds`, `date_confirmations`, `date_events`, `badges` | confirmation function, `recompute_hot_person()` + pg_cron |
+| Dates and badges | `date_rounds`, `date_review_flags`, `private.hot_person_state` | `date_state`, `answer_date`, `get_my_dates`, `invalidate_date`; badge computed live in the card function; hourly `pg_cron` consistency job (D-051) |
 | Safety | `blocks`, `reports`, `report_attachments`, `moderation_actions`, `risk_signals`, `appeals` | report/block functions, admin functions |
 | Platform | `feature_flags`, `app_config` (e.g. free cadence), `audit_events`, `admin_roles` | read-only flags for clients; admin-only writes |
 

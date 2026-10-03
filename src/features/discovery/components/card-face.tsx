@@ -1,7 +1,7 @@
 import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 import Animated, { type AnimatedStyle } from 'react-native-reanimated';
 
-import { VerifiedBadge } from '@/components/badges';
+import { HotPersonBadge, VerifiedBadge } from '@/components/badges';
 import { PhotoScrim } from '@/components/photo-scrim';
 import { SoulPhoto } from '@/components/soul-photo';
 import { SoulText } from '@/components/soul-text';
@@ -57,7 +57,10 @@ export function CardFace({ card, likeStampStyle, passStampStyle }: Props) {
           <SoulText variant="section" tone="onPhoto" style={styles.age}>
             {`, ${card.age}`}
           </SoulText>
-          {card.verified ? <VerifiedBadge onPhoto /> : null}
+          <View style={styles.badges}>
+            {card.verified ? <VerifiedBadge onPhoto /> : null}
+            {card.hot_person ? <HotPersonBadge onPhoto /> : null}
+          </View>
         </View>
         {card.hook ? (
           <SoulText variant="subheading" italic tone="onPhoto" numberOfLines={2}>
@@ -80,6 +83,7 @@ const useStyles = createThemedStyles(({ colors }) =>
       gap: spacing.xxs,
     },
     titleRow: { flexDirection: 'row', alignItems: 'center' },
+    badges: { flexDirection: 'row', alignItems: 'center', gap: spacing.xxs },
     age: { flexShrink: 0, marginRight: spacing.xs },
     title: { flexShrink: 1 },
     stamp: {

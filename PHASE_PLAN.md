@@ -18,7 +18,7 @@ Skills per phase come from `skills/SOUL_SKILL_MAP.md`. `soul-audit` is enabled o
 | 8 | Matching | done (Android + web verified) |
 | 9 | Chat | done (Android + web verified, two live clients) |
 | 10 | Instant Meet (the only location feature, 1 km) | done (Android + web verified; location-leak audit passed) |
-| 11 | Date confirmation + Hot Person | todo |
+| 11 | Date confirmation + Hot Person | done (Android + web verified) |
 | 12 | Billing (SOUL web checkout, D-037) | todo |
 | 13 | Safety + moderation | todo |
 | 14 | Push (FCM + Web Push) | todo |
@@ -262,6 +262,39 @@ Skills per phase come from `skills/SOUL_SKILL_MAP.md`. `soul-audit` is enabled o
   - A `visualViewport` keyboard inset in `SoulScreen` (iPhone Safari keeps the page size). Verified in Chrome; the iPhone path needs a real iPhone.
 
 **Closed 2026-09-28:** the Android rebuild embeds the new `remove` icon (verified in Filters).
+
+## Phase 11: Date confirmation and the fire badge (2026-10-03)
+
+**Server:** migration `…1003000200_dates.sql` (D-051):
+- `date_rounds` (answers, never readable by the app), `date_review_flags`, `private.hot_person_state`.
+- `date_state`, `answer_date`, `get_my_dates`, `invalidate_date` (moderators only).
+- The badge is computed live in the card function; an hourly `pg_cron` consistency job keeps the stored state and audit trail; a block voids pending rounds.
+
+**App:**
+- "Did you meet?" sheet (`/date/[id]`, a form sheet).
+- The quiet row under a match chat's header once both have written.
+- "Did you meet?" on the Instant tab after a meet ends.
+- The private progress card on the You tab.
+- The fire badge (icon only, owner's decision) next to the verified mark on Discover cards, profiles and the owner's own preview.
+- Native rebuild for the `local_fire_department` glyph.
+
+**Verified:**
+- pgTAP 420/420 (63 new), `db:verify` 87/87 (5 new over HTTP and Realtime), 145 unit tests, typecheck and lint clean.
+- **Privacy of answers:** after one yes, the other person's state is byte-for-byte what it was before. A "no" with nothing pending stores nothing. After both answered, the first yes learns "not counted".
+- **Rules:** cooldown (no double count), expiry (a late yes starts a new round), the Instant source (7 days), blocks and unmatches.
+- **Badge maths:** the window boundary (29.99 days counts, 30 days 1 minute does not), distinct partners, server config, moderation invalidation, review flags, the audit trail and the scheduled job.
+- **Two browser sessions:** a yes showed "Waiting" for User C while Profile 07 still saw a plain "Did you meet?". Profile 07's yes confirmed it, and User C's sheet changed to "You both said you met" by itself.
+- **Badge in the browser:**
+  - With 3 dates, User C's You tab showed "3 dates in the last 30 days" and the fire next to the verified mark.
+  - Profile 07's Discover card for User C showed the fire.
+- **Chat row in the browser:** it appeared live once the second person wrote; "Not yet" closed the sheet and stored nothing.
+- **Android (rebuilt for the fire glyph):** the You tab's progress card and the fire next to the verified mark render with the native icon font; the chat row opens the answer as a native form sheet; the composer's send icon renders.
+
+**Open:**
+- C-14 (distinct partners) stays for the owner to confirm; it is on by default.
+- Reviewing flags and invalidating dates needs the admin surface (Phase 15).
+
+---
 
 ## Phase 10: Instant Meet (2026-10-03)
 
@@ -590,3 +623,4 @@ Release build config, signing workflow (owner keystore, C-20), launcher icon (C-
 - 2026-10-02: Phase 8 done: matches created inside the like transaction under a pair lock, reveal, matches list with unseen count, unmatch, anonymous reveal setting (D-048).
 - 2026-10-02: Phase 9 done: chat with private Realtime topics, read receipts, typing, reply, retry; verified with two live clients (D-049). C: drive filled to 2 GB free because the page file grew to 32 GB under memory pressure; the emulator now runs only during Android checks.
 - 2026-10-03: Phase 10 done: Instant Meet with plan gate, 1 km candidates on a ~110 m grid, mutual acceptance, compass, rounded distance, session chat, End Meet and expiry; location-leak audit and end-session revocation tests pass (D-050). The owner freed C: (198 GB free). Native rebuild for expo-location, expo-haptics and the new icon glyphs.
+- 2026-10-03: Phase 11 done: "Did you meet?" with private answers, cooldown, expiry and review flags; the fire badge (icon only, owner's decision) computed live from 3 dates in a rolling 30 days, with an hourly consistency job (D-051).

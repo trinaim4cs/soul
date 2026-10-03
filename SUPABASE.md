@@ -28,7 +28,7 @@ npx supabase config push                                  # OTP length/expiry, c
 npx supabase functions deploy health profile-photos
 ```
 
-Without `profile-photos` deployed, photos cannot be added (D-043). Instant Meet needs nothing extra: PostGIS is created by the foundation migration, and expiry runs inside the Instant functions (no cron).
+Without `profile-photos` deployed, photos cannot be added (D-043). Instant Meet needs nothing extra: PostGIS is created by the foundation migration, and expiry runs inside the Instant functions (no cron). The dates migration enables `pg_cron` and schedules `soul-dates-consistency` hourly; check it under Database → Cron after the push.
 
 Then in the dashboard:
 - **Authentication → URL configuration:** set Site URL to the Vercel URL.

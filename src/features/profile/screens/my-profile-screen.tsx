@@ -7,6 +7,7 @@ import { SoulScreen } from '@/components/soul-screen';
 import { SoulText } from '@/components/soul-text';
 import { ErrorState, LoadingState } from '@/components/states';
 import { useCurrentUserId } from '@/features/auth/account-status-provider';
+import { DateProgress } from '@/features/dates/components/date-progress';
 import { useMyProfile } from '@/features/profile/api/profile';
 import { ProfileView } from '@/features/profile/components/profile-view';
 import { useOwnProfileView } from '@/features/profile/hooks/use-own-profile-view';
@@ -67,6 +68,7 @@ export function MyProfileScreen() {
           </SoulText>
         </View>
       ) : null}
+      {userId ? <DateProgress userId={userId} /> : null}
       <ProfileView profile={view} />
     </SoulScreen>
   );

@@ -80,7 +80,7 @@ Semantic tokens with light and dark values, following the system appearance (D-0
 | `SoulScreen` | safe areas (top inset on the container, so nothing scrolls under the status bar), gutter, scroll option, pinned footer |
 | `SoulLogo` | the supplied mark as is; black or white by surface; ≤ 180 dp |
 | `SoulPhoto`, `SoulAvatar` | `expo-image`, cover crop, blurhash placeholder, recycling key |
-| `SoulBadge`, `VerifiedBadge`, `HotPersonBadge` | monochrome only; Hot Person shows the badge, never a count |
+| `SoulBadge`, `VerifiedBadge`, `HotPersonBadge` | monochrome only. Verified and Hot Person are single glyphs side by side after the name (`verified`, `local_fire_department`); the Hot Person badge is the fire alone, never words and never a count (owner, D-051); both carry an accessibility label |
 | `Skeleton`, `LoadingState` | layout-mirroring placeholders, gentle pulse, static under reduced motion |
 | `EmptyState`, `ErrorState`, `OfflineState`, `PermissionState` | composed interstitials with a clear next action |
 | `SoulIcon` | Material Symbols |

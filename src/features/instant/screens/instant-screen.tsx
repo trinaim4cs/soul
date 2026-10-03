@@ -229,9 +229,17 @@ function Setup({ userId }: { userId: string }) {
       <Header title="Instant" />
       {ended ? (
         <View style={styles.notice}>
-          <SoulText variant="supporting" tone="secondary" style={styles.noticeText}>
-            {`Your meet with ${ended.name} has ended. Location sharing stopped for both of you.`}
-          </SoulText>
+          <View style={styles.noticeText}>
+            <SoulText variant="supporting" tone="secondary">
+              {`Your meet with ${ended.name} has ended. Location sharing stopped for both of you.`}
+            </SoulText>
+            <SoulButton
+              label="Did you meet?"
+              variant="secondary"
+              size="sm"
+              onPress={() => router.push({ pathname: '/date/[id]', params: { id: ended.id } })}
+            />
+          </View>
           <PressableScale
             accessibilityRole="button"
             accessibilityLabel="Dismiss"
@@ -444,7 +452,7 @@ const useStyles = createThemedStyles(({ colors }) =>
       borderRadius: radii.md,
       backgroundColor: colors.surfaceSubtle,
     },
-    noticeText: { flex: 1, paddingVertical: spacing.sm },
+    noticeText: { flex: 1, gap: spacing.sm, paddingVertical: spacing.sm },
     dismiss: {
       width: sizes.touchTarget,
       height: sizes.touchTarget,

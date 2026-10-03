@@ -44,9 +44,20 @@ export function VerifiedBadge({ onPhoto = false }: { onPhoto?: boolean }) {
   );
 }
 
-/** Public Hot Person badge: only the badge, never a date count (spec 37). */
+/**
+ * Public Hot Person badge (spec 36, D-051): a fire mark only, never words and never a date count.
+ * Monochrome like every badge. Screen readers still hear what it means.
+ */
 export function HotPersonBadge({ onPhoto = false }: { onPhoto?: boolean }) {
-  return <SoulBadge label="Hot Person" appearance={onPhoto ? 'onPhoto' : 'solid'} />;
+  return (
+    <SoulIcon
+      name="local_fire_department"
+      size="sm"
+      color={onPhoto ? 'onPhoto' : 'textPrimary'}
+      weight="regular"
+      accessibilityLabel="Hot Person"
+    />
+  );
 }
 
 const useStyles = createThemedStyles(({ colors }) =>

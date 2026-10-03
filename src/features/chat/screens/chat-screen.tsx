@@ -23,6 +23,7 @@ import {
   type ChatRow,
   type ReplyTarget,
 } from '@/features/chat/model/chat';
+import { DatePrompt } from '@/features/dates/components/date-prompt';
 import { cardBucket, type DiscoveryCard } from '@/features/discovery/model/card';
 import { useMatches } from '@/features/matching/api/matches';
 import { matchedLabel, personName } from '@/features/matching/model/match';
@@ -79,6 +80,9 @@ export function ChatScreen({ id }: { id: string }) {
       onOpenProfile={() =>
         router.push({ pathname: '/profile/[id]', params: { id: match.person.id } })
       }
+      banner={(talked) => (
+        <DatePrompt otherId={match.person.id} name={personName(match.person)} talked={talked} />
+      )}
     />
   );
 }
@@ -94,6 +98,8 @@ type ConversationProps = {
   onOpenProfile?: () => void;
   /** Extra controls at the end of the header (Instant Meet: distance and End Meet). */
   headerAccessory?: ReactNode;
+  /** A row under the header, told whether both people have written (a match: Did you meet?). */
+  banner?: (talked: boolean) => ReactNode;
 };
 
 /**
@@ -108,6 +114,7 @@ export function Conversation({
   onBack,
   onOpenProfile,
   headerAccessory,
+  banner,
 }: ConversationProps) {
   const styles = useStyles();
   const { colors } = useTheme();
@@ -196,6 +203,10 @@ export function Conversation({
         </Pressable>
         {headerAccessory}
       </View>
+      {banner?.(
+        state.messages.some((message) => message.id != null && message.sender_id === userId) &&
+          state.messages.some((message) => message.sender_id !== userId),
+      )}
 
       <KeyboardAvoidingView
         behavior="padding"

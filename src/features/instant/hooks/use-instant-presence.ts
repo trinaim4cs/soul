@@ -79,7 +79,7 @@ export function useInstantPresence() {
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
       router.push({ pathname: '/instant/session/[id]', params: { id: session.id } });
     } else if (!session && before) {
-      noteEnded(personName(before.person));
+      noteEnded(before.person.id, personName(before.person));
     }
   }, [session, noteEnded]);
 }

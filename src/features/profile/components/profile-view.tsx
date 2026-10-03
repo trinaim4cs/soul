@@ -59,7 +59,10 @@ export function ProfileView({ profile, actions }: Props) {
               {`, ${profile.age}`}
             </SoulText>
           ) : null}
-          {profile.verified ? <VerifiedBadge /> : null}
+          <View style={styles.badges}>
+            {profile.verified ? <VerifiedBadge /> : null}
+            {profile.hotPerson ? <HotPersonBadge /> : null}
+          </View>
         </View>
         {profile.gender ? (
           <SoulText variant="supporting" tone="secondary">
@@ -104,12 +107,6 @@ export function ProfileView({ profile, actions }: Props) {
         />
       ))}
 
-      {profile.hotPerson ? (
-        <View style={styles.block}>
-          <HotPersonBadge />
-        </View>
-      ) : null}
-
       {actions ? <View style={styles.actions}>{actions}</View> : null}
     </View>
   );
@@ -119,6 +116,7 @@ const styles = StyleSheet.create({
   root: { gap: layout.sectionGap / 2 },
   identity: { gap: spacing.xs },
   nameRow: { flexDirection: 'row', alignItems: 'center' },
+  badges: { flexDirection: 'row', alignItems: 'center', gap: spacing.xxs },
   age: { flexShrink: 0, marginRight: spacing.xs },
   name: { flexShrink: 1 },
   block: { gap: spacing.xxs, maxWidth: layout.maxTextWidth },
