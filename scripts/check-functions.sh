@@ -9,5 +9,5 @@ cd "$(dirname "$0")/.."
 if command -v deno >/dev/null 2>&1; then
   deno check --node-modules-dir=none supabase/functions/*/index.ts
 else
-  npx --yes deno@2 check supabase/functions/*/index.ts
+  npx --yes deno@2 check --node-modules-dir=none supabase/functions/*/index.ts
 fi
