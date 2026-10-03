@@ -6,6 +6,27 @@ Status values: `accepted` · `default, confirm` · `open`.
 
 ---
 
+## Phase 15 admin (2026-10-03)
+
+### D-055 Admin and operations
+- **Where (closes D-019):** a role-gated Admin section inside the SOUL app itself (Android and web), reached from Settings → Admin. The entry only appears for accounts the server lists in `admin_roles`, and **every action is a server function that checks the role again**: the route grants nothing (spec 45: no admin power from a hidden route).
+- **Roles:** `moderator` and `admin`, granted only by the owner in the database (SUPABASE.md). The app cannot grant or change roles. A moderator cannot act on themselves, nor on another moderator unless they are an admin (D-053).
+- **Moderators:**
+  - **reports:** the queue (urgent first), each report with its details and the recent messages kept as evidence, then *Suspend 7 days*, *Ban* (confirmed) or *No action*;
+  - **photos:** pending photos (when photo review is on) with Approve / Reject. Moderators can view any profile photo file through a dedicated storage rule;
+  - **appeals (spec 45):** a suspended or banned person can *Ask for a review* from the restricted screen, once at a time and at most 3 times in 30 days. Moderators *Restore* or *Keep decision*; the person sees the answer on the same screen, live;
+  - **badge abuse:** dates flagged by the consistency job (the same pair repeatedly, unusual volume) with *Void date* (the badge is recomputed) or *Looks fine*;
+  - **accounts:** found only by **exact email or id, never by name**. The account view shows state, the SRMIST code date, the self-declared **age (never the birth date)**, the rules version, reports, likes and plans, dates and the badge, push devices, photos, history and appeals, with suspend (1, 7, 30 days), ban and restore. **Opening an account is itself logged.**
+- **Admins also:**
+  - **plans:** price, likes and on sale / off sale. Open orders keep their frozen price (D-052); every change is logged with the old value;
+  - **support grants:** 5 likes (never expire, like a top-up) or a plan, always with a written reason, for support cases such as a payment that never reached SOUL;
+  - **feature flags:** payments open, Instant Meet open (new), photo review, the badge's distinct-partner rule and threshold, the daily report limit. Each has a type and a range; nothing else can be changed. Rules the owner fixed (4 free likes, the 1 km radius) are not flags.
+- **Instant Meet pause (new flag `instant_open`):** when off, nobody can turn Instant on and everyone waiting is taken out at once; sessions already running end normally.
+- **Verification review:** verification is the SRMIST email code (D-027), so there is nothing to approve. The account view shows the verification facts, and fake or underage accounts are suspended or banned. An age-check lock (an under-18 birth date) cannot be cleared from the app (C-31).
+- **Logging:** every action goes to `moderation_actions` (who, on whom, what, why) and the sensitive ones also to `audit_events` with before and after values.
+
+---
+
 ## Phase 14 push (2026-10-03)
 
 ### D-054 Push notifications
@@ -543,9 +564,9 @@ Open values are listed under Unresolved configuration below.
 
 `expo-notifications` on Android needs Firebase Cloud Messaging credentials, either through the Expo Push Service (needs an Expo account and project ID) or through direct FCM HTTP v1 from Edge Functions (needs a Firebase service account). *Decided in Phase 14 (D-054): direct FCM HTTP v1, no Expo account. Web Push for the PWA.*
 
-## D-019 Admin and moderation surface (open)
+## D-019 Admin and moderation surface (accepted in D-055)
 
-All moderation actions are server-side functions that check a server-held `admin_roles` table. No admin power relies on a hidden route. The admin UI (a separate internal web app versus a role-gated app section) is decided in Phase 16.
+All moderation actions are server-side functions that check a server-held `admin_roles` table. No admin power relies on a hidden route. *Decided in Phase 15 (D-055): a role-gated Admin section in the app; the server checks every action.*
 
 ## D-020 Analytics (accepted)
 
@@ -629,3 +650,4 @@ The owner felt the strict monochrome direction read "too X" (too much like a soc
 | C-28 | Email sender for OTP codes on the cloud project (custom SMTP). Supabase's built-in email reaches only project team members | **Before real students sign in** | Suggested without a domain: a dedicated SOUL Gmail account with an app password (SUPABASE.md); the owner enters it in the dashboard |
 | C-29 | Retention periods and legal placeholders in the drafts: deleted-data purge (proposed 30 days + 30 for backups), safety records (12 months, email fingerprint only), Instant Meet session records (90 days), refund timing (5 to 7 working days) | Legal review | Proposed values in the drafts |
 | C-30 | Automated photo checks (spec 14: visible face, lighting, one subject, no photo of a screen, no heavy manipulation). **Server intake built (D-043):** real-JPEG check, real size, metadata stripped, server-written copies. Still open: the face/lighting/subject checks, planned for Phase 13 inside the `profile-photos` function, with low-confidence photos going to `pending` for the Phase 15 review queue. Until then photos are approved on upload (review flag off) and moderated after reports. Options: on-device face detection as a hint only (the app is untrusted), or server-side detection. Never identity matching (D-027, D-032) | Before public launch | Report-driven review; review flag available |
+| C-31 | Clearing an age-check lock after an appeal (someone typed a wrong birth date and was locked out as under 18) | Before public launch | Not possible from the app: the lock stays, and the person can only write to support. Allowing it would weaken the 18+ rule, so it needs the owner's decision (D-055) |

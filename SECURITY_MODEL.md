@@ -116,7 +116,7 @@ Automated face, lighting and one-subject checks are C-30 (Phase 13, with the rev
 | Stalking via Instant | mutual acceptance before any proximity; one acceptance is invisible to the other person; unilateral End Meet always on screen; session expiry; a block ends the session at once; positions deleted at the end (D-050) |
 | Notification leaks | a notification never holds a message's text; names follow the card rules (anonymous stays anonymous); lock screens show "Contents hidden"; the server ping carries nothing; a tapped notification opens only an allowed internal page (D-054) |
 | Push abuse and SSRF | devices registered only through `push-register`, web subscriptions only on known push services, 10 devices per person, removed at sign-out and on suspension, ban or deletion; `push-send` takes no input and delivers only what the server queued |
-| Admin abuse | role table checked server-side; moderators cannot act on themselves or on other moderators unless admin; every action writes `moderation_actions` + `audit_events` (D-053) |
+| Admin abuse | role table checked server-side on every action, roles granted only in the database; moderators cannot act on themselves or on other moderators unless admin; accounts found only by exact email or id; the account view never shows a birth date and is itself logged; plans, grants and flags are admin-only with typed, ranged values; every action writes `moderation_actions` + `audit_events` (D-053, D-055) |
 
 ## 8. Realtime
 

@@ -53,7 +53,7 @@ export function restrictionCopy(
   if (state === 'banned') {
     return {
       title: 'Your account has been closed',
-      body: "It broke SOUL's community rules. If you think this is a mistake, write to SOUL support from your SRMIST email.",
+      body: "It broke SOUL's community rules. If you think this is a mistake, you can ask for a review.",
     };
   }
   if (state === 'deletion_pending') {
@@ -65,7 +65,7 @@ export function restrictionCopy(
   return {
     title: 'Your account is paused',
     body: until
-      ? `It is hidden from everyone until ${formatDay(until)} for breaking SOUL's community rules. If you think this is a mistake, write to SOUL support from your SRMIST email.`
-      : 'It is hidden from everyone while SOUL looks into a report. If you think this is a mistake, write to SOUL support from your SRMIST email.',
+      ? `It is hidden from everyone until ${formatDay(until)} for breaking SOUL's community rules. If you think this is a mistake, you can ask for a review.`
+      : 'It is hidden from everyone while SOUL looks into a report. If you think this is a mistake, you can ask for a review.',
   };
 }

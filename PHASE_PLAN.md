@@ -22,7 +22,7 @@ Skills per phase come from `skills/SOUL_SKILL_MAP.md`. `soul-audit` is enabled o
 | 12 | Billing (SOUL web checkout, D-037) | done (Android + web verified on the mock provider; live Razorpay needs the owner's keys) |
 | 13 | Safety + moderation | done (Android + web verified) |
 | 14 | Push (FCM + Web Push) | done (Web Push verified for real; Android FCM awaits C-16) |
-| 15 | Admin | todo |
+| 15 | Admin | done (Android + web verified) |
 | 16 | Testing (incl. the cross-platform matrix in `PLATFORM_MATRIX.md`) | todo |
 | 17 | Visual QA (Android + iPhone-size web) | todo |
 | 18 | Security audit | todo |
@@ -262,6 +262,27 @@ Skills per phase come from `skills/SOUL_SKILL_MAP.md`. `soul-audit` is enabled o
   - A `visualViewport` keyboard inset in `SoulScreen` (iPhone Safari keeps the page size). Verified in Chrome; the iPhone path needs a real iPhone.
 
 **Closed 2026-09-28:** the Android rebuild embeds the new `remove` icon (verified in Filters).
+
+## Phase 15: Admin (2026-10-03)
+
+**Server:** migration `…1003000600_admin.sql` (D-055):
+- Appeals; the queue extended with appeals and flagged dates; exact account lookup and the account view (logged).
+- Admin-only plans, likes and plan grants, and a typed allowlist of feature flags, including the new Instant Meet pause.
+- A storage rule so moderators can see photos under review.
+
+**App:**
+- Settings → Admin (only for roles): the queue (reports, photos, appeals, flagged dates), find an account, then the report, account, plans and flags screens.
+- The restricted screen: *Ask for a review*, the pending and answered states, and a live update when a moderator decides.
+
+**Verified:**
+- pgTAP 660/660 (70 new). `db:verify` 109/109 (3 new: students refused, moderators limited to their tools, appeals reaching moderators only). 185 unit tests.
+- **Android (admin):** Settings → Admin; a harassment report with its evidence message; the reported account's view; 5 likes given with a logged reason (the balance went 3 → 8); the flags screen.
+- **Web (the suspended person):** the restricted screen, then *Ask for a review* (pending). When the Android admin chose *Keep decision*, the answer appeared live. When the admin restored the account, the web session left the restricted screen for Discover on its own.
+- Fixed while testing: the restricted screen did not hear moderator decisions (it sits outside the main app layout), and the restricted copy still pointed only to email support.
+
+**Open:** C-31 (age-check locks), the support address (C-23).
+
+---
 
 ## Phase 14: Push (2026-10-03)
 
@@ -719,3 +740,4 @@ Release build config, signing workflow (owner keystore, C-20), launcher icon (C-
 - 2026-10-03: Phase 12 done: Razorpay Payment Links with signed webhooks as the only grant path, frozen order prices, sync/restore, refund revocation and a mock provider that exercises the real webhook locally (D-052). Live payments wait for the owner's Razorpay keys.
 - 2026-10-03: Phase 13 done: block (invisible to the blocked person), report with message evidence, moderator functions with an action log, bans that stop re-sign-up, immediate account deletion that keeps purchase and safety records, hourly retention (D-053).
 - 2026-10-03: Phase 14 done: push for matches, messages (never the text), Instant Meet and payments; per-person choices; an outbox drained by `push-send` (FCM HTTP v1 and Web Push with RFC 8291 and VAPID); real Web Push verified on the emulator; Android FCM waits for the owner's Firebase project (D-054, C-16).
+- 2026-10-03: Phase 15 done: a role-gated Admin section (reports with evidence, photos, appeals, flagged dates, exact account lookup, suspend, ban, restore; admins also plans, support grants and feature flags including an Instant Meet pause), every action checked by the server and logged (D-055).

@@ -4,6 +4,7 @@ import { StyleSheet, View } from 'react-native';
 import { SoulButton } from '@/components/soul-button';
 import { SoulScreen } from '@/components/soul-screen';
 import { SoulText } from '@/components/soul-text';
+import { useAdminRole } from '@/features/admin/api/admin';
 import { useCurrentUserId } from '@/features/auth/account-status-provider';
 import { signOut } from '@/features/auth/api/auth';
 import { SettingsRow } from '@/features/settings/components/settings-row';
@@ -16,7 +17,10 @@ import { spacing } from '@/theme';
  * swipes (7, 12), blocked users (13), notifications (14), delete account (13).
  */
 export function SettingsScreen() {
-  const swipes = useSwipeBalance(useCurrentUserId());
+  const userId = useCurrentUserId();
+  const swipes = useSwipeBalance(userId);
+  // Shown only to people the server lists as moderators or admins (D-055).
+  const role = useAdminRole(userId);
   return (
     <SoulScreen scroll edges={{ top: false, bottom: true }}>
       <SoulText variant="title" accessibilityRole="header">
@@ -75,6 +79,14 @@ export function SettingsScreen() {
           detail="What SOUL keeps, and for how long"
           onPress={() => router.push('/legal/retention')}
         />
+        {role.data ? (
+          <SettingsRow
+            icon="flag"
+            label="Admin"
+            detail="Reports, photos, appeals and more"
+            onPress={() => router.push('/admin')}
+          />
+        ) : null}
         <SettingsRow
           icon="remove"
           label="Delete account"

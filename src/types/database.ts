@@ -93,6 +93,45 @@ export type Database = {
         };
         Relationships: [];
       };
+      appeals: {
+        Row: {
+          account_state: Database['public']['Enums']['account_state'];
+          created_at: string;
+          decided_at: string | null;
+          decided_by: string | null;
+          id: string;
+          message: string;
+          note: string | null;
+          restriction_reason: string | null;
+          status: string;
+          user_id: string | null;
+        };
+        Insert: {
+          account_state: Database['public']['Enums']['account_state'];
+          created_at?: string;
+          decided_at?: string | null;
+          decided_by?: string | null;
+          id?: string;
+          message: string;
+          note?: string | null;
+          restriction_reason?: string | null;
+          status?: string;
+          user_id?: string | null;
+        };
+        Update: {
+          account_state?: Database['public']['Enums']['account_state'];
+          created_at?: string;
+          decided_at?: string | null;
+          decided_by?: string | null;
+          id?: string;
+          message?: string;
+          note?: string | null;
+          restriction_reason?: string | null;
+          status?: string;
+          user_id?: string | null;
+        };
+        Relationships: [];
+      };
       audit_events: {
         Row: {
           action: string;
@@ -1103,6 +1142,23 @@ export type Database = {
         Args: { p_height: number; p_id: string; p_source: string; p_user: string; p_width: number };
         Returns: Json;
       };
+      admin_account_detail: { Args: { p_user: string }; Returns: Json };
+      admin_find_account: { Args: { p_query: string }; Returns: Json };
+      admin_grant_likes: {
+        Args: { p_quantity: number; p_reason: string; p_user: string };
+        Returns: Json;
+      };
+      admin_grant_plan: {
+        Args: { p_plan: string; p_reason: string; p_user: string };
+        Returns: Json;
+      };
+      admin_list_flags: { Args: Record<PropertyKey, never>; Returns: Json };
+      admin_list_plans: { Args: Record<PropertyKey, never>; Returns: Json };
+      admin_set_flag: { Args: { p_key: string; p_value: Json }; Returns: Json };
+      admin_update_plan: {
+        Args: { p_active: boolean; p_plan: string; p_price_paise: number; p_right_swipes: number };
+        Returns: Json;
+      };
       answer_date: { Args: { p_met: boolean; p_other: string }; Returns: Json };
       block_user: { Args: { p_target: string }; Returns: Json };
       date_state: { Args: { p_other: string }; Returns: Json };
@@ -1112,6 +1168,8 @@ export type Database = {
         Args: { p_before?: number; p_conversation: string; p_limit?: number };
         Returns: Json;
       };
+      get_my_admin_role: { Args: Record<PropertyKey, never>; Returns: Json };
+      get_my_appeal: { Args: Record<PropertyKey, never>; Returns: Json };
       get_my_blocks: { Args: Record<PropertyKey, never>; Returns: Json };
       get_my_dates: { Args: Record<PropertyKey, never>; Returns: Json };
       get_my_matches: { Args: Record<PropertyKey, never>; Returns: Json };
@@ -1141,9 +1199,17 @@ export type Database = {
         Returns: Json;
       };
       mark_match_seen: { Args: { p_match: string }; Returns: Json };
+      moderation_decide_appeal: {
+        Args: { p_appeal: string; p_note: string; p_restore: boolean };
+        Returns: Json;
+      };
       moderation_queue: { Args: Record<PropertyKey, never>; Returns: Json };
       moderation_resolve_report: {
         Args: { p_actioned: boolean; p_note: string; p_report: string };
+        Returns: Json;
+      };
+      moderation_review_date_flag: {
+        Args: { p_flag: number; p_invalidate: boolean; p_note: string };
         Returns: Json;
       };
       moderation_review_photo: {
@@ -1238,6 +1304,7 @@ export type Database = {
         Args: { p_instant: boolean; p_matches: boolean; p_messages: boolean; p_payments: boolean };
         Returns: Json;
       };
+      submit_appeal: { Args: { p_message: string }; Returns: Json };
       submit_profile: { Args: Record<PropertyKey, never>; Returns: Json };
       swipe_left: { Args: { p_target: string }; Returns: Json };
       swipe_right: { Args: { p_idempotency_key: string; p_target: string }; Returns: Json };

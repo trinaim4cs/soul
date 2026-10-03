@@ -893,6 +893,39 @@ try {
   const claimByApp = await userA.client.rpc('push_claim', { p_limit: 10 });
   check('the app cannot take notifications from the outbox', Boolean(claimByApp.error));
 
+  // Phase 15: admin over HTTP (D-055). Roles live only in the database; the app just calls.
+  const plansByStudent = await userA.client.rpc('admin_list_plans');
+  check('a student cannot open admin tools', plansByStudent.error?.code === '42501');
+  const moderator = await makeUser('test.user.moderator');
+  await admin.from('admin_roles').insert({ user_id: moderator.id, role: 'moderator' });
+  const detailByModerator = await moderator.client.rpc('admin_account_detail', {
+    p_user: userB.id,
+  });
+  const flagsByModerator = await moderator.client.rpc('admin_set_flag', {
+    p_key: 'payments_open',
+    p_value: false,
+  });
+  check(
+    'a moderator can open an account but not admin-only tools',
+    detailByModerator.data?.ok === true &&
+      typeof detailByModerator.data?.email === 'string' &&
+      !('date_of_birth' in (detailByModerator.data ?? {})) &&
+      flagsByModerator.error?.code === '42501',
+    JSON.stringify({ detail: detailByModerator.data?.ok, flags: flagsByModerator.error?.code }),
+  );
+  const appealing = await makeUser('test.user.appealing');
+  await admin.from('account_private').update({ account_state: 'suspended' }).eq('id', appealing.id);
+  const appealed = await appealing.client.rpc('submit_appeal', { p_message: 'Please look again' });
+  const appealsTable = await appealing.client.from('appeals').select('*');
+  const queueWithAppeal = await moderator.client.rpc('moderation_queue');
+  check(
+    'a suspended person can ask for a review, which reaches moderators only',
+    appealed.data?.ok === true &&
+      Boolean(appealsTable.error) &&
+      (queueWithAppeal.data?.appeals ?? []).some((a) => a.user_id === appealing.id),
+    JSON.stringify({ appealed: appealed.data, table: appealsTable.error?.code }),
+  );
+
   // Phase 10: Instant Meet over real HTTP and Realtime. Positions go in; only rounded,
   // derived values come out, and only after both people accept (spec 26 to 34, D-050).
   const base = { lat: 12.823, lng: 80.045 };

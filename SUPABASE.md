@@ -57,6 +57,9 @@ Then in the dashboard:
   - Authentication → Hooks: *Before User Created* → `public.hook_before_user_created`, and *Customize Access Token (JWT) Claims* → `public.hook_custom_access_token`.
   - Without the second hook, password sign-in would be possible again.
 - **Realtime → Settings: turn off "Allow public access"**, so only private, authorized topics work (D-049).
+- **Make yourself admin (D-055):** sign in to SOUL once with your SRMIST email, then in the dashboard SQL editor run
+  `insert into public.admin_roles (user_id, role) select id, 'admin' from auth.users where email = '<your srmist email>';`
+  (use `'moderator'` for helpers). Settings → Admin appears after the app restarts. Remove a role with `delete from public.admin_roles where user_id = ...`.
 - Check that `get_my_status` exists: `POST /rest/v1/rpc/get_my_status` with the publishable key returns 401 or a status, not `PGRST202`.
 
 Never apply schema changes by hand; every change is a migration.
