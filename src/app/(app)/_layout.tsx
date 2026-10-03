@@ -49,6 +49,8 @@ export default function AppLayout() {
         }}
       />
       <Stack.Screen name="paywall" options={{ presentation: 'modal', headerShown: false }} />
+      <Stack.Screen name="pay/return" options={{ headerShown: false, gestureEnabled: false }} />
+      <Stack.Screen name="pay/mock" options={{ headerShown: false }} />
       <Stack.Screen
         name="match/[id]"
         options={{
@@ -63,6 +65,7 @@ export default function AppLayout() {
       <Stack.Screen name="instant/chat/[id]" options={{ headerShown: false }} />
       <Stack.Screen name="settings/index" options={pageHeader} />
       <Stack.Screen name="settings/privacy" options={pageHeader} />
+      <Stack.Screen name="settings/purchases" options={pageHeader} />
     </Stack>
   );
 }

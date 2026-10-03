@@ -9,8 +9,9 @@ import { SoulScreen } from '@/components/soul-screen';
 import { SoulText } from '@/components/soul-text';
 import { ErrorState, LoadingState } from '@/components/states';
 import { useCurrentUserId } from '@/features/auth/account-status-provider';
-import { refreshSwipes, usePlans, useSwipeBalance } from '@/features/swipes/api/swipes';
+import { usePlans, useSwipeBalance } from '@/features/swipes/api/swipes';
 import { PlanOption } from '@/features/swipes/components/plan-option';
+import { unavailableMessage } from '@/features/swipes/model/payments';
 import {
   balanceSummary,
   formatPrice,
@@ -64,19 +65,18 @@ export function PaywallScreen() {
     setBusy(true);
     setNotice(null);
     try {
+      // The server freezes the catalog price in an order; the app never sends one.
       const result = await payments.checkout(selected.id);
-      if (result === 'completed') {
-        await refreshSwipes(userId);
-        close();
-        return;
+      if (result.status === 'unavailable') {
+        setNotice(unavailableMessage(result.reason));
+      } else if (result.status === 'mock') {
+        router.push({ pathname: '/pay/mock', params: { order: result.orderId } });
+      } else if (result.status === 'returned') {
+        router.replace({ pathname: '/pay/return', params: { order: result.orderId } });
       }
-      if (result === 'unavailable') {
-        setNotice("Payments aren't open yet. Nothing was charged.");
-      } else if (result === 'failed') {
-        setNotice("That payment didn't go through. Try again.");
-      }
+      // `redirected`: the web app is on its way to checkout.
     } catch {
-      setNotice("That payment didn't go through. Check your connection and try again.");
+      setNotice("That payment couldn't start. Check your connection and try again.");
     } finally {
       setBusy(false);
     }

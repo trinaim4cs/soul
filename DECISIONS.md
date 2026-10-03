@@ -6,6 +6,42 @@ Status values: `accepted` · `default, confirm` · `open`.
 
 ---
 
+## Phase 12 billing (2026-10-03)
+
+### D-052 Billing: Razorpay Payment Links, server-verified (builds D-037; settles C-25 as Razorpay)
+- **Checkout:** the app names a catalog item, nothing else.
+  - `payments-checkout` creates an order that freezes the catalog price (`payment_orders`).
+  - It then asks Razorpay for a Standard Payment Link (reference = our order id, 20 minutes, no customer details sent) and returns its URL.
+  - Android opens it in an in-app browser tab (Custom Tabs via `expo-web-browser`); the web app navigates to it.
+  - No third-party script ever runs inside SOUL, and the CSP stays `script-src 'self'`.
+  - Only `https://*.rzp.io` and `https://*.razorpay.com` URLs are ever opened.
+- **Granting (the only path):** `payments-webhook` checks `X-Razorpay-Signature` (HMAC-SHA256 of the raw body, constant-time compare) before parsing anything. Then:
+  - `payment_link.paid`: `payment_mark_paid` checks the link, the amount (the frozen order amount) and the currency, then calls `activate_plan(user, plan, 'razorpay:<payment id>')`.
+  - Any mismatch rejects the order and is audited. Nothing is granted.
+  - Every step is idempotent, and an event is recorded only after it was handled, so failures are retried by Razorpay.
+  - Events keep ids and amounts only, never the payer's details.
+- **Returning proves nothing:** `/pay/return` (web) and `com.soul.srm://pay/return` (Android, through the static `pay-return.html`) only ask the server what happened. Query parameters Razorpay adds are ignored.
+- **Synchronization and restore:** after 6 seconds without a webhook the return screen calls `payments-sync`, which reads the link from Razorpay's API and applies the same rules. It can only grant what Razorpay reports as captured at the right amount. Settings → Purchases has "Check for missed payments". Server nudges (`reason: payment`) refresh likes and history at once.
+- **Refunds and revocation:**
+  - A full refund (`refund.processed` adding up to the order amount) revokes what is left of the purchase. The lot's unused likes get a `reverse` ledger row, and a plan period is marked `refunded`, which also ends its Instant Meet.
+  - Likes already used stay used.
+  - A partial refund is recorded and audited but takes nothing away (the owner's goodwill gesture).
+  - Each refund counts once.
+- **Out of order and expiry:** a link reported expired or cancelled and then paid still grants (the payment happened). A paid order cannot be closed afterwards. Unpaid orders expire after 20 minutes. One account may hold at most 5 unpaid orders.
+- **Expiry of what was bought** is unchanged (D-047): plan likes end with the plan period; top-ups never expire.
+- **Development (mock provider):**
+  - With `PAYMENTS_PROVIDER=mock` the server returns a mock order, and the app opens a test checkout page (development builds only).
+  - The test page calls `payments-mock`, which signs a Razorpay-shaped event with the webhook secret and posts it to the real webhook. The whole verified path runs.
+  - Production refuses it twice: `SOUL_ENV=production` disables the function and the provider, and the database refuses mock orders unless `payments_allow_mock` is true (only the local seed sets it).
+- **Secrets** (server only, never in the app): `PAYMENTS_PROVIDER`, `SOUL_ENV`, `PAYMENTS_SITE_URL`, `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `RAZORPAY_WEBHOOK_SECRET` (see `supabase/functions/.env.example` and SUPABASE.md).
+- **Not in this phase:**
+  - Chargebacks/disputes (`payment.dispute.*`) are left to manual handling by the owner.
+  - "Rejected" orders (amount mismatch after a real capture) need a manual refund from the Razorpay dashboard.
+  - GST invoices are the owner's accounting setup in Razorpay.
+- **Owner action to go live (C-25):** a Razorpay account with Payment Links enabled, test keys first, the webhook URL and secret, then `supabase secrets set …` and deploy the three payment functions (SUPABASE.md).
+
+---
+
 ## Phase 11 date confirmation and the fire badge (2026-10-03)
 
 ### D-051 "Did you meet?" and the Hot Person badge (refines D-017)
@@ -517,7 +553,7 @@ The owner felt the strict monochrome direction read "too X" (too much like a soc
 | C-22 | ~~Logo licensing~~ **closed 2026-09-27 by owner statement**: the owner states the logo (from a Pinterest pin) is free for public use and grants full permission to use it; no need to hide it. Recommended: keep a saved copy of the source page or licence note as proof. (The separate compact app-icon mark, C-21, stays a release blocker) | - | - |
 | C-23 | Legal texts: eight drafts written 2026-09-27 (community and safety rules, Terms, Privacy, 18+ eligibility, verification and photo checks, Instant Meet and location, subscriptions/top-ups/refunds, deletion and retention) in `src/features/auth/legal/documents.ts`, labelled "DRAFT — REQUIRES FINAL HUMAN/LEGAL REVIEW", with bracketed placeholders (operator name, address, contacts, Grievance Officer, city, retention days, tax wording). Engineering is not blocked | **Public release** | Drafts shown in app and on the website |
 | C-24 | ~~Accent colour~~ **closed 2026-09-27**: keep wine/rose for like, match and hearts only (D-026); everything else monochrome | - | - |
-| C-25 | Payment provider: **Razorpay** (owner, 2026-09-27). Needed from the owner in Phase 12: Razorpay **test** key id + key secret and a webhook secret, set as server secrets (never in chat or the app); live keys and merchant KYC before paid launch | Phase 12 (test keys); paid launch (live) | Mock provider in development only |
+| C-25 | Payment provider: **Razorpay** (owner, 2026-09-27); **built in Phase 12 (D-052)**, running on the mock provider locally until the keys are set. Needed from the owner: Razorpay **test** key id + key secret and a webhook secret, set as server secrets (never in chat or the app); live keys and merchant KYC before paid launch | Phase 12 (test keys); paid launch (live) | Mock provider in development only |
 | C-26 | ~~Hosting~~ **closed 2026-09-27**: free Vercel hosting with the generated `*.vercel.app` domain for development and beta. A custom domain is optional and never blocks any phase | - | - |
 | C-27 | Plan renewal: whether plans renew automatically (Razorpay subscriptions) or are bought one period at a time | Phase 12 | One period at a time, no auto-renewal **[DEFAULT, confirm]** (the purchases draft says so, marked "to confirm") |
 | C-28 | Email sender for OTP codes on the cloud project (custom SMTP). Supabase's built-in email reaches only project team members | **Before real students sign in** | Suggested without a domain: a dedicated SOUL Gmail account with an app password (SUPABASE.md); the owner enters it in the dashboard |

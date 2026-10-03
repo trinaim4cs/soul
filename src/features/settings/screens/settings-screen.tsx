@@ -41,6 +41,12 @@ export function SettingsScreen() {
           onPress={() => router.push('/paywall')}
         />
         <SettingsRow
+          icon="download"
+          label="Purchases"
+          detail="History and missed payments"
+          onPress={() => router.push('/settings/purchases')}
+        />
+        <SettingsRow
           icon="visibility_off"
           label="Privacy"
           detail="Visibility, read receipts, zodiac"

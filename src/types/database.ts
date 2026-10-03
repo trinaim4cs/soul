@@ -493,6 +493,135 @@ export type Database = {
         };
         Relationships: [];
       };
+      payment_events: {
+        Row: {
+          event_id: string;
+          event_type: string;
+          order_id: string | null;
+          provider: string;
+          received_at: string;
+          result: string | null;
+          summary: NonNullable<Json>;
+        };
+        Insert: {
+          event_id: string;
+          event_type: string;
+          order_id?: string | null;
+          provider: string;
+          received_at?: string;
+          result?: string | null;
+          summary?: NonNullable<Json>;
+        };
+        Update: {
+          event_id?: string;
+          event_type?: string;
+          order_id?: string | null;
+          provider?: string;
+          received_at?: string;
+          result?: string | null;
+          summary?: NonNullable<Json>;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'payment_events_order_id_fkey';
+            columns: ['order_id'];
+            isOneToOne: false;
+            referencedRelation: 'payment_orders';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      payment_orders: {
+        Row: {
+          amount_paise: number;
+          checkout_url: string | null;
+          closed_at: string | null;
+          created_at: string;
+          currency: string;
+          expires_at: string;
+          id: string;
+          paid_at: string | null;
+          plan_id: string;
+          provider: string;
+          provider_link_id: string | null;
+          provider_payment_id: string | null;
+          refunded_paise: number;
+          status: string;
+          user_id: string;
+        };
+        Insert: {
+          amount_paise: number;
+          checkout_url?: string | null;
+          closed_at?: string | null;
+          created_at?: string;
+          currency?: string;
+          expires_at: string;
+          id?: string;
+          paid_at?: string | null;
+          plan_id: string;
+          provider: string;
+          provider_link_id?: string | null;
+          provider_payment_id?: string | null;
+          refunded_paise?: number;
+          status?: string;
+          user_id: string;
+        };
+        Update: {
+          amount_paise?: number;
+          checkout_url?: string | null;
+          closed_at?: string | null;
+          created_at?: string;
+          currency?: string;
+          expires_at?: string;
+          id?: string;
+          paid_at?: string | null;
+          plan_id?: string;
+          provider?: string;
+          provider_link_id?: string | null;
+          provider_payment_id?: string | null;
+          refunded_paise?: number;
+          status?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'payment_orders_plan_id_fkey';
+            columns: ['plan_id'];
+            isOneToOne: false;
+            referencedRelation: 'plans';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      payment_refunds: {
+        Row: {
+          amount_paise: number;
+          created_at: string;
+          order_id: string;
+          refund_id: string;
+        };
+        Insert: {
+          amount_paise: number;
+          created_at?: string;
+          order_id: string;
+          refund_id: string;
+        };
+        Update: {
+          amount_paise?: number;
+          created_at?: string;
+          order_id?: string;
+          refund_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'payment_refunds_order_id_fkey';
+            columns: ['order_id'];
+            isOneToOne: false;
+            referencedRelation: 'payment_orders';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       plans: {
         Row: {
           active: boolean;
@@ -768,9 +897,11 @@ export type Database = {
       };
       get_my_dates: { Args: Record<PropertyKey, never>; Returns: Json };
       get_my_matches: { Args: Record<PropertyKey, never>; Returns: Json };
+      get_my_payments: { Args: Record<PropertyKey, never>; Returns: Json };
       get_my_profile: { Args: Record<PropertyKey, never>; Returns: Json };
       get_my_status: { Args: Record<PropertyKey, never>; Returns: Json };
       get_my_swipes: { Args: Record<PropertyKey, never>; Returns: Json };
+      get_payment: { Args: { p_order: string }; Returns: Json };
       get_profile_card: { Args: { p_target: string }; Returns: Json };
       hook_before_user_created: { Args: { event: Json }; Returns: Json };
       hook_custom_access_token: { Args: { event: Json }; Returns: Json };
@@ -791,6 +922,43 @@ export type Database = {
         Returns: Json;
       };
       mark_match_seen: { Args: { p_match: string }; Returns: Json };
+      payment_attach_link: {
+        Args: { p_link_id: string; p_order: string; p_url: string };
+        Returns: Json;
+      };
+      payment_create_order: {
+        Args: { p_plan: string; p_provider: string; p_user: string };
+        Returns: Json;
+      };
+      payment_mark_closed: { Args: { p_link_id: string; p_status: string }; Returns: Json };
+      payment_mark_paid: {
+        Args: {
+          p_amount: number;
+          p_currency: string;
+          p_link_id: string;
+          p_order: string;
+          p_payment_id: string;
+        };
+        Returns: Json;
+      };
+      payment_mark_refunded: {
+        Args: { p_amount: number; p_payment_id: string; p_refund_id: string };
+        Returns: Json;
+      };
+      payment_record_event: {
+        Args: {
+          p_event_id: string;
+          p_order: string;
+          p_provider: string;
+          p_summary: Json;
+          p_type: string;
+        };
+        Returns: boolean;
+      };
+      payment_set_event_result: {
+        Args: { p_event_id: string; p_result: string };
+        Returns: undefined;
+      };
       remove_profile_photo: { Args: { p_id: string; p_user: string }; Returns: Json };
       reorder_profile_photos: { Args: { p_ids: string[] }; Returns: Json };
       send_message: {

@@ -54,8 +54,8 @@ The client can request these; only the server decides them. Each is a SECURITY D
 | Like, credit consumption, match creation | `swipe_right` transaction under a per-account lock, then a pair lock (D-013, D-015, D-047, D-048); the balance is computed from an append-only ledger; one match row per pair |
 | Message stored and delivered | `send_message()` (membership, active match, length, reply target, rate limit, idempotent per device id); a trigger broadcasts it. Clients cannot publish on the chat topic (D-049) |
 | Unmatch, anonymous reveal to a match | `unmatch()` (participants only; the pair never sees each other again); `reveal_on_match` applied by the card function and by Storage signing |
-| Plan or top-up granted | `activate_plan` (service role only, once per payment key), called by the payment webhook after it verifies the signature and amount |
-| Subscription active, top-up granted, refunds | `payments-webhook` after verifying the provider signature and the amount against the server catalog (D-037); idempotent on the provider payment ID |
+| Plan or top-up granted | `activate_plan` (service role only, once per payment key), called only by `payment_mark_paid` after the webhook verified the signature and the order's frozen amount, link and currency (D-052) |
+| Subscription active, top-up granted, refunds | `payments-webhook` (HMAC-SHA256 of the raw body, constant-time) or `payments-sync` (Razorpay's own API); idempotent on the provider payment and refund IDs; a full refund revokes what is left (D-052) |
 | Instant entitlement, Instant visibility, session start/end | `instant_start` (plan gate), `instant_candidates`, `instant_accept` (both must accept; one transaction under the pair lock), `instant_end_session` / `instant_stop` (unilateral) and the lazy sweep (expiry) (D-050) |
 | Other user's distance and bearing | `instant_state` returns buckets only: 50 m / 100 m distance steps, 15° bearing, only `nearby` under 100 m (D-050) |
 | Date confirmed, Hot Person badge | `answer_date` (both must say yes, independently; one counted date per pair per 24 h; answers unreadable), the badge computed live from confirmed dates (only a boolean leaves the server; the count only to its owner via `get_my_dates`), `invalidate_date` for moderators, hourly consistency job (D-051) |
@@ -127,7 +127,7 @@ Private channels only, authorized by RLS on `realtime.messages` (D-012, built in
 - `.env*` files are git-ignored. `app.config.ts` exposes only `EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_ANON_KEY` and `APP_ENV`.
 - Edge Function secrets are set with `supabase secrets set`, one set per project (dev and prod).
 - Release signing keys stay with the owner and are never committed.
-- The mock payment provider is compiled out of release builds **and** refused by the server in production.
+- The mock payment provider is refused by the server in production twice (`SOUL_ENV=production` disables it; the database refuses mock orders unless `payments_allow_mock`, set only by the local seed); its test checkout page renders nothing in production builds.
 
 ## 10. Logging
 

@@ -25,10 +25,20 @@ npx supabase link --project-ref bdwuhrkgrwzpwqhgsngi       # asks for the databa
 npx supabase db push                                      # applies supabase/migrations in order
 npx supabase config diff                                  # review auth settings before pushing
 npx supabase config push                                  # OTP length/expiry, confirmations, email template, both auth hooks
-npx supabase functions deploy health profile-photos
+npx supabase functions deploy health profile-photos payments-checkout payments-webhook payments-sync
 ```
 
-Without `profile-photos` deployed, photos cannot be added (D-043). Instant Meet needs nothing extra: PostGIS is created by the foundation migration, and expiry runs inside the Instant functions (no cron). The dates migration enables `pg_cron` and schedules `soul-dates-consistency` hourly; check it under Database → Cron after the push.
+Without `profile-photos` deployed, photos cannot be added (D-043).
+
+**Payments (D-052, C-25).** Start in Razorpay's **test mode**; switch the same steps to live keys only after KYC.
+1. In the Razorpay dashboard, make sure Payment Links is available, then create API keys (Account & Settings → API Keys).
+2. Add a webhook (Account & Settings → Webhooks) for `https://bdwuhrkgrwzpwqhgsngi.supabase.co/functions/v1/payments-webhook` with the events `payment_link.paid`, `payment_link.expired`, `payment_link.cancelled` and `refund.processed`. Choose a long random secret.
+3. Set the server secrets (they never go in the app, the repo or chat):
+   ```bash
+   npx supabase secrets set SOUL_ENV=production PAYMENTS_PROVIDER=razorpay PAYMENTS_SITE_URL=https://<your SOUL site> RAZORPAY_KEY_ID=<key id> RAZORPAY_KEY_SECRET=<key secret> RAZORPAY_WEBHOOK_SECRET=<webhook secret>
+   ```
+4. Deploy the payment functions (above). Do not deploy `payments-mock`; it refuses to run in production anyway.
+5. `payments_allow_mock` stays `false` in the hosted database (only the local seed turns it on). Instant Meet needs nothing extra: PostGIS is created by the foundation migration, and expiry runs inside the Instant functions (no cron). The dates migration enables `pg_cron` and schedules `soul-dates-consistency` hourly; check it under Database → Cron after the push.
 
 Then in the dashboard:
 - **Authentication → URL configuration:** set Site URL to the Vercel URL.

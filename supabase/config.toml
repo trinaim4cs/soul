@@ -433,3 +433,17 @@ verify_jwt = false
 
 [functions.profile-photos]
 verify_jwt = false
+
+# Payments (D-052). The webhook is called by Razorpay and checks its own signature; the
+# others check the caller's token themselves (`requireUser`).
+[functions.payments-checkout]
+verify_jwt = false
+
+[functions.payments-webhook]
+verify_jwt = false
+
+[functions.payments-sync]
+verify_jwt = false
+
+[functions.payments-mock]
+verify_jwt = false

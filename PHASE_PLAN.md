@@ -19,7 +19,7 @@ Skills per phase come from `skills/SOUL_SKILL_MAP.md`. `soul-audit` is enabled o
 | 9 | Chat | done (Android + web verified, two live clients) |
 | 10 | Instant Meet (the only location feature, 1 km) | done (Android + web verified; location-leak audit passed) |
 | 11 | Date confirmation + Hot Person | done (Android + web verified) |
-| 12 | Billing (SOUL web checkout, D-037) | todo |
+| 12 | Billing (SOUL web checkout, D-037) | done (Android + web verified on the mock provider; live Razorpay needs the owner's keys) |
 | 13 | Safety + moderation | todo |
 | 14 | Push (FCM + Web Push) | todo |
 | 15 | Admin | todo |
@@ -262,6 +262,44 @@ Skills per phase come from `skills/SOUL_SKILL_MAP.md`. `soul-audit` is enabled o
   - A `visualViewport` keyboard inset in `SoulScreen` (iPhone Safari keeps the page size). Verified in Chrome; the iPhone path needs a real iPhone.
 
 **Closed 2026-09-28:** the Android rebuild embeds the new `remove` icon (verified in Filters).
+
+## Phase 12: Billing (2026-10-03)
+
+**Server:** migration `…1003000300_payments.sql` and four Edge Functions (D-052):
+- `payment_orders` (price frozen per order), `payment_events` (ids and amounts only), `payment_refunds`.
+- Service-only functions: `payment_create_order`, `payment_attach_link`, `payment_mark_paid` (the single path to `activate_plan`), `payment_mark_refunded` (a full refund revokes what is left), `payment_mark_closed`, `payment_record_event`.
+- Owner reads: `get_payment`, `get_my_payments`.
+- Edge Functions:
+  - `payments-checkout`: order plus Razorpay Payment Link.
+  - `payments-webhook`: signature first; paid, refund, expired or cancelled.
+  - `payments-sync`: asks Razorpay directly (restore).
+  - `payments-mock`: development only; signs a Razorpay-shaped event and posts it to the real webhook.
+- `npm run functions:check` type-checks every Edge Function with Deno.
+
+**App:**
+- The plans screen starts checkout:
+  - Android opens Razorpay in an in-app browser tab (`expo-web-browser`, native rebuild).
+  - The web app goes to Razorpay and comes back to `/pay/return`.
+  - Development opens the test checkout (`/pay/mock`).
+- `/pay/return` asks the server, syncs after 6 seconds, and shows paid, not completed, refunded or "still confirming". `public/pay-return.html` hands Android back to the app.
+- Settings → Purchases: history and "Check for missed payments".
+- Likes and history refresh when the server nudges (`reason: payment`).
+
+**Verified:**
+- pgTAP 470/470 (50 new): no client access, no self-grant, the frozen price, mismatched amount/link/currency rejected, one grant per payment, out-of-order expiry then payment, partial versus full refunds, revocation with used likes kept, a top-up refund, the open-order limit, events once, and the mock provider off unless allowed.
+- `db:verify` 96/96 (9 new over HTTP):
+  - checkout needs a session, and a price sent by the app is ignored;
+  - unsigned and wrongly signed webhooks are refused and grant nothing;
+  - nobody can pay another student's order;
+  - a signed payment grants and nudges the phone, and a second payment event grants nothing;
+  - sync works, and a full refund revokes.
+- 159 unit tests, including Razorpay signature known-answer tests, payload parsing, the Payment Link request (no customer data) and the checkout URL allow-list.
+- **Web, end to end** (local mock provider): Plans → 12 likes → test checkout → "Pay (test)" → "12 likes added"; the balance went 20 → 32; Purchases listed it as Paid; "Check for missed payments" said up to date.
+- **Android (rebuilt with `expo-web-browser`):** Plans → Weekly → test checkout → "Pay (test)" → "Weekly is on, 15 likes for 1 week". The `com.soul.srm://pay/return?order=…` deep link that `pay-return.html` uses opens the same return screen.
+
+**Open (owner, C-25):** Razorpay account with Payment Links, test keys, the webhook (URL, secret, events) and `supabase secrets set` (SUPABASE.md). Live keys and KYC before paid launch.
+
+---
 
 ## Phase 11: Date confirmation and the fire badge (2026-10-03)
 
@@ -624,3 +662,4 @@ Release build config, signing workflow (owner keystore, C-20), launcher icon (C-
 - 2026-10-02: Phase 9 done: chat with private Realtime topics, read receipts, typing, reply, retry; verified with two live clients (D-049). C: drive filled to 2 GB free because the page file grew to 32 GB under memory pressure; the emulator now runs only during Android checks.
 - 2026-10-03: Phase 10 done: Instant Meet with plan gate, 1 km candidates on a ~110 m grid, mutual acceptance, compass, rounded distance, session chat, End Meet and expiry; location-leak audit and end-session revocation tests pass (D-050). The owner freed C: (198 GB free). Native rebuild for expo-location, expo-haptics and the new icon glyphs.
 - 2026-10-03: Phase 11 done: "Did you meet?" with private answers, cooldown, expiry and review flags; the fire badge (icon only, owner's decision) computed live from 3 dates in a rolling 30 days, with an hourly consistency job (D-051).
+- 2026-10-03: Phase 12 done: Razorpay Payment Links with signed webhooks as the only grant path, frozen order prices, sync/restore, refund revocation and a mock provider that exercises the real webhook locally (D-052). Live payments wait for the owner's Razorpay keys.

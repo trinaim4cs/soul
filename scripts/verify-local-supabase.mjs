@@ -706,6 +706,110 @@ try {
         })
       ).data?.reason === 'not_available',
   );
+  // Phase 12: billing over HTTP. The local stack runs the mock provider, which posts
+  // Razorpay-shaped events signed with the webhook secret to the real webhook function.
+  const fnUrl = (name) => `${url}/functions/v1/${name}`;
+  const anonCheckout = await fetch(fnUrl('payments-checkout'), {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ plan: 'weekly', platform: 'web' }),
+  });
+  check(
+    'checkout needs a signed-in student',
+    anonCheckout.status === 401,
+    `HTTP ${anonCheckout.status}`,
+  );
+  const balanceOf = async (user) => (await user.client.rpc('get_my_swipes')).data?.balance ?? null;
+  const balanceBefore = await balanceOf(userB);
+  const checkout = await userB.client.functions.invoke('payments-checkout', {
+    body: { plan: 'weekly', platform: 'web' },
+  });
+  const orderId = checkout.data?.order_id;
+  check(
+    'checkout creates an order for a catalog item',
+    checkout.data?.ok === true && checkout.data?.provider === 'mock' && typeof orderId === 'string',
+    JSON.stringify(checkout.data ?? checkout.error?.message),
+  );
+  const priced = await userB.client.functions.invoke('payments-checkout', {
+    body: { plan: 'weekly', platform: 'web', amount: 1, amount_paise: 1 },
+  });
+  const pricedOrder = priced.data?.order_id
+    ? await userB.client.rpc('get_payment', { p_order: priced.data.order_id })
+    : null;
+  check(
+    'a price sent by the app is ignored: the order costs what the catalog says',
+    pricedOrder?.data?.payment?.amount_paise === 6900,
+    JSON.stringify(pricedOrder?.data?.payment?.amount_paise ?? priced.data),
+  );
+  const forgedBody = JSON.stringify({
+    event: 'payment_link.paid',
+    payload: {
+      payment_link: { entity: { id: 'plink_x', reference_id: orderId, currency: 'INR' } },
+      payment: { entity: { id: 'pay_forged', amount: 6900, currency: 'INR' } },
+    },
+  });
+  const unsigned = await fetch(fnUrl('payments-webhook'), {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: forgedBody,
+  });
+  const wronglySigned = await fetch(fnUrl('payments-webhook'), {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', 'x-razorpay-signature': 'a'.repeat(64) },
+    body: forgedBody,
+  });
+  const stillPending = await userB.client.rpc('get_payment', { p_order: orderId });
+  check(
+    'a webhook without a valid signature is refused and grants nothing',
+    unsigned.status === 401 &&
+      wronglySigned.status === 401 &&
+      stillPending.data?.payment?.status === 'created',
+    `${unsigned.status}, ${wronglySigned.status}, ${stillPending.data?.payment?.status}`,
+  );
+  const payIntruder = await userA.client.functions.invoke('payments-mock', {
+    body: { order_id: orderId, outcome: 'paid' },
+  });
+  check("nobody can pay another student's order", Boolean(payIntruder.error));
+
+  const buyerInbox = await join(userB.client, `user:${userB.id}`);
+  const paidNow = await userB.client.functions.invoke('payments-mock', {
+    body: { order_id: orderId, outcome: 'paid' },
+  });
+  const afterPay = await userB.client.rpc('get_payment', { p_order: orderId });
+  const balancePaid = await balanceOf(userB);
+  check(
+    'a signed payment event grants the plan, and the phone is told at once',
+    paidNow.data?.result === 'granted' &&
+      afterPay.data?.payment?.status === 'paid' &&
+      balancePaid === balanceBefore + 15 &&
+      (await received(
+        buyerInbox.events,
+        (e) => e.event === 'refresh' && e.payload.reason === 'payment',
+      )),
+    JSON.stringify({ result: paidNow.data?.result, before: balanceBefore, after: balancePaid }),
+  );
+  const paidAgain = await userB.client.functions.invoke('payments-mock', {
+    body: { order_id: orderId, outcome: 'paid' },
+  });
+  check(
+    'a second payment event for the same order grants nothing',
+    paidAgain.data?.result?.startsWith('refused') && (await balanceOf(userB)) === balancePaid,
+    paidAgain.data?.result,
+  );
+  const synced = await userB.client.functions.invoke('payments-sync', { body: {} });
+  check('the app can ask the server to re-check its purchases', synced.data?.ok === true);
+  const refundedNow = await userB.client.functions.invoke('payments-mock', {
+    body: { order_id: orderId, outcome: 'refund' },
+  });
+  const afterRefund = await userB.client.rpc('get_payment', { p_order: orderId });
+  check(
+    'a full refund revokes the unused likes',
+    refundedNow.data?.result === 'revoked' &&
+      afterRefund.data?.payment?.status === 'refunded' &&
+      (await balanceOf(userB)) === balanceBefore,
+    JSON.stringify({ result: refundedNow.data?.result, balance: await balanceOf(userB) }),
+  );
+  await buyerInbox.channel.unsubscribe();
   for (const client of [userA.client, partner.client, userB.client])
     await client.removeAllChannels();
 
