@@ -9,6 +9,7 @@ import {
 } from '@/features/safety/model/safety';
 import { queryClient } from '@/lib/query-client';
 import { supabase } from '@/lib/supabase';
+import { stripInvisible } from '@/lib/text';
 
 export const blocksKey = (userId: string) => ['safety', 'blocks', userId] as const;
 
@@ -36,7 +37,7 @@ export async function reportUser(input: {
   const { data, error } = await supabase.rpc('report_user', {
     p_target: input.targetId,
     p_category: input.category,
-    p_details: input.details.trim(),
+    p_details: stripInvisible(input.details).trim(),
     p_context: input.context,
     p_block: input.block,
   });

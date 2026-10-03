@@ -19,6 +19,8 @@
     "db:test": "supabase test db",
     "db:types": "supabase gen types typescript --local --schema public > src/types/database.ts && prettier --write src/types/database.ts",
     "db:verify": "node scripts/verify-local-supabase.mjs",
+    "security:attack": "node scripts/attack-local-supabase.mjs",
+    "text:check": "node scripts/check-source-text.mjs",
     "functions:check": "bash scripts/check-functions.sh",
     "emulator": "bash scripts/emulator.sh",
     "android:build": "bash scripts/android-build.sh",

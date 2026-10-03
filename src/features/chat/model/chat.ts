@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { stripInvisible } from '@/lib/text';
+
 /** A stored message as `send_message`, `get_messages` and the Realtime broadcast return it. */
 export const messageSchema = z.object({
   id: z.number().int().positive(),
@@ -205,6 +207,6 @@ export function previewText(last: { body: string; mine: boolean }): string {
 
 /** What the composer may send: trimmed, not empty, within the server's limit. */
 export function cleanDraft(draft: string): string | null {
-  const body = draft.trim();
+  const body = stripInvisible(draft).trim();
   return body.length === 0 || body.length > MAX_MESSAGE_LENGTH ? null : body;
 }

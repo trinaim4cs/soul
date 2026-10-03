@@ -6,6 +6,18 @@ Status values: `accepted` · `default, confirm` · `open`.
 
 ---
 
+## Phase 18 security audit (2026-10-03)
+
+### D-057 Security audit and text safety
+- **Audit (spec 72):** SECURITY_AUDIT.md. Every spec 72 item was checked, and User A was shown unable to reach User B's raw coordinates, identity documents (none are stored), billing, reports or verification details, with B's data really present.
+- **Standing attack run:** `npm run security:attack` signs in as an ordinary student and attacks another account through tables, schemas, RPCs, Storage, Realtime and the Edge Functions. It runs in `npm run test:all` and in CI, so a later change that opens a path fails the build.
+- **Text safety (finding F-1):** names, hooks, About me, messages, report details and appeals refuse C0 and C1 control characters, DEL, bidi embeddings and overrides (U+202A to U+202E) and bidi isolates (U+2066 to U+2069); one-line fields (name, hook) also refuse line breaks. The database enforces it with check constraints; the app removes these characters before saving, so pasted text is cleaned rather than refused. Directional marks (U+200E, U+200F) and the zero-width joiner stay allowed: they cannot reorder neighbouring text, and real scripts and emoji need them.
+- **Mock payments fail closed (F-2):** the mock provider needs `SOUL_ENV=development`; an unset or other value keeps it off.
+- **No invisible characters in the code:** `npm run text:check` fails on control or bidi characters in any tracked text file. Tests and rules that need such characters build them from code points.
+- **Accepted (owner may revisit):** `push-send` stays callable without credentials (it takes no input); OTP limits are per IP (CAPTCHA or 8-digit codes if guessing appears); a banned address is told "This email can't be used for SOUL." without a reason.
+
+---
+
 ## Phase 16 testing (2026-10-03)
 
 ### D-056 Testing and continuous checks
@@ -134,7 +146,7 @@ Status values: `accepted` · `default, confirm` · `open`.
 - **Development (mock provider):**
   - With `PAYMENTS_PROVIDER=mock` the server returns a mock order, and the app opens a test checkout page (development builds only).
   - The test page calls `payments-mock`, which signs a Razorpay-shaped event with the webhook secret and posts it to the real webhook. The whole verified path runs.
-  - Production refuses it twice: `SOUL_ENV=production` disables the function and the provider, and the database refuses mock orders unless `payments_allow_mock` is true (only the local seed sets it).
+  - Production refuses it twice: only `SOUL_ENV=development` enables the function and the provider (D-057: a missing setting keeps it off), and the database refuses mock orders unless `payments_allow_mock` is true (only the local seed sets it).
 - **Secrets** (server only, never in the app): `PAYMENTS_PROVIDER`, `SOUL_ENV`, `PAYMENTS_SITE_URL`, `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `RAZORPAY_WEBHOOK_SECRET` (see `supabase/functions/.env.example` and SUPABASE.md).
 - **Not in this phase:**
   - Chargebacks/disputes (`payment.dispute.*`) are left to manual handling by the owner.

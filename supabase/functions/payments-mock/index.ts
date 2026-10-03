@@ -2,7 +2,7 @@ import { z } from 'npm:zod@4';
 
 import { requireUser, serviceClient } from '../_shared/auth.ts';
 import { HttpError, handler, json } from '../_shared/http.ts';
-import { isProduction, paymentProvider, webhookSecret } from '../_shared/payments.ts';
+import { isDevelopment, paymentProvider, webhookSecret } from '../_shared/payments.ts';
 import { hmacHex } from '../_shared/razorpay.ts';
 import { parseBody } from '../_shared/validate.ts';
 
@@ -19,7 +19,7 @@ const body = z.object({
 Deno.serve(
   handler(async (req) => {
     if (req.method !== 'POST') throw new HttpError('invalid_request', 'Use POST.');
-    if (isProduction() || paymentProvider() !== 'mock') {
+    if (!isDevelopment() || paymentProvider() !== 'mock') {
       throw new HttpError('forbidden', 'Not available.');
     }
     const { user } = await requireUser(req);

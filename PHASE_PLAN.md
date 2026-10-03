@@ -25,7 +25,7 @@ Skills per phase come from `skills/SOUL_SKILL_MAP.md`. `soul-audit` is enabled o
 | 15 | Admin | done (Android + web verified) |
 | 16 | Testing (incl. the cross-platform matrix in `PLATFORM_MATRIX.md`) | done (`npm run test:all`, CI, TESTING.md) |
 | 17 | Visual QA (Android + iPhone-size web) | done (Android + PWA on Android; real iPhone pending) |
-| 18 | Security audit | todo |
+| 18 | Security audit | done (SECURITY_AUDIT.md, `security:attack` in CI) |
 | 19 | Performance | todo |
 | 20 | APK + website (`/download`, `/install`, PWA deploy) | todo |
 
@@ -262,6 +262,25 @@ Skills per phase come from `skills/SOUL_SKILL_MAP.md`. `soul-audit` is enabled o
   - A `visualViewport` keyboard inset in `SoulScreen` (iPhone Safari keeps the page size). Verified in Chrome; the iPhone path needs a real iPhone.
 
 **Closed 2026-09-28:** the Android rebuild embeds the new `remove` icon (verified in Filters).
+
+## Phase 18: Security audit (2026-10-03)
+
+**Method:** SECURITY_AUDIT.md (D-057). Every spec 72 item checked; a cross-account attack run (`npm run security:attack`, 11 checks) where User A, an ordinary student, goes after User B's private data through tables, the private and auth schemas, GraphQL, RPCs with B's ids, Storage, Realtime and the Edge Functions, with B's data really present; a secrets scan of the tree and the whole history; a scan of the web and Android bundles for every server secret's value; a review of the Edge Functions, Auth settings, headers and logs.
+
+**Proved:** User A cannot reach User B's raw coordinates (even as a candidate 20 m away), identity documents (none are stored), billing, reports or verification details.
+
+**Fixed:**
+- F-1 (medium): names, hooks, About me, messages, reports and appeals could hold bidi overrides and control characters (text that reads differently from what was typed). The database refuses them (`…1003000800_text_safety.sql`, pgTAP `018`); the app strips them before saving (`src/lib/text.ts`).
+- F-2: the mock payment provider now needs `SOUL_ENV=development` (it failed open when the setting was missing; the database still refused mock orders).
+- F-3: `push-send` logs error names only.
+- F-7, F-8: SECURITY_MODEL claims corrected to what is built; EAS `credentials.json` git-ignored.
+- Added `npm run text:check` (no invisible characters in tracked files) and `security:attack` to `test:all` and CI.
+
+**Accepted (Low):** `push-send` callable without credentials (no input, delivers only queued notifications); OTP limits per IP; a banned address is told it can't be used.
+
+**Verified:** all checks green through `npm run test:all` (189 unit tests, pgTAP 689, `db:verify` 109, `security:attack` 11).
+
+---
 
 ## Phase 17: Visual QA (2026-10-03)
 
@@ -782,3 +801,4 @@ Release build config, signing workflow (owner keystore, C-20), launcher icon (C-
 - 2026-10-03: Phase 15 done: a role-gated Admin section (reports with evidence, photos, appeals, flagged dates, exact account lookup, suspend, ban, restore; admins also plans, support grants and feature flags including an Instant Meet pause), every action checked by the server and logged (D-055).
 - 2026-10-03: Phase 16 done: `npm run test:all`, GitHub Actions CI with no secrets, schema-wide structural tests (which closed a PUBLIC execute gap in the private schema), TESTING.md mapping every spec 70 item, live Android ↔ web chat, receipts and block (D-056).
 - 2026-10-03: Phase 17 done: every spec 71 screen reviewed on Android (light, dark, 1.3× text) and the PWA; seven defects fixed (link alignment, the reveal's wait, Instant's hidden duration choice, web composer focus and keyboard), VISUAL_QA.md with screenshots.
+- 2026-10-03: Phase 18 done: security audit (SECURITY_AUDIT.md); User A shown unable to reach User B's coordinates, billing, reports or verification details; text spoofing characters refused (F-1), mock payments fail closed (F-2); `security:attack` and `text:check` added to `test:all` and CI.

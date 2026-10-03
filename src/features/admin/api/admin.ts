@@ -13,6 +13,7 @@ import {
 import type { ReportCategory } from '@/features/safety/model/safety';
 import { queryClient } from '@/lib/query-client';
 import { supabase } from '@/lib/supabase';
+import { stripInvisible } from '@/lib/text';
 
 export const roleKey = (userId: string) => ['admin', 'role', userId] as const;
 export const queueKey = ['admin', 'queue'] as const;
@@ -220,7 +221,9 @@ export function useMyAppeal(userId: string | null) {
 }
 
 export async function submitAppeal(userId: string, message: string) {
-  const outcome = result(await supabase.rpc('submit_appeal', { p_message: message.trim() }));
+  const outcome = result(
+    await supabase.rpc('submit_appeal', { p_message: stripInvisible(message).trim() }),
+  );
   await queryClient.invalidateQueries({ queryKey: appealKey(userId) });
   return outcome;
 }

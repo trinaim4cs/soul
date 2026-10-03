@@ -73,3 +73,7 @@ GoogleService-Info.plist
 # Vercel CLI link folder and local preview config
 .vercel
 .claude/launch.json
+
+# EAS local credentials (can hold keystore passwords; SECURITY_AUDIT F-8)
+credentials.json
+credentials/

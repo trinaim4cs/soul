@@ -98,19 +98,20 @@ Automated face, lighting and one-subject checks are C-30 (Phase 13, with the rev
 | Threat | Control |
 |---|---|
 | Account enumeration | identical auth responses; no public search by name (spec 17); discovery only via server functions |
-| OTP brute force | 6-digit email OTP, 10-minute expiry, single use (replay rejected, tested), 60 s resend window, Auth verification rate limits per IP; production limits set in the dashboard |
+| OTP brute force | 6-digit email OTP, 10-minute expiry, single use (replay rejected, tested), 60 s resend window, Auth verification rate limits per IP; production limits set in the dashboard. Limits are per IP, so Auth CAPTCHA or 8-digit codes are the next step if guessing appears (SECURITY_AUDIT F-5) |
 | Non-SRMIST sign-up | Auth `before-user-created` hook against the server-side allowlist; rejects gmail, look-alike suffixes and unlisted subdomains (tested). Clients cannot bypass it |
 | Duplicate accounts | one account per verified SRMIST email (a mailbox proves identity, D-027); device signals; report-driven review |
-| Replay | idempotency keys on swipes, purchases and confirmations; provider payment and order IDs unique; webhook events processed once; nonces on sensitive Edge calls |
+| Replay | idempotency keys on swipes, purchases, messages and confirmations; provider payment and order IDs unique; webhook events processed once |
 | Client entitlement tampering | no client-writable entitlement or balance; balance computed from the ledger |
-| Fake purchase state | only a signed provider webhook grants (the success redirect grants nothing); amount and currency checked against the server catalog; the mock provider is refused in production |
+| Fake purchase state | only a signed provider webhook grants (the success redirect grants nothing); amount and currency checked against the server catalog; the mock provider runs only in an explicit development deployment |
 | Swipe or match races | row lock on the entitlement row + pair advisory lock + unique constraints; pgTAP concurrency tests |
-| Message spam | per-conversation and per-user rate limits in the send function; new-match first-message throttle |
-| Upload abuse | size and type limits, per-day caps, moderation queue before public visibility |
+| Message spam | at most 15 messages per 10 s per sender in the send function; messages only inside a live match or Instant session; a block ends the conversation |
+| Upload abuse | JPEG only, 3 MB per photo, 6 photos per profile, metadata stripped on the server, moderation queue before public visibility (when photo review is on) |
 | Location leakage | Location exists only in Instant Meet (D-030); no raw coordinates to clients; 1 km server-side candidacy; bucketed distance; arrow suppressed under 100 m; deleted when Instant ends. Phase 10 leak audit done: pgTAP and HTTP checks that positions are unreadable and that no function output contains a coordinate (D-050); repeated in Phase 18 |
 | Location spoofing and probing | a fake position cannot locate anyone precisely: the 1 km test uses a ~110 m grid, one position every 2 s, impossible jumps refused (D-050). Risk signals (D-023), manual review, never single-signal bans (Phases 13 and 18) |
 | Direct object access | UUID keys, RLS on every table, signed URLs with short TTL, no guessable public paths |
-| Service-role exposure | never in the app bundle, the web bundle or `EXPO_PUBLIC_*`; a CI grep plus an APK and `dist/` string scan in Phase 18 |
+| Service-role exposure | never in the app bundle, the web bundle or `EXPO_PUBLIC_*`; the Phase 18 scan searched the web and Android bundles for every server secret's value and found none (SECURITY_AUDIT.md); repeated on the release build |
+| Text spoofing | names, hooks, About me, messages, reports and appeals refuse bidi overrides, isolates and control characters in the database; the app strips them before saving (D-057). Tracked source files may not hold such characters either (`npm run text:check`) |
 | Token theft on the web | strict CSP, no third-party scripts, no `dangerouslySetInnerHTML`, short-lived access tokens (section 12) |
 | Tampered APK download | HTTPS only, SHA-256 published on `/download`, the same signing key for every version so Android refuses a mismatched update (D-039, C-20) |
 | Stalking via Instant | mutual acceptance before any proximity; one acceptance is invisible to the other person; unilateral End Meet always on screen; session expiry; a block ends the session at once; positions deleted at the end (D-050) |
@@ -129,7 +130,7 @@ Private channels only, authorized by RLS on `realtime.messages` (D-012, built in
 - `.env*` files are git-ignored. `app.config.ts` exposes only `EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_ANON_KEY` and `APP_ENV`.
 - Edge Function secrets are set with `supabase secrets set`, one set per project (dev and prod).
 - Release signing keys stay with the owner and are never committed.
-- The mock payment provider is refused by the server in production twice (`SOUL_ENV=production` disables it; the database refuses mock orders unless `payments_allow_mock`, set only by the local seed); its test checkout page renders nothing in production builds.
+- The mock payment provider is refused by the server outside development twice (it runs only with `SOUL_ENV=development`, so a missing setting keeps it off; the database refuses mock orders unless `payments_allow_mock`, set only by the local seed); its test checkout page renders nothing in production builds.
 
 ## 10. Logging
 
@@ -142,7 +143,7 @@ Logs never contain message bodies, coordinates, ID data, face images, OTPs, toke
 - Phase 3: RLS framework + first pgTAP deny tests.
 - Phase 10: location-leak audit done (D-050): `011_instant_meet.test.sql` and `db:verify` prove no client access to positions, acceptances or sessions, no coordinate in any Instant output, nothing before both accept, and End Meet revoking everything; verified on Android and the PWA build in the browser.
 - Phase 16: full RLS, constraint and race test suites.
-- Phase 18: security audit with the `soul-audit` plugin (enable it for that phase), plus manual cross-account attack attempts listed in spec Phase 19.
+- Phase 18: security audit done (SECURITY_AUDIT.md, D-057). `npm run security:attack` repeats the cross-account attack (User A against User B's coordinates, billing, reports, verification details, chat, storage and topics) on every `test:all` and CI run.
 
 ## 12. Web (iPhone PWA) specifics (D-040)
 

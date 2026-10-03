@@ -73,7 +73,7 @@ Deno.serve(
           await sendWebPush(subscription, payload, vapid, { topic: note.collapse_key, urgent })
         ).outcome;
       } catch (error) {
-        console.error('push_device_error', error instanceof Error ? error.message : typeof error);
+        console.error('push_device_error', error instanceof Error ? error.name : typeof error);
         return 'retry';
       }
     }

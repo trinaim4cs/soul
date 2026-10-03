@@ -3,7 +3,7 @@ import type { RazorpayKeys } from './razorpay.ts';
 // Payment configuration (DECISIONS D-052). Every value is a server secret; nothing here is
 // ever in the app. Set with `supabase secrets set` (hosted) or `supabase/functions/.env` (local).
 //   PAYMENTS_PROVIDER         razorpay | mock
-//   SOUL_ENV                  production refuses the mock provider outright
+//   SOUL_ENV                  only `development` may use the mock provider (unset counts as not)
 //   PAYMENTS_SITE_URL         the SOUL website that receives the return from checkout
 //   RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET, RAZORPAY_WEBHOOK_SECRET
 
@@ -11,8 +11,12 @@ export type Provider = 'razorpay' | 'mock' | 'none';
 
 const read = (name: string) => Deno.env.get(name)?.trim() ?? '';
 
-export function isProduction(): boolean {
-  return read('SOUL_ENV') === 'production';
+/**
+ * The mock provider grants plans without a payment, so it needs an explicit development
+ * deployment: a missing or mistyped SOUL_ENV keeps it off (fails closed, Phase 18).
+ */
+export function isDevelopment(): boolean {
+  return read('SOUL_ENV') === 'development';
 }
 
 export function razorpayKeys(): RazorpayKeys | null {
@@ -29,7 +33,7 @@ export function webhookSecret(): string {
 export function paymentProvider(): Provider {
   const configured = read('PAYMENTS_PROVIDER');
   if (configured === 'razorpay' && razorpayKeys() && webhookSecret()) return 'razorpay';
-  if (configured === 'mock' && !isProduction() && webhookSecret()) return 'mock';
+  if (configured === 'mock' && isDevelopment() && webhookSecret()) return 'mock';
   return 'none';
 }
 

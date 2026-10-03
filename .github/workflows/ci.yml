@@ -31,6 +31,7 @@ jobs:
       - run: npm run typecheck
       - run: npm run lint
       - run: npm run format:check
+      - run: npm run text:check
       - run: npx jest --ci
 
   functions:
@@ -76,5 +77,6 @@ jobs:
       - run: npm run db:start
       - run: npm run db:test
       - run: npm run db:verify
+      - run: npm run security:attack
       - if: always()
         run: npm run db:stop

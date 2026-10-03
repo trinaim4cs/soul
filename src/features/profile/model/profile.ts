@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { stripInvisible } from '@/lib/text';
+
 /** Profile rules shared with the server (supabase/migrations/…_profile.sql, DECISIONS D-041). */
 export const HOOK_MAX = 30;
 export const ABOUT_MAX = 1000;
@@ -118,14 +120,15 @@ export function missingFields(profile: MyProfile): MissingField[] {
   return missing;
 }
 
-/** Trims and collapses inner whitespace; the server enforces the length limits. */
+/** Trims, collapses inner whitespace and drops invisible controls; the server enforces the limits. */
 export function cleanText(value: string): string {
-  return value.replace(/\s+/g, ' ').trim();
+  return stripInvisible(value).replace(/\s+/g, ' ').trim();
 }
 
 /** About Me keeps line breaks but not runs of blank lines. */
 export function cleanAbout(value: string): string {
-  return value
+  return stripInvisible(value)
+    .replace(/\r\n?/g, '\n')
     .replace(/[ \t]+/g, ' ')
     .replace(/\n{3,}/g, '\n\n')
     .trim();

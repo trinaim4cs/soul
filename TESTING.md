@@ -6,14 +6,14 @@ How SOUL is tested, what each layer covers, and where every item of spec section
 
 ```bash
 npm run db:start      # local Supabase (Docker), once
-npm run test:all      # types, lint, format, unit tests, Edge Functions, pgTAP, HTTP checks
+npm run test:all      # types, lint, format, source text, unit tests, Edge Functions, pgTAP, HTTP checks, attacks
 ```
 
-`npm run test:all -- --no-db` skips the two database steps. GitHub Actions (`.github/workflows/ci.yml`) runs the same steps on every push to `main`, with no secrets: a throwaway local stack, the mock payment provider and freshly generated Web Push keys.
+`npm run test:all -- --no-db` skips the three database steps. GitHub Actions (`.github/workflows/ci.yml`) runs the same steps on every push to `main`, with no secrets: a throwaway local stack, the mock payment provider and freshly generated Web Push keys.
 
 **CI notes:**
 - The Edge Function check runs with `--node-modules-dir=none`: the functions resolve their own `npm:` imports, as the hosted runtime does, and CI does not install the app's `node_modules` for that job.
-- A failed `db:verify` check (or a crash) is printed as a GitHub annotation, so it can be read without signing in to open the log.
+- A failed `db:verify` or `security:attack` check (or a crash) is printed as a GitHub annotation, so it can be read without signing in to open the log.
 - One early run failed in `db:verify` before annotations existed, and the next runs passed, so it was intermittent and its check is unknown. If it returns, the annotation names it.
 
 ## Layers
@@ -21,10 +21,12 @@ npm run test:all      # types, lint, format, unit tests, Edge Functions, pgTAP, 
 | Layer | Command | Size | What it proves |
 |---|---|---|---|
 | Types and lint | `npm run typecheck`, `npm run lint` | whole repo | strict TypeScript; hex colours only in `src/theme` |
-| Unit tests (Jest) | `npm test` | 185 tests, 24 files | app models (pricing, badges, Instant buckets, chat grouping, payments, safety, admin, notification links) and the Edge Function libraries in `supabase/functions/_shared` (JPEG stripping, Razorpay signatures, **Web Push RFC 8291 test vector**, VAPID, FCM assertions) |
+| Source text | `npm run text:check` | every tracked text file | no invisible control or bidi characters in code, SQL or docs (D-057) |
+| Unit tests (Jest) | `npm test` | 189 tests, 25 files | app models (pricing, badges, Instant buckets, chat grouping, payments, safety, admin, notification links) and the Edge Function libraries in `supabase/functions/_shared` (JPEG stripping, Razorpay signatures, **Web Push RFC 8291 test vector**, VAPID, FCM assertions) |
 | Edge Functions | `npm run functions:check` | 11 functions | every function type-checks under Deno |
-| Database (pgTAP) | `npm run db:test` | **672 assertions, 17 files** | every rule enforced by the database, run as the real `authenticated` and `service_role` roles inside a rolled-back transaction |
+| Database (pgTAP) | `npm run db:test` | **689 assertions, 18 files** | every rule enforced by the database, run as the real `authenticated` and `service_role` roles inside a rolled-back transaction |
 | Server over HTTP | `npm run db:verify` | **109 checks** | the real stack end to end: Auth with OTP email, PostgREST, Realtime sockets, Storage, Edge Functions |
+| Cross-account attacks | `npm run security:attack` | **11 checks** | an ordinary student attacks another account's coordinates, billing, reports, verification details, chat, storage and topics through every route the app's credentials reach (Phase 18, SECURITY_AUDIT.md) |
 | Devices | per phase, PHASE_PLAN "Verified" | | the Android emulator (development build) and an iPhone-size web viewport, plus the cross-platform matrix in PLATFORM_MATRIX.md |
 
 **Fixture rules:** neutral identities only (`Test User 01`, `Profile 07`); each pgTAP file creates its own accounts with a fixed id prefix and counts **only its own fixtures** (a shared local database once broke two tests that assumed it was empty); every pgTAP file rolls back.
@@ -58,4 +60,4 @@ npm run test:all      # types, lint, format, unit tests, Edge Functions, pgTAP, 
 - **Live Razorpay:** waits for the owner's test keys and webhook (C-25); the mock provider signs events for the real webhook.
 - **A real iPhone:** the PWA is tested in an iPhone-size viewport and in Chrome on Android, not yet in Safari on an iPhone (Phase 17 visual QA and the release checklist).
 - **One Android and one PWA in the same Instant Meet:** each platform has been tested with a scripted or browser partner, not with each other.
-- **Performance and the security audit:** Phases 18 and 19.
+- **Performance:** Phase 19. The security audit is done (Phase 18, SECURITY_AUDIT.md).
