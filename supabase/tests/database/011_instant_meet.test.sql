@@ -3,7 +3,7 @@
 begin;
 create extension if not exists pgtap with schema extensions;
 set search_path = public, extensions;
-select plan(64);
+select plan(71);
 
 create function pg_temp.mk(p_id uuid, p_gender public.gender, p_show public.gender[], p_plan text default 'monthly')
 returns void language plpgsql as $$
@@ -30,11 +30,16 @@ end $$;
 create function pg_temp.act(p_id uuid) returns void language sql as $$
   select set_config('request.jwt.claims', json_build_object('sub', p_id, 'role', 'authenticated')::text, true);
 $$;
--- Report the acting account's position as metres north and east of the base point.
+-- Report the acting account's position as metres north and east of the base point. now() is
+-- fixed inside this transaction, so the previous position is first moved two minutes into
+-- the past (the rate limit and the jump check are tested on their own below).
 create function pg_temp.locate(p_north double precision, p_east double precision, p_accuracy double precision default 12)
-returns jsonb language sql as $$
-  select public.instant_update_location(12.8230 + p_north / 110574.0, 80.0450 + p_east / 108600.0, p_accuracy);
-$$;
+returns jsonb language plpgsql security definer as $$
+begin
+  update private.instant_presence set located_at = located_at - interval '2 minutes'
+    where user_id = (select auth.uid());
+  return public.instant_update_location(12.8230 + p_north / 110574.0, 80.0450 + p_east / 108600.0, p_accuracy);
+end $$;
 
 select pg_temp.mk('000000a0-0000-4000-8000-000000000001', 'woman', '{man}');            -- V
 select pg_temp.mk('000000a0-0000-4000-8000-0000000000a1', 'man', '{woman}');            -- M1, 900 m north
@@ -47,6 +52,8 @@ select pg_temp.mk('000000a0-0000-4000-8000-0000000000a7', 'man', '{woman}');    
 select pg_temp.mk('000000a0-0000-4000-8000-0000000000a8', 'man', '{woman}');            -- M8, nearby, joins later
 select pg_temp.mk('000000a0-0000-4000-8000-0000000000a9', 'man', '{woman}');            -- M9, nearby, unmatched from V
 select pg_temp.mk('000000a0-0000-4000-8000-0000000000aa', 'man', '{woman}');            -- M10, nearby, skipped by V
+select pg_temp.mk('000000a0-0000-4000-8000-0000000000b1', 'woman', '{man}');            -- W1, probes positions
+select pg_temp.mk('000000a0-0000-4000-8000-0000000000b2', 'man', '{woman}');            -- M11, probed
 insert into public.matches (user_a, user_b, active, ended_at, ended_by)
 values ('000000a0-0000-4000-8000-000000000001', '000000a0-0000-4000-8000-0000000000a9', false, now(),
         '000000a0-0000-4000-8000-000000000001');
@@ -299,6 +306,36 @@ select is(public.instant_state() -> 'active', 'false'::jsonb, 'Instant turns its
 reset role;
 select is((select count(*)::int from private.instant_presence where user_id = '000000a0-0000-4000-8000-0000000000a8'),
   0, 'and the position is deleted, not kept');
+
+-- ---------------------------------------------------------------- probing a position is not possible
+set local role authenticated;
+select pg_temp.act('000000a0-0000-4000-8000-0000000000b2');
+select public.instant_start(60);
+select pg_temp.locate(0, -980);
+select pg_temp.act('000000a0-0000-4000-8000-0000000000b1');
+select public.instant_start(60);
+select is(public.instant_update_location(12.8230, 80.0450, 10) ->> 'ok', 'true', 'a first position is accepted');
+select is(public.instant_update_location(12.8231, 80.0450, 10) ->> 'reason', 'too_soon',
+  'a second one straight after is refused');
+reset role;
+update private.instant_presence set located_at = now() - interval '5 seconds'
+  where user_id = '000000a0-0000-4000-8000-0000000000b1';
+set local role authenticated;
+select is(public.instant_update_location(12.8680, 80.0450, 10) ->> 'reason', 'implausible',
+  'a 5 km jump five seconds later is refused');
+select is(public.instant_update_location(12.8232, 80.0450, 10) ->> 'ok', 'true',
+  'a nearby position is accepted');
+-- 980, 1000 and 1020 m from the probed person: the exact boundary sits between the second and
+-- the third, but all three are in the same grid cell, so the answer cannot reveal it.
+select pg_temp.locate(0, 0);
+select ok(public.instant_candidates() -> 'candidates' @> '[{"id": "000000a0-0000-4000-8000-0000000000b2"}]',
+  'at 980 m the person is a candidate');
+select pg_temp.locate(0, 20);
+select ok(public.instant_candidates() -> 'candidates' @> '[{"id": "000000a0-0000-4000-8000-0000000000b2"}]',
+  'at 1000 m too');
+select pg_temp.locate(0, 40);
+select ok(public.instant_candidates() -> 'candidates' @> '[{"id": "000000a0-0000-4000-8000-0000000000b2"}]',
+  'and at 1020 m: the 1 km test is between grid cells, never exact positions');
 
 select * from finish();
 rollback;

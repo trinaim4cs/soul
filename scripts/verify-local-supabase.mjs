@@ -708,6 +708,166 @@ try {
   );
   for (const client of [userA.client, partner.client, userB.client])
     await client.removeAllChannels();
+
+  // Phase 10: Instant Meet over real HTTP and Realtime. Positions go in; only rounded,
+  // derived values come out, and only after both people accept (spec 26 to 34, D-050).
+  const base = { lat: 12.823, lng: 80.045 };
+  const north = (metres) => ({ lat: base.lat + metres / 110574, lng: base.lng });
+  const report = (client, point) =>
+    client.rpc('instant_update_location', {
+      p_latitude: point.lat,
+      p_longitude: point.lng,
+      p_accuracy: 12,
+    });
+  const coordinateLeak = (value) => {
+    const text = JSON.stringify(value ?? null);
+    return /12\.8[0-9]|80\.0[0-9]|"(latitude|longitude|location|lat|lng|accuracy_m)"/.test(text);
+  };
+
+  const noPlan = await userA.client.rpc('instant_start', { p_minutes: 30 });
+  check(
+    'Instant Meet needs a plan that includes it (top-ups never unlock it)',
+    noPlan.data?.reason === 'no_plan',
+    JSON.stringify(noPlan.data),
+  );
+  const likedOnly = targets.filter((_, index) => burst[index].data?.ok === true);
+  const [nearId, farId] = likedOnly;
+  const nearUser = await signIn(targetEmail.get(nearId));
+  const farUser = await signIn(targetEmail.get(farId));
+  for (const id of [userA.id, nearId, farId]) {
+    await admin.rpc('activate_plan', { p_user: id, p_plan: 'monthly', p_key: `verify-${hex()}` });
+  }
+  const before = await userA.client.rpc('instant_update_location', {
+    p_latitude: base.lat,
+    p_longitude: base.lng,
+    p_accuracy: 10,
+  });
+  check(
+    'no position is taken before Instant is turned on',
+    before.data?.reason === 'not_active',
+    JSON.stringify(before.data),
+  );
+  const started = await Promise.all(
+    [userA, nearUser, farUser].map((user) => user.client.rpc('instant_start', { p_minutes: 30 })),
+  );
+  check(
+    'a monthly plan can turn Instant on',
+    started.every((result) => result.data?.ok === true),
+    JSON.stringify(started.map((result) => result.data)),
+  );
+  await Promise.all([
+    report(userA.client, base),
+    report(nearUser.client, north(200)),
+    report(farUser.client, north(1400)),
+  ]);
+  const found = await userA.client.rpc('instant_candidates');
+  const foundIds = (found.data?.candidates ?? []).map((candidate) => candidate.id);
+  check(
+    'someone 200 m away is a candidate; someone 1.4 km away is not',
+    foundIds.includes(nearId) && !foundIds.includes(farId),
+    JSON.stringify(foundIds),
+  );
+  check(
+    'the candidate list carries no coordinate or distance',
+    !coordinateLeak(found.data) && !JSON.stringify(found.data).includes('distance_m'),
+  );
+
+  const presence = await userA.client.schema('private').from('instant_presence').select('*');
+  const sessionsTable = await userA.client.from('instant_sessions').select('*');
+  check(
+    'no client can read stored positions or the sessions table',
+    Boolean(presence.error) && Boolean(sessionsTable.error),
+    `${presence.error?.code}, ${sessionsTable.error?.code}`,
+  );
+
+  const nearInbox = await join(nearUser.client, `user:${nearId}`);
+  const firstYes = await userA.client.rpc('instant_accept', { p_candidate: nearId });
+  const waitingState = await nearUser.client.rpc('instant_state');
+  check(
+    'one yes shares nothing',
+    firstYes.data?.ok === true &&
+      firstYes.data.session === null &&
+      waitingState.data?.session === null,
+  );
+  const secondYes = await nearUser.client.rpc('instant_accept', { p_candidate: userA.id });
+  check(
+    'the second yes starts the session and nudges both phones',
+    typeof secondYes.data?.session === 'string' &&
+      (await received(
+        nearInbox.events,
+        (e) => e.event === 'refresh' && e.payload.reason === 'instant',
+      )),
+    JSON.stringify(secondYes.data),
+  );
+  const live = await userA.client.rpc('instant_state');
+  const liveSession = live.data?.session;
+  check(
+    'during the session: a rounded distance and a 15-degree bearing only',
+    liveSession?.distance_m === 200 && liveSession?.bearing === 0 && !coordinateLeak(live.data),
+    JSON.stringify({ distance: liveSession?.distance_m, bearing: liveSession?.bearing }),
+  );
+  await new Promise((resolve) => setTimeout(resolve, 2100));
+  const teleport = await report(nearUser.client, north(5200));
+  check(
+    'a position that jumps 5 km in two seconds is refused',
+    teleport.data?.reason === 'implausible',
+    JSON.stringify(teleport.data),
+  );
+  await new Promise((resolve) => setTimeout(resolve, 2100));
+  await report(nearUser.client, north(60));
+  const close = await userA.client.rpc('instant_state');
+  check(
+    'under 100 m only "nearby": no number, no direction',
+    close.data?.session?.nearby === true &&
+      close.data.session.distance_m === null &&
+      close.data.session.bearing === null,
+    JSON.stringify(close.data?.session),
+  );
+
+  const meetChat = liveSession?.conversation_id;
+  const meetMine = await join(userA.client, `chat:${meetChat}`);
+  const meetOutsider = await join(userB.client, `chat:${meetChat}`);
+  const meetMessage = await nearUser.client.rpc('send_message', {
+    p_conversation: meetChat,
+    p_body: 'on my way',
+    p_client_id: randomUUID(),
+  });
+  check(
+    'the two people can chat during the session; nobody else can listen',
+    meetMine.status === 'SUBSCRIBED' &&
+      meetOutsider.status !== 'SUBSCRIBED' &&
+      meetMessage.data?.ok === true &&
+      (await received(meetMine.events, (e) => e.event === 'message')),
+    `${meetMine.status}, ${meetOutsider.status}`,
+  );
+
+  // End Meet: one person ends it for both, at once, with no consent from the other.
+  const ending = await nearUser.client.rpc('instant_end_session');
+  const afterEnd = await userA.client.rpc('instant_state');
+  const lateMessage = await userA.client.rpc('send_message', {
+    p_conversation: meetChat,
+    p_body: 'still there?',
+    p_client_id: randomUUID(),
+  });
+  check(
+    'End Meet stops sharing for both at once and closes the chat',
+    ending.data?.ended === true &&
+      afterEnd.data?.session === null &&
+      afterEnd.data?.active === false &&
+      afterEnd.data?.located === false &&
+      lateMessage.data?.reason === 'not_available' &&
+      (await received(meetMine.events, (e) => e.event === 'closed')),
+    JSON.stringify(afterEnd.data),
+  );
+  const rejoin = await join(nearUser.client, `chat:${meetChat}`);
+  const nearAfter = await nearUser.client.rpc('instant_candidates');
+  check(
+    'after the end: the chat topic is refused and nothing more is shared',
+    rejoin.status !== 'SUBSCRIBED' && (nearAfter.data?.candidates ?? []).length === 0,
+    rejoin.status,
+  );
+  await farUser.client.rpc('instant_stop');
+  for (const client of [nearUser.client, farUser.client]) await client.removeAllChannels();
 } finally {
   for (const id of [userA.id, userB.id, ...extraUsers]) {
     for (const bucket of ['profile-photos', 'profile-photos-blurred', 'photo-uploads']) {

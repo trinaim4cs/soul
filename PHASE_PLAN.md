@@ -17,7 +17,7 @@ Skills per phase come from `skills/SOUL_SKILL_MAP.md`. `soul-audit` is enabled o
 | 7 | Swipes + plans | done (Android + web verified; checkout itself is Phase 12) |
 | 8 | Matching | done (Android + web verified) |
 | 9 | Chat | done (Android + web verified, two live clients) |
-| 10 | Instant Meet (the only location feature, 1 km) | todo |
+| 10 | Instant Meet (the only location feature, 1 km) | done (Android + web verified; location-leak audit passed) |
 | 11 | Date confirmation + Hot Person | todo |
 | 12 | Billing (SOUL web checkout, D-037) | todo |
 | 13 | Safety + moderation | todo |
@@ -262,6 +262,57 @@ Skills per phase come from `skills/SOUL_SKILL_MAP.md`. `soul-audit` is enabled o
   - A `visualViewport` keyboard inset in `SoulScreen` (iPhone Safari keeps the page size). Verified in Chrome; the iPhone path needs a real iPhone.
 
 **Closed 2026-09-28:** the Android rebuild embeds the new `remove` icon (verified in Filters).
+
+## Phase 10: Instant Meet (2026-10-03)
+
+**Server:** migrations `…1002000400_instant_meet.sql` and `…1003000100_instant_hardening.sql` (D-050):
+- `private.instant_presence` (latest position only), `private.instant_accepts`, `private.instant_skips`, `instant_sessions` (who and when, never where); a session has its own conversation.
+- `instant_start` (plan gate, 15/30/60 min), `instant_stop`, `instant_update_location`, `instant_candidates`, `instant_accept`, `instant_skip`, `instant_state`, `instant_end_session`. No function returns a coordinate.
+- 1 km by `ST_DWithin` between ~110 m grid cells. One position every 2 s; impossible jumps refused. Positions count for 90 s and only within 200 m accuracy.
+- Mutual acceptance under the pair lock. During a session: distance in 50/100 m steps, bearing in 15° steps, only "nearby" under 100 m.
+- End Meet, Turn off, expiry (lazy sweep, no cron), a block or a lost plan end everything for both at once.
+
+**App:**
+- `expo-location` (foreground only, no Google accuracy dialog) and `expo-haptics`; native rebuild with the new icon glyphs (`navigation`, `send`, `timer`, `location_off`, `explore_off`).
+- `src/services/location` and `src/services/heading` for Android and the PWA. Location is sent only while Instant is on and the app is in the foreground.
+- Instant tab: plan gate with the plans that include it, setup with 15/30/60 and three privacy points, searching radar, candidate cards with no distance, waiting state, an "ended" note, and the way back into a live meet.
+- Session screen (`/instant/session/[id]`): compass with a smoothed heading on a damped spring, rounded distance, timer, Message and End Meet.
+- Session chat (`/instant/chat/[id]`): the Phase 9 chat with a distance pill and End Meet in the header.
+- A session opens the compass on both phones by itself (account topic) and leaves an "ended" note when it closes.
+- Also: the chat Send button is now an icon, and the first showing of a match reveal has a success haptic (both waited for this rebuild). `SoulChip` gained `fill` for equal chips in a row.
+
+**Verified:**
+- pgTAP 357/357 (71 new), `db:verify` 82/82 (14 new, over real HTTP and Realtime), 139 unit tests, typecheck and lint clean.
+- **Location-leak audit:**
+  - No client can read positions, acceptances or sessions (PostgREST `PGRST106` and `42501`).
+  - No candidate list or state contains a coordinate (checked in SQL and over HTTP).
+  - Nothing is shared before both accept, and one acceptance is invisible.
+- **End-session revocation:** after End Meet, both states drop the session, both positions are deleted, the chat refuses messages, `closed` arrives, and joining the chat topic is refused.
+- **Web, two browser sessions** (Profile 07 and User C, fake positions ~500 m apart):
+  - Candidate cards on both sides; the waiting state, then a mutual yes.
+  - The compass opened on both by itself, showing "~500 m". The arrow sat at 30°, the true bearing, and turned smoothly the short way to -60° when the heading changed.
+  - Session chat with End Meet in the header; End Meet ended it for both, with no positions left on the server and the "ended" note on the tab.
+  - A desktop browser with no compass says "Direction unavailable on this device".
+- **Android emulator** (`adb emu geo fix`, a scripted second person over the API):
+  - Foreground-only permission prompt (no "all the time").
+  - Position on the server within seconds.
+  - Candidate card, mutual yes, the compass opening by itself, "~500 m", then "~450 m" and "You're nearby" (no number, no arrow) as the other person walked closer.
+  - The arrow appeared when the emulator's magnetic field turned.
+  - When the meet ended: "This meet has ended", and the status-bar location indicator went away.
+
+**Fixed during testing:**
+- Reloading or deep-linking into a live session opened a second copy of the compass screen. The session-start push now skips a screen already open.
+- The compass dial was an oval on Android (a percentage width with a max width and an aspect ratio). Dial and radar now have numeric sizes.
+- Android reports a heading only after about 2° of turning, so a phone held still facing north looked like it had no compass after 3 s. It now asks for a small turn after 3 s and gives up only after 15 s, and a late first reading still brings the arrow.
+- `mayShowUserSettingsDialog` opened Google's "Location Accuracy" consent dialog; it is now off.
+- At phone width the "60 min" chip wrapped to a second line (equal `fill` chips now), and the paired buttons did not fill their half of the row.
+
+**Open:**
+- Real-device feel of the compass (sensor noise, figure-eight calibration) and iPhone Safari's compass prompt: Phase 17 on hardware.
+- Mutual extension is deferred, ask the owner. Meeting points are not in spec v2.
+- Mock-location and integrity signals for Instant: Phases 13 and 18.
+
+---
 
 ## Phase 9: Chat (2026-10-02)
 
@@ -538,3 +589,4 @@ Release build config, signing workflow (owner keystore, C-20), launcher icon (C-
 - 2026-10-02: Phase 7 done: plan catalog, swipe ledger, metered likes, balance and plans screen; race tests pass over HTTP. Checkout waits for Phase 12.
 - 2026-10-02: Phase 8 done: matches created inside the like transaction under a pair lock, reveal, matches list with unseen count, unmatch, anonymous reveal setting (D-048).
 - 2026-10-02: Phase 9 done: chat with private Realtime topics, read receipts, typing, reply, retry; verified with two live clients (D-049). C: drive filled to 2 GB free because the page file grew to 32 GB under memory pressure; the emulator now runs only during Android checks.
+- 2026-10-03: Phase 10 done: Instant Meet with plan gate, 1 km candidates on a ~110 m grid, mutual acceptance, compass, rounded distance, session chat, End Meet and expiry; location-leak audit and end-session revocation tests pass (D-050). The owner freed C: (198 GB free). Native rebuild for expo-location, expo-haptics and the new icon glyphs.

@@ -107,6 +107,19 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         microphonePermission: false,
       },
     ],
+    [
+      // Instant Meet only (DECISIONS D-030, D-031, D-050): foreground location while the
+      // person has Instant on, and the compass heading. Never in the background, so no
+      // background permission and no foreground service.
+      'expo-location',
+      {
+        locationWhenInUsePermission:
+          'SOUL uses your location only while Instant Meet is on, to find people within 1 km. Others never see where you are.',
+        isIosBackgroundLocationEnabled: false,
+        isAndroidBackgroundLocationEnabled: false,
+        isAndroidForegroundServiceEnabled: false,
+      },
+    ],
     // Release builds sign only with the production key from local config (DECISIONS C-20).
     './plugins/with-release-signing',
   ],

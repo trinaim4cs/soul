@@ -12,20 +12,35 @@ type Props = {
   /** `radio` for single choice (gender), `checkbox` for multiple choice (show me). */
   kind?: 'radio' | 'checkbox';
   disabled?: boolean;
+  /** Share a row equally with the other `fill` chips (short labels only). */
+  fill?: boolean;
 };
 
 /** Selectable pill. Selection shows as an ink fill plus a tick, never colour alone. */
-export function SoulChip({ label, selected, onPress, kind = 'radio', disabled = false }: Props) {
+export function SoulChip({
+  label,
+  selected,
+  onPress,
+  kind = 'radio',
+  disabled = false,
+  fill = false,
+}: Props) {
   const styles = useStyles();
   return (
     <PressableScale
       onPress={onPress}
       disabled={disabled}
+      containerStyle={fill ? styles.fillBox : undefined}
       role={kind}
       aria-checked={selected}
       aria-disabled={disabled}
       accessibilityLabel={label}
-      style={[styles.chip, selected && styles.selected, disabled && styles.disabled]}>
+      style={[
+        styles.chip,
+        fill && styles.fill,
+        selected && styles.selected,
+        disabled && styles.disabled,
+      ]}>
       {selected ? <SoulIcon name="check" size="sm" color="inverseText" weight="regular" /> : null}
       <SoulText variant="label" tone={selected ? 'inverse' : 'primary'}>
         {label}
@@ -39,6 +54,7 @@ const useStyles = createThemedStyles(({ colors }) =>
     chip: {
       flexDirection: 'row',
       alignItems: 'center',
+      justifyContent: 'center',
       gap: spacing.xs,
       minHeight: sizes.touchTarget,
       paddingHorizontal: spacing.lg,
@@ -47,6 +63,8 @@ const useStyles = createThemedStyles(({ colors }) =>
       borderColor: colors.border,
       backgroundColor: colors.background,
     },
+    fillBox: { flex: 1 },
+    fill: { paddingHorizontal: spacing.sm },
     selected: { backgroundColor: colors.inverseSurface, borderColor: colors.inverseSurface },
     disabled: { opacity: 0.5 },
   }),

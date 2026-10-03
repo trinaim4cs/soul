@@ -46,8 +46,9 @@ Tokens are in `src/theme/motion.ts`. The values follow the `expo-animation` skil
 | Floating chat composer | 9 (built) | `react-native-keyboard-controller` keyboard position on the UI thread; composer height changes via layout transition |
 | Typing indicator | 9 (built) | three dots, staggered opacity CSS animation, `durations.base` |
 | New message entry | 9 (built) | the list container animates, never row `entering` inside virtualized cells |
-| Instant compass | 11 | heading and bearing into a shared value; shortest-angle unwrap; `springs.compass`; the arrow is hidden below 100 m |
-| Distance changes | 11 | cross-fade of bucketed text only (no counting animation) |
+| Instant compass | 10 (built) | heading smoothed by a circular low-pass filter (66 ms steps), then the arrow rotation as a shared value on `springs.compass` (700 ms, fully damped), always the short way round; hidden below 100 m, where a slow pulse (static under reduced motion) says "nearby" |
+| Distance changes | 10 (built) | the bucketed text simply changes (no counting animation) |
+| Instant searching | 10 (built) | three rings widening from the centre, CSS animation, 3.6 s loop, linear; three still rings under reduced motion |
 
 Feel is judged on a **release build** on the slowest available Android device. Dev builds are not a performance environment.
 

@@ -1,5 +1,5 @@
-import { ShellPlaceholder } from '@/components/shell-placeholder';
+import { InstantScreen } from '@/features/instant/screens/instant-screen';
 
 export default function InstantRoute() {
-  return <ShellPlaceholder title="Instant" phase={10} />;
+  return <InstantScreen />;
 }

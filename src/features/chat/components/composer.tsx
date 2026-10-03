@@ -101,10 +101,9 @@ export function Composer({ replyingTo, onCancelReply, onSend, onTyping }: Props)
           aria-disabled={!body}
           disabled={!body}
           onPress={submit}
+          hitSlop={(sizes.touchTarget - sizes.button.sm) / 2}
           style={[styles.send, !body && styles.sendDisabled]}>
-          <SoulText variant="button" tone="inverse">
-            Send
-          </SoulText>
+          <SoulIcon name="send" size="md" color="inverseText" weight="regular" />
         </PressableScale>
       </View>
     </View>
@@ -159,8 +158,8 @@ const useStyles = createThemedStyles(({ colors }) =>
       textAlignVertical: 'center',
     },
     send: {
-      minHeight: sizes.button.sm,
-      paddingHorizontal: spacing.md,
+      width: sizes.button.sm,
+      height: sizes.button.sm,
       borderRadius: radii.full,
       alignItems: 'center',
       justifyContent: 'center',

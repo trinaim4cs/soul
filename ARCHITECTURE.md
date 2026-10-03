@@ -84,12 +84,12 @@ Location never gates the app (spec v2: no geofence). Only the Instant tab asks f
 | Accounts | `profiles` (public projection), `account_private` (DOB, prefs, settings), `devices`, `push_tokens` | status RPC, account deletion function |
 | Verification | SRMIST email + OTP only (D-027): `account_private.institutional_email_verified_at`, terms and DOB columns | Auth `before-user-created` hook, `accept_terms()`, `set_date_of_birth()`, `get_my_status()` |
 | Photos | `profile_photos` (moderation state, order, blurred derivative ref) | upload-intent + moderation functions |
-| Location (Instant Meet only) | `instant_presence`, `instant_location_private` (no client policies) | 1 km `ST_DWithin` candidacy, proximity buckets (D-030, D-031) |
+| Location (Instant Meet only) | `private.instant_presence` (private schema, no client access) | 1 km `ST_DWithin` candidacy on a ~110 m grid, proximity buckets (D-030, D-031, D-050) |
 | Discovery | `preferences`, `passes`, `likes` | `discovery_feed()` (filters, privacy, blocks, ranking) |
 | Economy | `plans`, `subscriptions`, `swipe_credit_ledger` (Phase 7, D-047); `purchase_records` (Phase 12) | `swipe_right()` transaction, `get_my_swipes()`, `activate_plan()`; app code in `src/features/swipes` |
 | Matching | `matches` (Phase 8, D-048) | inside `swipe_right()`; `get_my_matches()`, `get_match()`, `mark_match_seen()`, `unmatch()`; app code in `src/features/matching` |
 | Chat | `conversations`, `conversation_members`, `messages` (Phase 9, D-049) | `send_message()` + broadcast trigger, `get_messages()`, `mark_conversation_read()`; typing via Broadcast on a client topic; app code in `src/features/chat` |
-| Instant | `instant_presence`, `instant_sessions`, `instant_participants`, `meeting_points`, `meeting_point_votes` | `instant-*` functions, `instant_proximity()` |
+| Instant | `private.instant_presence`, `private.instant_accepts`, `private.instant_skips`, `instant_sessions`, session `conversations` | `instant_start`, `instant_stop`, `instant_update_location`, `instant_candidates`, `instant_accept`, `instant_skip`, `instant_state`, `instant_end_session` (SQL functions, no Edge Function; D-050) |
 | Dates and badges | `date_rounds`, `date_confirmations`, `date_events`, `badges` | confirmation function, `recompute_hot_person()` + pg_cron |
 | Safety | `blocks`, `reports`, `report_attachments`, `moderation_actions`, `risk_signals`, `appeals` | report/block functions, admin functions |
 | Platform | `feature_flags`, `app_config` (e.g. free cadence), `audit_events`, `admin_roles` | read-only flags for clients; admin-only writes |
@@ -98,7 +98,7 @@ Location never gates the app (spec v2: no geofence). Only the Instant tab asks f
 
 - **Right swipe:** client → `swipe_right(target, idempotency_key)`. In one transaction: lock entitlement, check eligibility and blocks, insert like, consume a credit if new, create the match if reciprocal. Returns `{liked, matched, match_id, balance}`.
 - **Sign-in:** Rules ticked → SRMIST email → Auth hook checks the domain → 6-digit OTP email → session → `get_my_status()` → onboarding (18+ DOB, then profile) → app.
-- **Instant:** opt-in (entitled) → presence row → candidate suggestion → both accept → session created → each device posts fixes to `instant-location` → server returns `{distance_bucket, bearing_sector | null, meeting_point_bearing?}` → End Meet or expiry deletes the location state.
+- **Instant (built, D-050):** opt-in (entitled, 15/30/60 min) → presence row → the device posts its position every 5 s in the foreground → candidates within 1 km (no distance or direction) → both accept → session + session chat → `instant_state` returns `{distance_m | null, bearing | null, nearby, located}` → End Meet, Turn off, expiry or a block deletes the positions for both. No meeting points (not in spec v2).
 - **Message:** `send_message()` validates membership, blocks and rate limit, inserts, and the trigger broadcasts to the private topic. Receipts are updated through an RPC.
 - **Purchase (D-037):** client asks `payments-checkout` for an order for a catalog item → the provider's hosted checkout → the provider calls `payments-webhook` → the function verifies the signature and the amount against the server catalog → an idempotent ledger or subscription grant → the client re-reads its entitlement. The client never grants anything and never sees provider secrets. Play Billing and Apple IAP remain possible later adapters.
 - **Android update (D-039):** the app reads `app_config.android_release`, compares it with its own version, and shows an update prompt (forced below `min_supported_version`) that links to `/download`.

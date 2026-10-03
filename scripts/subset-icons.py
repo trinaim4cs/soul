@@ -74,7 +74,9 @@ def build(glyphs: dict[str, int]) -> None:
         print(f"{out_name}: {len(codepoints)} glyphs, {target.stat().st_size} bytes")
 
     manifest = {name: glyphs[name] for name in sorted(glyphs)}
-    (OUT / "SoulIcons.codepoints.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+    # LF endings on every platform, so the file matches Prettier and the repo.
+    with open(OUT / "SoulIcons.codepoints.json", "w", encoding="utf-8", newline="\n") as file:
+        file.write(json.dumps(manifest, indent=2) + "\n")
 
 
 if __name__ == "__main__":

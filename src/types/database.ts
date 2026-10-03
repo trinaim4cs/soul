@@ -166,24 +166,34 @@ export type Database = {
           closed_at: string | null;
           created_at: string;
           id: string;
+          instant_session_id: string | null;
           last_message_at: string | null;
-          match_id: string;
+          match_id: string | null;
         };
         Insert: {
           closed_at?: string | null;
           created_at?: string;
           id?: string;
+          instant_session_id?: string | null;
           last_message_at?: string | null;
-          match_id: string;
+          match_id?: string | null;
         };
         Update: {
           closed_at?: string | null;
           created_at?: string;
           id?: string;
+          instant_session_id?: string | null;
           last_message_at?: string | null;
-          match_id?: string;
+          match_id?: string | null;
         };
         Relationships: [
+          {
+            foreignKeyName: 'conversations_instant_session_id_fkey';
+            columns: ['instant_session_id'];
+            isOneToOne: true;
+            referencedRelation: 'instant_sessions';
+            referencedColumns: ['id'];
+          },
           {
             foreignKeyName: 'conversations_match_id_fkey';
             columns: ['match_id'];
@@ -211,6 +221,39 @@ export type Database = {
           enabled?: boolean;
           key?: string;
           updated_at?: string;
+        };
+        Relationships: [];
+      };
+      instant_sessions: {
+        Row: {
+          end_reason: string | null;
+          ended_at: string | null;
+          ended_by: string | null;
+          expires_at: string;
+          id: string;
+          started_at: string;
+          user_a: string;
+          user_b: string;
+        };
+        Insert: {
+          end_reason?: string | null;
+          ended_at?: string | null;
+          ended_by?: string | null;
+          expires_at: string;
+          id?: string;
+          started_at?: string;
+          user_a: string;
+          user_b: string;
+        };
+        Update: {
+          end_reason?: string | null;
+          ended_at?: string | null;
+          ended_by?: string | null;
+          expires_at?: string;
+          id?: string;
+          started_at?: string;
+          user_a?: string;
+          user_b?: string;
         };
         Relationships: [];
       };
@@ -612,6 +655,17 @@ export type Database = {
       get_profile_card: { Args: { p_target: string }; Returns: Json };
       hook_before_user_created: { Args: { event: Json }; Returns: Json };
       hook_custom_access_token: { Args: { event: Json }; Returns: Json };
+      instant_accept: { Args: { p_candidate: string }; Returns: Json };
+      instant_candidates: { Args: Record<PropertyKey, never>; Returns: Json };
+      instant_end_session: { Args: Record<PropertyKey, never>; Returns: Json };
+      instant_skip: { Args: { p_candidate: string }; Returns: Json };
+      instant_start: { Args: { p_minutes: number }; Returns: Json };
+      instant_state: { Args: Record<PropertyKey, never>; Returns: Json };
+      instant_stop: { Args: Record<PropertyKey, never>; Returns: Json };
+      instant_update_location: {
+        Args: { p_accuracy: number; p_latitude: number; p_longitude: number };
+        Returns: Json;
+      };
       mark_conversation_read: {
         Args: { p_conversation: string; p_message: number };
         Returns: Json;

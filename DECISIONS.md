@@ -6,6 +6,40 @@ Status values: `accepted` · `default, confirm` · `open`.
 
 ---
 
+## Phase 10 Instant Meet (2026-10-03)
+
+### D-050 Instant Meet
+- **Who:** people on a plan that includes Instant Meet (monthly, 3 months, 6 months). Free, weekly and top-ups never unlock it. It is off until the person turns it on, for 15, 30 or 60 minutes, and it turns itself off at the end.
+- **Location permission:** asked only from the "Turn on Instant" tap, and only for the foreground. Android gets fine and coarse location; there is no background permission and no foreground service. SOUL never opens Google's "Location Accuracy" consent dialog; when location is off, the Instant tab says so in SOUL's own words and links to settings.
+- **Positions:** the device sends its own position (latitude, longitude, accuracy) to `instant_update_location` every 5 seconds while Instant is on and the app is in the foreground, and never otherwise. `private.instant_presence` keeps one row per person with the latest position only, never a history. A position counts only while it is under 90 seconds old and accurate to 200 m. It is deleted when Instant ends.
+- **Candidates:** compatible both ways (gender, age, an approved main photo), eligible, on a plan with Instant, Instant on, not blocked, never unmatched, not passed on in this activation, and not already in a session; within 1 km by `ST_DWithin`. Cards carry no distance and no direction, and their order is a hash, not closeness. Private mode does not hide someone here, because turning Instant on is itself the choice to be found nearby; anonymous people stay blurred.
+- **Probing defence (interpretation of spec 27, recorded here):** a modified app can report any position, so the server limits what moving a fake position can reveal.
+  - The 1 km test compares positions snapped to a 0.001° grid (about 110 m). The answer never changes inside a cell, so the boundary reveals the cell at most. The effective radius is therefore 1 km ± about 150 m, and someone 1.4 km away is never a candidate.
+  - At most one position every 2 seconds.
+  - A position implying travel faster than 20 m/s (plus 150 m of GPS slack) since the last usable one is refused.
+  - A spoofed GPS cannot be prevented outright, since the device is the only source. Mock-location and integrity signals are Phase 13 and 18 work.
+  - All three values are server config (`instant_grid_degrees`, `instant_fix_min_interval_seconds`, `instant_max_speed_mps`).
+- **Accepting:** a session starts only when both have accepted. It is created in one transaction under the pair lock, and only while both are still free and still each other's candidates. One acceptance is invisible to the other person. "Not now" hides someone for the rest of the activation, in one direction only.
+- **Session:** 30 minutes (`instant_session_minutes`), and both stay on Instant for it. `instant_state` returns the other person's card, the time left, the session chat and derived values only:
+  - distance in 50 m steps under 1 km (never below 100) and 100 m steps above;
+  - bearing in 15° steps;
+  - under 100 m only `nearby`, with no number and no bearing;
+  - `located: false` when either position is missing or stale, so the screen shows no number rather than a wrong one.
+- **Chat:** the session has its own conversation (the two people may not be matched). It uses the Phase 9 functions and private topics and closes with the session.
+- **Ending:** either person can end the meet at once, with no confirmation, from the compass or from the chat header (End Meet is always on screen). Turning Instant off, expiry, a block, a suspension or a lost plan also end it.
+  - The end is the same for both people at once: positions deleted, acceptances and passes cleared, the chat closed, and both devices nudged.
+  - The session row keeps who and when, never where. Retention is C-29, proposed 90 days.
+- **Expiry without cron:** every Instant call first ends expired sessions and deletes expired availability, and the app re-reads when its timer reaches zero.
+- **Updates:** the state is re-read every 5 seconds during a session and every 8 seconds while searching. A session starting or ending arrives at once on `user:<account>` (`reason: instant`) and opens or closes the compass on both phones.
+- **Compass:** the device heading turns an arrow to the server's bearing.
+  - Heading sources: true north from expo-location on Android, `webkitCompassHeading` on iPhone Safari after a tap, and the absolute `alpha` on Android Chrome.
+  - Readings pass through a circular low-pass filter, and the arrow follows on a fully damped spring (`springs.compass`), always the short way round.
+  - Android reports a heading only after about 2° of turning. After 3 seconds without a reading the screen asks for a small turn; after 15 seconds it says "Direction unavailable on this device". It never guesses.
+- **Haptics:** a success haptic when a session starts and on the first showing of a match reveal; a medium impact on End Meet. The chat Send button is now an icon.
+- **Not built (not in spec v2, no feature creep):** meeting points (D-011's meeting-point line is void), "Everything okay?" check-ins, and a first-use safety notice. Mutual extension ("can be supported", spec 33) is deferred until the owner asks for it.
+
+---
+
 ## Phase 9 chat (2026-10-02)
 
 ### D-049 Chat
@@ -187,7 +221,7 @@ The final master specification (v2) and the owner's direct instructions in the s
 ### D-031 Instant Meet radius = 1 km (spec v2 sections 27 to 33; refines D-011)
 - Candidates are Instant-active, entitled, compatible, not blocked, and within **1 km** by server-side PostGIS `ST_DWithin` on `geography`. Someone 1.4 km away is never a candidate.
 - Everything else in D-011 stands: mutual accept before any proximity, bucketed distances, and below 100 m only "<100 m, You're nearby".
-- Location updates are adaptive for walking pace. Instant location is deleted when the session ends; only the minimum abuse and security record is kept.
+- Location updates are adaptive for walking pace. Instant location is deleted when the session ends; only the minimum abuse and security record is kept. *Built in Phase 10 as one position every 5 seconds in the foreground, on a 110 m grid for the 1 km test (D-050).*
 
 ### D-032 Profile photo requirement without identity checks
 - At least one clear face photo is still required to use SOUL (spec 14), but it is profile content, not identity verification. It goes through basic automated checks (a face is present) plus report-driven moderation. There is no face-to-identity matching.
@@ -307,11 +341,11 @@ Verification is layered. Each step records a server-side status. The client neve
 ## D-011 Instant Meet proximity (accepted; radius locked at 1 km by D-031)
 
 - Candidate search runs only for users who opted in, are eligible, are entitled by plan, and are not blocked or suspended. Proximity data flows **only after both users accept**.
-- During an active session, each device posts its location to a server function about every 5 seconds (configurable). The latest fix sits in `private_location_state`, which no client can read under RLS. It is deleted when the session ends.
+- During an active session, each device posts its location to a server function about every 5 seconds (configurable). The latest fix sits in `private.instant_presence` (built in Phase 10; named `private_location_state` in this plan), which no client can read. It is deleted when the session ends.
 - The server computes geodesic distance (`ST_Distance` on geography) and absolute bearing (`ST_Azimuth`). It returns only a **bucketed distance** (~50 m steps below 1 km, ~100 m steps above; `<100 m` shows as "You're nearby") and a **quantized bearing** (15° sectors).
 - The client combines that bearing with its own device heading to draw the relative arrow. Raw coordinates of the other person never reach the client.
 - Below 100 m, the direction arrow is suppressed. The UI shows "You're nearby" only, so the feature cannot act as a tracking radar.
-- Once a public meeting point is agreed, guidance switches to the meeting point instead of the other person.
+- ~~Once a public meeting point is agreed, guidance switches to the meeting point instead of the other person.~~ Void: spec v2 has no meeting points (D-050).
 - End Meet by either user is unilateral: the session is revoked, the channel closed, and location rows deleted, all in one server transaction.
 
 ## D-012 Realtime (accepted)

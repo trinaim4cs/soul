@@ -1,3 +1,4 @@
+import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useRef } from 'react';
@@ -94,11 +95,13 @@ function Reveal({ match }: { match: Match }) {
   const theirs = usePhotoUrls(cardBucket(match.person), [theirPath]);
   const name = personName(match.person);
 
-  // The match is no longer "new" for this person once they have seen the reveal.
+  // The match is no longer "new" for this person once they have seen the reveal. The first
+  // showing is the match moment itself: one success haptic, with the reveal (never on a replay).
   const marked = useRef(false);
   useEffect(() => {
     if (marked.current || match.seen || !userId) return;
     marked.current = true;
+    void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
     void markMatchSeen(userId, match.id).catch(() => {});
   }, [match.id, match.seen, userId]);
 

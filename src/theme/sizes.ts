@@ -11,6 +11,8 @@ export const sizes = {
   photoAspect: 4 / 5,
   /** Extra softening on the tiny anonymous-mode copies (they are 24 px wide already). */
   anonymousBlur: 16,
+  /** Largest diameter of the Instant Meet compass. */
+  compassMax: 300,
 } as const;
 
 /** Material Symbols sizes (single icon family, DECISIONS D-005 / Phase 2). */
@@ -19,6 +21,8 @@ export const iconSizes = {
   md: 22,
   lg: 28,
   xl: 36,
+  /** The Instant Meet compass arrow, the one oversized glyph. */
+  compass: 96,
 } as const;
 
 export type IconSize = keyof typeof iconSizes;

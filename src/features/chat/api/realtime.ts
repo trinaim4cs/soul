@@ -84,8 +84,17 @@ export function joinConversation(
   };
 }
 
-/** The account's own topic: a nudge whenever a match or a message changes its chat list. */
-export function joinAccount(userId: string, onRefresh: () => void): () => void {
+const refreshSchema = z.object({ reason: z.string() });
+
+/**
+ * The account's own topic: a nudge whenever a match, a message or an Instant Meet session
+ * changes. `reason` says which (`match`, `message`, `instant`); `null` after a reconnect,
+ * when anything may have changed.
+ */
+export function joinAccount(
+  userId: string,
+  onRefresh: (reason: string | null) => void,
+): () => void {
   let left = false;
   let channel: RealtimeChannel | null = null;
   let joinedOnce = false;
@@ -93,11 +102,14 @@ export function joinAccount(userId: string, onRefresh: () => void): () => void {
     if (left) return;
     channel = supabase
       .channel(`user:${userId}`, { config: { private: true } })
-      .on('broadcast', { event: 'refresh' }, () => onRefresh())
+      .on('broadcast', { event: 'refresh' }, ({ payload }) => {
+        const parsed = refreshSchema.safeParse(payload);
+        onRefresh(parsed.success ? parsed.data.reason : null);
+      })
       .subscribe((status) => {
         if (status !== 'SUBSCRIBED') return;
         // After a reconnect, catch up on anything missed while offline.
-        if (joinedOnce) onRefresh();
+        if (joinedOnce) onRefresh(null);
         joinedOnce = true;
       });
   });

@@ -1,6 +1,6 @@
 import { FlashList, type FlashListRef } from '@shopify/flash-list';
 import { router } from 'expo-router';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -23,9 +23,9 @@ import {
   type ChatRow,
   type ReplyTarget,
 } from '@/features/chat/model/chat';
-import { cardBucket } from '@/features/discovery/model/card';
+import { cardBucket, type DiscoveryCard } from '@/features/discovery/model/card';
 import { useMatches } from '@/features/matching/api/matches';
-import { matchedLabel, personName, type Match } from '@/features/matching/model/match';
+import { matchedLabel, personName } from '@/features/matching/model/match';
 import { usePhotoUrls } from '@/features/profile/api/profile';
 import { createThemedStyles, layout, sizes, spacing, useTheme } from '@/theme';
 
@@ -69,21 +69,55 @@ export function ChatScreen({ id }: { id: string }) {
       />
     );
   }
-  return <Conversation conversationId={id} match={match} userId={userId} />;
+  return (
+    <Conversation
+      conversationId={id}
+      person={match.person}
+      userId={userId}
+      caption={matchedLabel(match.created_at)}
+      onBack={backToChats}
+      onOpenProfile={() =>
+        router.push({ pathname: '/profile/[id]', params: { id: match.person.id } })
+      }
+    />
+  );
 }
 
-type ConversationProps = { conversationId: string; match: Match; userId: string };
+type ConversationProps = {
+  conversationId: string;
+  /** The other person, as the server's whitelisted card. */
+  person: DiscoveryCard;
+  userId: string;
+  /** Under "Say hello" in an empty conversation. */
+  caption: string;
+  onBack: () => void;
+  onOpenProfile?: () => void;
+  /** Extra controls at the end of the header (Instant Meet: distance and End Meet). */
+  headerAccessory?: ReactNode;
+};
 
-function Conversation({ conversationId, match, userId }: ConversationProps) {
+/**
+ * The conversation itself, shared by match chats and Instant Meet session chats. The server
+ * decides access for every read, send and Realtime join.
+ */
+export function Conversation({
+  conversationId,
+  person,
+  userId,
+  caption,
+  onBack,
+  onOpenProfile,
+  headerAccessory,
+}: ConversationProps) {
   const styles = useStyles();
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const keyboardInset = useKeyboardInset();
   const { width } = useWindowDimensions();
   const bubbleMax = Math.floor((width - layout.screenGutter * 2) * BUBBLE_SHARE);
-  const name = personName(match.person);
-  const photoPath = match.person.photos[0]!.path;
-  const photo = usePhotoUrls(cardBucket(match.person), [photoPath]);
+  const name = personName(person);
+  const photoPath = person.photos[0]!.path;
+  const photo = usePhotoUrls(cardBucket(person), [photoPath]);
   const { state, send, retry, loadOlder, noteTyping, reload } = useConversation(
     conversationId,
     userId,
@@ -141,26 +175,26 @@ function Conversation({ conversationId, match, userId }: ConversationProps) {
         <PressableScale
           accessibilityRole="button"
           accessibilityLabel="Back"
-          onPress={backToChats}
+          onPress={onBack}
           style={styles.back}>
           <SoulIcon name="arrow_back" size="md" />
         </PressableScale>
         <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={`${name}. Open profile`}
-          onPress={() =>
-            router.push({ pathname: '/profile/[id]', params: { id: match.person.id } })
-          }
+          accessibilityRole={onOpenProfile ? 'button' : undefined}
+          accessibilityLabel={onOpenProfile ? `${name}. Open profile` : name}
+          disabled={!onOpenProfile}
+          onPress={onOpenProfile}
           style={styles.person}>
           <SoulAvatar
             size="sm"
             source={photo.data?.[photoPath] ? { uri: photo.data[photoPath] } : null}
-            blurRadius={match.person.anonymous ? sizes.anonymousBlur : undefined}
+            blurRadius={person.anonymous ? sizes.anonymousBlur : undefined}
           />
           <SoulText variant="label" numberOfLines={1} style={styles.name}>
             {name}
           </SoulText>
         </Pressable>
+        {headerAccessory}
       </View>
 
       <KeyboardAvoidingView
@@ -183,7 +217,7 @@ function Conversation({ conversationId, match, userId }: ConversationProps) {
               Say hello to {name}
             </SoulText>
             <SoulText variant="supporting" tone="tertiary" align="center" style={styles.stretch}>
-              {matchedLabel(match.created_at)}
+              {caption}
             </SoulText>
           </View>
         ) : (

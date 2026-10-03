@@ -35,7 +35,7 @@ This is the working security model. It will be updated every phase and audited i
 | Public-to-eligible | display photos (approved), age, hook, About Me, zodiac if shown, verified flag, Hot Person flag | eligible, non-blocked users through discovery and match functions only | `profiles`, `profile_photos`, bucket `profile-photos` (private, signed URLs) |
 | Private-self | email, date of birth, preferences, privacy settings, swipe balance, own date progress, purchases | owner only | owner-scoped RLS |
 | Restricted | date of birth (private; the public profile shows age only), allowlist config | owner reads own DOB; nobody else | `account_private` (owner read-only), `app_config` (hidden keys) |
-| Location-sensitive | eligibility state, Instant latest fix, meeting points | the raw fix: nobody through the client API; derived values only through server functions to session participants | `private_location_state` (no client policies at all) |
+| Location-sensitive | the Instant Meet latest position (no history) | the raw position: nobody through the client API; derived values (rounded distance, 15° bearing, `nearby`) only through `instant_state` to the two people of a live session | `private.instant_presence` (private schema: not exposed, no grants; D-050) |
 | Safety | reports, report attachments, moderation actions, risk signals | reporter can see their own report status; moderators through admin functions | bucket `report-evidence` (service role only) |
 | Operational | audit events, feature flags, plan catalog | catalog readable; flags readable by name only; audit is admin-only | |
 
@@ -56,8 +56,8 @@ The client can request these; only the server decides them. Each is a SECURITY D
 | Unmatch, anonymous reveal to a match | `unmatch()` (participants only; the pair never sees each other again); `reveal_on_match` applied by the card function and by Storage signing |
 | Plan or top-up granted | `activate_plan` (service role only, once per payment key), called by the payment webhook after it verifies the signature and amount |
 | Subscription active, top-up granted, refunds | `payments-webhook` after verifying the provider signature and the amount against the server catalog (D-037); idempotent on the provider payment ID |
-| Instant entitlement, Instant visibility, session start/end | Instant functions |
-| Other user's distance and bearing | `instant_proximity` function returns buckets only |
+| Instant entitlement, Instant visibility, session start/end | `instant_start` (plan gate), `instant_candidates`, `instant_accept` (both must accept; one transaction under the pair lock), `instant_end_session` / `instant_stop` (unilateral) and the lazy sweep (expiry) (D-050) |
+| Other user's distance and bearing | `instant_state` returns buckets only: 50 m / 100 m distance steps, 15° bearing, only `nearby` under 100 m (D-050) |
 | Date confirmed, Hot Person badge | confirmation function + recompute job |
 | Photo published and registered | `profile-photos` Edge Function: JPEG structure, real size read from the file, metadata stripped, clean copy written by the server (D-043) |
 | Suspension, ban, photo or verification rejection | admin functions with role check + audit log |
@@ -107,18 +107,18 @@ Automated face, lighting and one-subject checks are C-30 (Phase 13, with the rev
 | Swipe or match races | row lock on the entitlement row + pair advisory lock + unique constraints; pgTAP concurrency tests |
 | Message spam | per-conversation and per-user rate limits in the send function; new-match first-message throttle |
 | Upload abuse | size and type limits, per-day caps, moderation queue before public visibility |
-| Location leakage | Location exists only in Instant Meet (D-030); no raw coordinates to clients; 1 km server-side candidacy; bucketed distance; arrow suppressed under 100 m; deleted at session end; leak audit in Phase 10 and Phase 18 |
-| Location spoofing | risk signals (D-023), manual review, never single-signal bans |
+| Location leakage | Location exists only in Instant Meet (D-030); no raw coordinates to clients; 1 km server-side candidacy; bucketed distance; arrow suppressed under 100 m; deleted when Instant ends. Phase 10 leak audit done: pgTAP and HTTP checks that positions are unreadable and that no function output contains a coordinate (D-050); repeated in Phase 18 |
+| Location spoofing and probing | a fake position cannot locate anyone precisely: the 1 km test uses a ~110 m grid, one position every 2 s, impossible jumps refused (D-050). Risk signals (D-023), manual review, never single-signal bans (Phases 13 and 18) |
 | Direct object access | UUID keys, RLS on every table, signed URLs with short TTL, no guessable public paths |
 | Service-role exposure | never in the app bundle, the web bundle or `EXPO_PUBLIC_*`; a CI grep plus an APK and `dist/` string scan in Phase 18 |
 | Token theft on the web | strict CSP, no third-party scripts, no `dangerouslySetInnerHTML`, short-lived access tokens (section 12) |
 | Tampered APK download | HTTPS only, SHA-256 published on `/download`, the same signing key for every version so Android refuses a mismatched update (D-039, C-20) |
-| Stalking via Instant | mutual acceptance before any proximity; unilateral End Meet; session expiry; block immediately revokes |
+| Stalking via Instant | mutual acceptance before any proximity; one acceptance is invisible to the other person; unilateral End Meet always on screen; session expiry; a block ends the session at once; positions deleted at the end (D-050) |
 | Admin abuse | role table checked server-side; every admin action writes `moderation_actions` + `audit_events` |
 
 ## 8. Realtime
 
-Private channels only, authorized by RLS on `realtime.messages` (D-012, built in Phase 9 as D-049): `chat:<conversation>` and `user:<account>` are server-to-client, and `typing:<conversation>` is the only topic a client may publish on. "Allow public access" must be off in the hosted Realtime settings (SUPABASE.md). Topic names include IDs that the policy checks against membership plus not-blocked. Presence payloads contain only a typing flag and user ID, never location. Instant proximity updates are **not** broadcast peer-to-peer; each client polls or receives server-computed buckets over its own authorized session topic.
+Private channels only, authorized by RLS on `realtime.messages` (D-012, built in Phase 9 as D-049): `chat:<conversation>` and `user:<account>` are server-to-client, and `typing:<conversation>` is the only topic a client may publish on. "Allow public access" must be off in the hosted Realtime settings (SUPABASE.md). Topic names include IDs that the policy checks against membership plus not-blocked. Presence payloads contain only a typing flag and user ID, never location. Instant proximity updates are **not** broadcast at all: each client re-reads `instant_state` (server-computed buckets for its own session), and the server only nudges `user:<account>` when a session starts or ends. The session chat uses the same `chat:` and `typing:` topics, authorized while the session is live (D-050).
 
 **Known limitation:** Realtime re-authorizes on join and token refresh. After a block, the server immediately stops writing to the channel and sends a revoke event. A tampered client could keep an idle socket open until its next token refresh, but it would receive nothing further because no new messages are written for that pair.
 
@@ -136,7 +136,7 @@ Logs never contain message bodies, coordinates, ID data, face images, OTPs, toke
 ## 11. Verification of this model
 
 - Phase 3: RLS framework + first pgTAP deny tests.
-- Phase 10: dedicated location-leak audit before Instant ships (Android and PWA).
+- Phase 10: location-leak audit done (D-050): `011_instant_meet.test.sql` and `db:verify` prove no client access to positions, acceptances or sessions, no coordinate in any Instant output, nothing before both accept, and End Meet revoking everything; verified on Android and the PWA build in the browser.
 - Phase 16: full RLS, constraint and race test suites.
 - Phase 18: security audit with the `soul-audit` plugin (enable it for that phase), plus manual cross-account attack attempts listed in spec Phase 19.
 

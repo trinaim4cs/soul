@@ -1,16 +1,19 @@
 import { Stack } from 'expo-router';
 
 import { useAccountRealtime } from '@/features/chat/hooks/use-account-realtime';
+import { useInstantPresence } from '@/features/instant/hooks/use-instant-presence';
 import { fontFamily, radii, useTheme } from '@/theme';
 
 /**
  * Tabs at the root; profile and settings screens push over them with a plain back header.
  * Filters is a sheet, the paywall a modal with its own close button, and the match reveal a
- * full-screen fade onto the black brand surface.
+ * full-screen fade onto the black brand surface. A live Instant Meet session has its own
+ * screen (compass) and chat, both pushed over the tabs.
  */
 export default function AppLayout() {
   const { colors } = useTheme();
   useAccountRealtime();
+  useInstantPresence();
   const pageHeader = {
     headerShown: true,
     headerTitle: '',
@@ -46,6 +49,8 @@ export default function AppLayout() {
         }}
       />
       <Stack.Screen name="chat/[id]" options={{ headerShown: false }} />
+      <Stack.Screen name="instant/session/[id]" options={{ headerShown: false }} />
+      <Stack.Screen name="instant/chat/[id]" options={{ headerShown: false }} />
       <Stack.Screen name="settings/index" options={pageHeader} />
       <Stack.Screen name="settings/privacy" options={pageHeader} />
     </Stack>

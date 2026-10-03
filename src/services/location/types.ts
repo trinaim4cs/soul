@@ -17,6 +17,10 @@ export type LocationService = {
   getPermission(): Promise<LocationPermission>;
   /** Must be called from a user action (web browsers require it). */
   requestPermission(): Promise<LocationPermission>;
+  /** Where to turn location back on after a refusal, in the platform's own words. */
+  settingsHint: string;
+  /** Opens the app's system settings; absent where a page cannot do that (the web). */
+  openSettings?: () => void;
   /** Foreground updates while Instant Meet is on; returns an unsubscribe function. */
   watch(
     onFix: (fix: LocationFix) => void,
