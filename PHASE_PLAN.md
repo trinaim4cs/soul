@@ -273,6 +273,7 @@ Skills per phase come from `skills/SOUL_SKILL_MAP.md`. `soul-audit` is enabled o
 
 **Verified:**
 - pgTAP 672/672 across 17 files, `db:verify` 109/109, 185 unit tests, Deno check of 11 functions, types, lint and format: all through `npm run test:all`.
+- **GitHub Actions green** on all three jobs (app, Edge Functions, database with the full HTTP checks on a fresh stack). Getting there fixed two CI-only problems: `npx deno` did not run on the runner (now `setup-deno`), and Deno tied the functions' `npm:` imports to the app's `node_modules`. One earlier run failed `db:verify` intermittently; failed checks now appear as annotations.
 - **Cross-platform, live (Android emulator as Test User 01, the web as Test User 02):**
   - a message from Android appeared on the web at once, and the web's reply appeared on Android;
   - "Read" showed on both sides without a reload;

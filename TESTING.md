@@ -11,6 +11,11 @@ npm run test:all      # types, lint, format, unit tests, Edge Functions, pgTAP, 
 
 `npm run test:all -- --no-db` skips the two database steps. GitHub Actions (`.github/workflows/ci.yml`) runs the same steps on every push to `main`, with no secrets: a throwaway local stack, the mock payment provider and freshly generated Web Push keys.
 
+**CI notes:**
+- The Edge Function check runs with `--node-modules-dir=none`: the functions resolve their own `npm:` imports, as the hosted runtime does, and CI does not install the app's `node_modules` for that job.
+- A failed `db:verify` check (or a crash) is printed as a GitHub annotation, so it can be read without signing in to open the log.
+- One early run failed in `db:verify` before annotations existed, and the next runs passed, so it was intermittent and its check is unknown. If it returns, the annotation names it.
+
 ## Layers
 
 | Layer | Command | Size | What it proves |
