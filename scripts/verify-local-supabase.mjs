@@ -18,8 +18,9 @@ const fixture = (name) => new URL(`./fixtures/${name}`, import.meta.url);
 // A crash (not a failed check) is reported the same way in CI.
 for (const event of ['uncaughtException', 'unhandledRejection']) {
   process.on(event, (error) => {
-    const text = String(error?.stack ?? error).replace(/?
-/g, ' ').slice(0, 900);
+    const text = String(error?.stack ?? error)
+      .replace(/\r?\n/g, ' ')
+      .slice(0, 900);
     if (process.env.GITHUB_ACTIONS) console.log(`::error title=db:verify crashed::${text}`);
     console.error(error);
     process.exit(1);
@@ -32,9 +33,7 @@ const check = (name, ok, detail = '') => {
   console.log(`${ok ? 'PASS' : 'FAIL'}  ${name}${detail ? `  (${detail})` : ''}`);
   // In CI a failure also becomes an annotation, readable without opening the log.
   if (!ok && process.env.GITHUB_ACTIONS) {
-    const text = `${name}${detail ? ` (${detail})` : ''}`.replace(/
-?
-/g, ' ').slice(0, 900);
+    const text = `${name}${detail ? ` (${detail})` : ''}`.replace(/\r?\n/g, ' ').slice(0, 900);
     console.log(`::error title=db:verify::${text}`);
   }
 };
