@@ -55,6 +55,12 @@ export function deviceCopy(
         }
       : { title: 'Not available here', body: "This browser can't show notifications from SOUL." };
   }
+  if (permission === 'not_ready') {
+    return {
+      title: "Notifications aren't ready yet",
+      body: "SOUL can't send notifications yet. Everything else works as usual.",
+    };
+  }
   if (permission === 'denied') {
     return {
       title: 'Notifications are off',

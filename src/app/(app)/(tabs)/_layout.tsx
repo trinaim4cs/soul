@@ -1,4 +1,6 @@
 import { NativeTabs } from 'expo-router/unstable-native-tabs';
+import { useEffect, useState } from 'react';
+import { Platform } from 'react-native';
 
 import { useCurrentUserId } from '@/features/auth/account-status-provider';
 import { useMatches } from '@/features/matching/api/matches';
@@ -14,8 +16,19 @@ export default function TabsLayout() {
   const label = { fontFamily: fontFamily.body, fontSize: typeScale.caption.fontSize };
   // New matches show as a count on Chats (monochrome, like the rest of the chrome).
   const newMatches = unseenCount(useMatches(useCurrentUserId()).data);
+  // react-native-screens 4.26 on Android measures the first tab screen before the gesture-bar
+  // inset reaches the tab bar and does not update it afterwards, so on a cold start Discover
+  // ran under the tab bar (its buttons half hidden) until the next tab switch. Mounting the
+  // tabs once more just after start measures them with the inset (E2E_ACCEPTANCE.md).
+  const [remeasured, setRemeasured] = useState(Platform.OS !== 'android');
+  useEffect(() => {
+    if (remeasured) return;
+    const timer = setTimeout(() => setRemeasured(true), 250);
+    return () => clearTimeout(timer);
+  }, [remeasured]);
   return (
     <NativeTabs
+      key={remeasured ? 'measured' : 'first'}
       backgroundColor={colors.background}
       badgeBackgroundColor={colors.inverseSurface}
       badgeTextColor={colors.inverseText}

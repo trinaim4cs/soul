@@ -6,6 +6,17 @@ Status values: `accepted` · `default, confirm` · `open`.
 
 ---
 
+## End-to-end acceptance (2026-10-05)
+
+### D-060 What the full walkthrough changed
+- **Acceptance:** E2E_ACCEPTANCE.md walks the whole app from a fresh install to account deletion on the release-optimised test APK, with the other side played by seeded accounts through the public API.
+- **Realtime nudges are best-effort, never the only path.** Every screen that waits on someone else's action also re-checks slowly: a waiting date confirmation (15 s), a suspended or banned account (30 s), an open chat (30 s, catching anything a lost broadcast missed), on top of the Instant (5 to 8 s) and payment (2 s) polls. Found when the local Realtime server dropped broadcasts while "rebalancing".
+- **Push is offered only where the server can deliver it:** without FCM credentials (C-16) Android shows "Notifications aren't ready yet" and never asks for the permission; the same for the web without Web Push keys (a new `not_ready` state).
+- **A reply counts as a read receipt** (when both people share receipts): the server already moves the sender's read position when they send, and the app now reflects it at once.
+- **Copy:** a wrong sign-in code says the code didn't work (Supabase answers it with HTTP 403, which had been read as the SRMIST-only refusal); a refused address says "This email can't be used for SOUL."
+
+---
+
 ## Phase 20 Android release (2026-10-04)
 
 ### D-059 Release builds, environment files and updates

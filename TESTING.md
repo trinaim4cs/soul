@@ -30,6 +30,10 @@ npm run test:all      # types, lint, format, source text, unit tests, Edge Funct
 | Devices | per phase, PHASE_PLAN "Verified" | | the Android emulator (development build, and from Phase 19 the release-optimised test APK) and an iPhone-size web viewport, plus the cross-platform matrix in PLATFORM_MATRIX.md |
 | Environment files | `npm run env:check -- development\|production` | every env file | the app files hold no secret, the server files are complete and well-formed (D-059) |
 
+**End to end:** E2E_ACCEPTANCE.md records a full walkthrough of the app on the release-optimised test APK (D-060).
+
+**Local Realtime quirk:** the local Realtime server periodically "rebalances" its tenant (it finds no node for the tenant's region), stops streaming database broadcasts for a few minutes and drops what is sent meanwhile. A Realtime check that times out right after such a restart is that, not the app; the app re-checks every waiting state anyway (D-060).
+
 **Fixture rules:** neutral identities only (`Test User 01`, `Profile 07`); each pgTAP file creates its own accounts with a fixed id prefix and counts **only its own fixtures** (a shared local database once broke two tests that assumed it was empty); every pgTAP file rolls back.
 
 ## Spec section 70, item by item

@@ -3,7 +3,8 @@
  * `index.web.ts`: Web Push through the service worker (installed PWA on iOS 16.4+, desktop and
  * Android browsers). SOUL works fully without push.
  */
-export type PushPermission = 'granted' | 'denied' | 'undetermined' | 'unavailable';
+/** `not_ready`: the device could, but the server has no credentials for it yet (C-16). */
+export type PushPermission = 'granted' | 'denied' | 'undetermined' | 'unavailable' | 'not_ready';
 
 export type NotificationService = {
   getPermission(): Promise<PushPermission>;

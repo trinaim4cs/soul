@@ -92,27 +92,30 @@ export function SoulButton({
         style,
       ]}
       pressedStyle={variant === 'ghost' ? styles.ghostPressed : undefined}>
+      {/* The label keeps its place while loading (hidden under the spinner), so the button
+          never changes width and nothing around it jumps. */}
+      <View style={[styles.content, loading && styles.hidden]}>
+        {icon ? <SoulIcon name={icon} size="sm" color={iconColor} weight="regular" /> : null}
+        <SoulText variant="button" tone={tone} numberOfLines={1} style={labelStyle}>
+          {label}
+        </SoulText>
+      </View>
       {loading ? (
-        <ActivityIndicator
-          color={
-            variant === 'primary'
-              ? colors.inverseText
-              : variant === 'moment'
-                ? colors.moment
-                : variant === 'accent'
-                  ? colors.onAccent
-                  : colors.textPrimary
-          }
-          accessibilityLabel={`${label}, loading`}
-        />
-      ) : (
-        <View style={styles.content}>
-          {icon ? <SoulIcon name={icon} size="sm" color={iconColor} weight="regular" /> : null}
-          <SoulText variant="button" tone={tone} numberOfLines={1} style={labelStyle}>
-            {label}
-          </SoulText>
+        <View style={styles.spinner} pointerEvents="none">
+          <ActivityIndicator
+            color={
+              variant === 'primary'
+                ? colors.inverseText
+                : variant === 'moment'
+                  ? colors.moment
+                  : variant === 'accent'
+                    ? colors.onAccent
+                    : colors.textPrimary
+            }
+            accessibilityLabel={`${label}, loading`}
+          />
         </View>
-      )}
+      ) : null}
     </PressableScale>
   );
 }
@@ -127,6 +130,16 @@ const useStyles = createThemedStyles(({ colors }) =>
     },
     block: { alignSelf: 'stretch' },
     content: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
+    hidden: { opacity: 0 },
+    spinner: {
+      position: 'absolute',
+      top: 0,
+      right: 0,
+      bottom: 0,
+      left: 0,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
     primary: { backgroundColor: colors.inverseSurface },
     secondary: {
       backgroundColor: colors.background,

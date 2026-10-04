@@ -54,10 +54,13 @@ async function signIn(email) {
   return { client, token: session.data.session.access_token };
 }
 
+const extraUsers = [];
+// Every account made here is removed at the end (extraUsers), so runs leave nothing behind.
 async function makeUser(label) {
   const email = `${label}.${randomBytes(4).toString('hex')}@srmist.edu.in`;
   const { data, error } = await admin.auth.admin.createUser({ email, email_confirm: true });
   if (error) throw error;
+  extraUsers.push(data.user.id);
   return { id: data.user.id, ...(await signIn(email)) };
 }
 
@@ -147,7 +150,6 @@ check(
 );
 if (pwUser.data?.user) await admin.auth.admin.deleteUser(pwUser.data.user.id);
 
-const extraUsers = [];
 const userA = await makeUser('test.user.a');
 const userB = await makeUser('test.user.b');
 
@@ -1166,7 +1168,7 @@ try {
   await farUser.client.rpc('instant_stop');
   for (const client of [nearUser.client, farUser.client]) await client.removeAllChannels();
 } finally {
-  for (const id of [userA.id, userB.id, ...extraUsers]) {
+  for (const id of new Set([userA.id, userB.id, ...extraUsers])) {
     for (const bucket of ['profile-photos', 'profile-photos-blurred', 'photo-uploads']) {
       const listed = await admin.storage.from(bucket).list(id);
       const names = (listed.data ?? []).map((o) => `${id}/${o.name}`);

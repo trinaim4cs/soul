@@ -102,7 +102,7 @@ export function SettingsScreen() {
           />
         ) : null}
         <SettingsRow
-          icon="remove"
+          icon="delete"
           label="Delete account"
           detail="Permanently, with everything in it"
           onPress={() => router.push('/settings/delete')}

@@ -45,7 +45,7 @@ export const notifications: NotificationService = {
     if (!supported()) return 'unavailable';
     // Not offered until the server has its Web Push keys.
     const channels = await cachedPushChannels().catch(() => null);
-    if (channels && !channels.web) return 'unavailable';
+    if (channels && !channels.web) return 'not_ready';
     return toPermission(Notification.permission);
   },
 

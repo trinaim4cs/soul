@@ -62,7 +62,7 @@ export const notifications: NotificationService = {
     // Not offered until the server can deliver Android push (FCM credentials, C-16): asking
     // for the permission would lead nowhere.
     const channels = await cachedPushChannels().catch(() => null);
-    if (channels && !channels.android) return 'unavailable';
+    if (channels && !channels.android) return 'not_ready';
     return toPermission(await Notifications.getPermissionsAsync());
   },
 

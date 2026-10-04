@@ -15,6 +15,7 @@ export const iconGlyphs = {
   check: 0xe5ca,
   chevron_right: 0xe5cc,
   close: 0xe5cd,
+  delete: 0xe872,
   download: 0xf090,
   edit: 0xe3c9,
   error: 0xe000,

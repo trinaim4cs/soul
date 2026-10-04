@@ -42,6 +42,7 @@ describe('settings', () => {
   it('tells iPhone browser users how to get notifications', () => {
     expect(deviceCopy('unavailable', null, true).title).toBe('Add SOUL to your Home Screen');
     expect(deviceCopy('unavailable', null, false).title).toBe('Not available here');
+    expect(deviceCopy('not_ready', null, false).title).toBe("Notifications aren't ready yet");
   });
 
   it('is honest when this build cannot receive them', () => {
