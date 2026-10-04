@@ -1,6 +1,6 @@
 import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import Animated, { useReducedMotion } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -113,8 +113,13 @@ function Reveal({ match }: { match: Match }) {
     animationFillMode: 'both' as const,
   });
 
+  const [opening, setOpening] = useState(false);
+
   async function message() {
+    if (opening) return;
+    setOpening(true);
     const conversation = await conversationOf(match).catch(() => null);
+    setOpening(false);
     if (conversation) {
       router.replace({ pathname: '/chat/[id]', params: { id: conversation } });
     } else {
@@ -159,7 +164,13 @@ function Reveal({ match }: { match: Match }) {
         </Animated.View>
       </View>
       <Animated.View style={[styles.actions, enter(rise, 260)]}>
-        <SoulButton label="Message" variant="moment" block onPress={() => void message()} />
+        <SoulButton
+          label="Message"
+          variant="moment"
+          block
+          loading={opening}
+          onPress={() => void message()}
+        />
         <PressableScale
           accessibilityRole="button"
           accessibilityLabel="Continue"

@@ -49,6 +49,18 @@ Screenshots: `docs/e2e/` (downscaled; the fixed state where a step was fixed).
 - **`db:verify` left accounts behind** (moderator and appeal test users): every account it makes is now removed at the end.
 - **Realtime nudges are best-effort.** The local Realtime server regularly stops streaming database broadcasts for minutes ("rebalancing for a closer region", a local-only setup quirk) and drops anything sent meanwhile. The hosted service does not do this routinely, but the app must not depend on one nudge, so every state that waits on someone else also re-checks slowly: a waiting date (15 s), a restricted account (30 s), an open chat (30 s), plus the existing Instant and payment polls.
 
+## Second pass (2026-10-05)
+
+A further sweep after the journey: the website and PWA as shipped, dependency health, and a review of every change made during the journey.
+
+**The PWA**, production build against the local stack (`npm run web:preview`, phone size, dark): sign-in with the code, Discover with photos, a deep link straight to Chats (and a reload on it), a conversation, sending a message, a live reply arriving, the read receipt, Notifications settings when the browser has notifications blocked. All pass.
+
+Found and fixed:
+- **The local preview of the production website talked to the hosted project** (SECURITY_AUDIT F-12). PWA.md said to test `web:export` output with `expo serve`, but that build reads `.env.production`; one sign-in code request for a test address reached the hosted project before this was caught. `npm run web:preview` now builds from `.env` only, refuses to serve a bundle naming the hosted project, and serves deep links like the host does (`expo serve` returned "Not Found" for `/chats`).
+- **"Message" on the reveal could do nothing offline.** When the conversation id still had to be fetched, the request waited for the connection to return, with no sign of progress. It now fails at once offline (the reveal then opens Chats), and the button shows it is working and ignores a second tap.
+- **The age steppers in Filters had no button role on the web**, so screen readers and keyboards met unnamed controls (Android groups them as one adjustable control, which was already right).
+- **SDK 57 patch releases** (`expo`, `expo-router`, `expo-constants`, `@expo/ui`) installed; `expo-doctor` passes all checks. The remaining `npm audit` advisories are recorded in SECURITY_AUDIT F-13.
+
 ## Checked by automated tests rather than by hand
 
 Everything in `npm run test:all` (TESTING.md): 205 unit tests, 695 pgTAP assertions, 110 HTTP checks against the real local stack, and the 11-check cross-account attack run.

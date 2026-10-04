@@ -61,7 +61,8 @@ Only `APP_ENV`, `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_ANON_KEY` e
 | `npm run android:build` | development build |
 | `npm run android:test-apk` | release-optimised test APK against the local stack |
 | `npm run android:release` | the production APK (needs the owner's signing key) |
-| `npm run web:export` | the website and PWA into `dist/` ([PWA.md](PWA.md)) |
+| `npm run web:preview` | the website and PWA as shipped, against the local stack, at http://localhost:8082 |
+| `npm run web:export` | the website and PWA into `dist/` for hosting, against the hosted project ([PWA.md](PWA.md)) |
 
 ## Documentation
 

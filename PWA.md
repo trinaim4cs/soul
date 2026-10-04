@@ -6,9 +6,11 @@ SOUL for iPhone is the same Expo Router app built for the web and installed from
 
 ```bash
 npm run web            # dev server (expo start --web), http://localhost:8081
-npm run web:export     # production build into dist/ for hosting
-npx expo serve         # serve dist/ locally to test the production build and service worker
+npm run web:preview    # the production build against the LOCAL stack, http://localhost:8082
+npm run web:export     # the production build into dist/ for hosting (reads .env.production)
 ```
+
+Test the production build and service worker locally with `web:preview` only. `web:export` reads `.env.production`, so its `dist/` talks to the **hosted** project: serving it locally and signing in would send real requests (a sign-in code, likes) to the hosted servers. `web:preview` builds from `.env` alone (`EXPO_NO_DOTENV=1`, because Expo would otherwise let `.env.production` win while bundling), refuses to serve a bundle that names the hosted project, and serves `dist/` with the same rewrite as the host (`scripts/web-preview.mjs`). Never deploy a preview build; the host runs its own `web:export`.
 
 The web build is a **single-page app** (`web.output: 'single'`): every route renders in the browser, never on a server, so no account code runs at build time. The host must:
 - serve over **HTTPS** (geolocation, the service worker and install all require it); host and domain are C-26;

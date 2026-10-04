@@ -207,6 +207,7 @@ function Stepper({ label, value, onChange, canDecrease, canIncrease }: StepperPr
       </SoulText>
       <View style={styles.stepperRow}>
         <PressableScale
+          accessibilityRole="button"
           accessibilityLabel={`${label} younger`}
           disabled={!canDecrease}
           onPress={() => onChange(value - 1)}
@@ -217,6 +218,7 @@ function Stepper({ label, value, onChange, canDecrease, canIncrease }: StepperPr
           {value}
         </SoulText>
         <PressableScale
+          accessibilityRole="button"
           accessibilityLabel={`${label} older`}
           disabled={!canIncrease}
           onPress={() => onChange(value + 1)}

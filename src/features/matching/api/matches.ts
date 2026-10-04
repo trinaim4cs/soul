@@ -47,6 +47,10 @@ export async function conversationOf(match: Match): Promise<string | null> {
   const fresh = await queryClient.fetchQuery({
     queryKey: ['match', match.id],
     queryFn: () => fetchMatch(match.id),
+    // A tap is waiting on this: offline it must fail at once (the reveal then opens Chats)
+    // rather than pause until the connection returns.
+    networkMode: 'always',
+    retry: false,
   });
   return fresh?.conversation_id ?? null;
 }
