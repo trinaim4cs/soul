@@ -2,6 +2,7 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import { Platform, StyleSheet, View } from 'react-native';
 
+import { FieldError } from '@/components/field-error';
 import { PressableScale } from '@/components/pressable-scale';
 import { SoulButton } from '@/components/soul-button';
 import { SoulChip } from '@/components/soul-chip';
@@ -49,7 +50,9 @@ function FiltersForm({ initial, userId }: { initial: DiscoveryFilters; userId: s
   const styles = useStyles();
   const [values, setValues] = useState(initial);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  // Shown where the problem is: under Show me, and next to the button for a failed save.
+  const [askedForShowMe, setAskedForShowMe] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const refresh = useDeckStore((state) => state.refresh);
 
   const toggleZodiac = (sign: ZodiacSign) =>
@@ -62,18 +65,18 @@ function FiltersForm({ initial, userId }: { initial: DiscoveryFilters; userId: s
 
   async function save() {
     if (values.showMe.length === 0) {
-      setError('Choose at least one.');
+      setAskedForShowMe(true);
       return;
     }
     setSaving(true);
-    setError(null);
+    setSaveError(null);
     try {
       await saveFilters(userId, values);
       void refresh();
       if (router.canGoBack()) router.back();
       else router.replace('/');
     } catch {
-      setError("Couldn't save your filters. Check your connection and try again.");
+      setSaveError("Couldn't save your filters. Check your connection and try again.");
       setSaving(false);
     }
   }
@@ -85,7 +88,10 @@ function FiltersForm({ initial, userId }: { initial: DiscoveryFilters; userId: s
       // A sheet has no header above it, so the title needs its own room from the edge.
       contentStyle={styles.sheet}
       footer={
-        <SoulButton label="Show profiles" block loading={saving} onPress={() => void save()} />
+        <View style={styles.footer}>
+          {saveError ? <FieldError>{saveError}</FieldError> : null}
+          <SoulButton label="Show profiles" block loading={saving} onPress={() => void save()} />
+        </View>
       }>
       {Platform.OS === 'android' ? (
         // The native grabber is iOS-only; this shows where the sheet starts and that it drags
@@ -144,6 +150,9 @@ function FiltersForm({ initial, userId }: { initial: DiscoveryFilters; userId: s
             />
           ))}
         </View>
+        {askedForShowMe && values.showMe.length === 0 ? (
+          <FieldError>Choose at least one.</FieldError>
+        ) : null}
       </View>
 
       <View style={styles.section} role="group" aria-label="Zodiac">
@@ -167,12 +176,6 @@ function FiltersForm({ initial, userId }: { initial: DiscoveryFilters; userId: s
           ))}
         </View>
       </View>
-
-      {error ? (
-        <SoulText variant="supporting" role="alert">
-          {error}
-        </SoulText>
-      ) : null}
     </SoulScreen>
   );
 }
@@ -236,6 +239,7 @@ const useStyles = createThemedStyles(({ colors }) =>
       backgroundColor: colors.border,
     },
     section: { gap: spacing.sm, marginTop: spacing.xl },
+    footer: { gap: spacing.sm },
     chips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs },
     steppers: { flexDirection: 'row', gap: spacing.md },
     stepper: {

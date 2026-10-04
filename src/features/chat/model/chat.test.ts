@@ -228,6 +228,25 @@ describe('conversation state', () => {
     expect(conversationReducer(loaded, { type: 'my-read', messageId: 0 }).myRead).toBe(1);
   });
 
+  it('takes a reply as read up to it, only when read receipts are shared', () => {
+    const replied = conversationReducer(loaded, {
+      type: 'stored',
+      message: server(5, THEM),
+      fromOther: true,
+    });
+    expect(replied.theirRead).toBe(5);
+    const mine = conversationReducer(loaded, { type: 'stored', message: server(5, ME) });
+    expect(mine.theirRead).toBe(1);
+    const unshared = conversationReducer(
+      conversationReducer(initialConversation, {
+        type: 'loaded',
+        page: page([server(1, ME)], { their_read: null }),
+      }),
+      { type: 'stored', message: server(5, THEM), fromOther: true },
+    );
+    expect(unshared.theirRead).toBeNull();
+  });
+
   it('stops the typing indicator when their message arrives or the chat closes', () => {
     const typing = conversationReducer(loaded, { type: 'typing', typing: true });
     expect(

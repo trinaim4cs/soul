@@ -40,5 +40,9 @@ export function useServerStatus(userId: string | null) {
     // The splash waits for this answer, so it must not pause while offline (Phase 19): it
     // fails instead, and the app says it can't reach SOUL, with a retry.
     networkMode: 'always',
+    // A suspended or banned account waits on a moderator: the account topic nudges at once,
+    // and this slow re-check catches a nudge that was lost (Realtime is best-effort).
+    refetchInterval: (query) =>
+      query.state.data && query.state.data.account_state !== 'active' ? 30_000 : false,
   });
 }

@@ -28,11 +28,17 @@ function StateView({ title, body, icon, visual, action, secondaryAction }: State
     <View style={styles.container} accessibilityLiveRegion="polite">
       {visual ?? (icon ? <SoulIcon name={icon} size="xl" color="textSecondary" /> : null)}
       <View style={styles.copy}>
-        <SoulText variant="subheading" align="center" accessibilityRole="header">
+        {/* Centred text spans the column: shrink-wrapped centred text can lose its last line
+            on Android when the measured width rounds down (the same fix as chat and Instant). */}
+        <SoulText
+          variant="subheading"
+          align="center"
+          accessibilityRole="header"
+          style={styles.stretch}>
           {title}
         </SoulText>
         {body ? (
-          <SoulText tone="secondary" align="center">
+          <SoulText tone="secondary" align="center" style={styles.stretch}>
             {body}
           </SoulText>
         ) : null}
@@ -137,6 +143,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xxl,
   },
   copy: { gap: spacing.xs, maxWidth: layout.maxTextWidth, alignSelf: 'stretch' },
+  stretch: { alignSelf: 'stretch' },
   actions: { alignItems: 'center', gap: spacing.xs },
   loading: { gap: spacing.md, paddingHorizontal: layout.screenGutter },
 });

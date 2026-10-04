@@ -1,6 +1,7 @@
 import type { Dispatch, ReactNode, SetStateAction } from 'react';
 import { StyleSheet, View } from 'react-native';
 
+import { FieldError } from '@/components/field-error';
 import { SoulChip } from '@/components/soul-chip';
 import { SoulInput } from '@/components/soul-input';
 import { SoulText } from '@/components/soul-text';
@@ -9,6 +10,7 @@ import {
   GENDERS,
   GENDER_LABEL,
   HOOK_MAX,
+  missingFormFields,
   NAME_MAX,
   SHOW_ME_LABEL,
   toggleGender,
@@ -35,8 +37,11 @@ const FIELD_ERROR: Partial<Record<MissingField, string>> = {
 /** Name, gender, who to see, hook and About Me: the whole profile, kept simple (spec 15). */
 export function ProfileForm({ values, onChange, missing }: Props) {
   const set = (patch: Partial<ProfileFormValues>) => onChange((prev) => ({ ...prev, ...patch }));
+  // An error from the last save attempt shows only while that field is still missing, so it
+  // clears as soon as the person fixes it.
+  const stillMissing = missingFormFields(values);
   const errorFor = (field: MissingField) =>
-    missing.includes(field) ? FIELD_ERROR[field] : undefined;
+    missing.includes(field) && stillMissing.includes(field) ? FIELD_ERROR[field] : undefined;
 
   return (
     <View style={styles.root}>
@@ -113,11 +118,7 @@ function ChoiceGroup({
         {label}
       </SoulText>
       <View style={styles.chips}>{children}</View>
-      {error ? (
-        <SoulText variant="supporting" role="alert">
-          {error}
-        </SoulText>
-      ) : null}
+      {error ? <FieldError>{error}</FieldError> : null}
     </View>
   );
 }

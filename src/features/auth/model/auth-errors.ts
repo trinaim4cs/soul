@@ -3,7 +3,13 @@
  * Identical copy is used whether or not an account exists (no enumeration).
  */
 export type AuthErrorKind =
-  'not_institutional' | 'rate_limited' | 'invalid_code' | 'expired_code' | 'network' | 'unknown';
+  | 'not_institutional'
+  | 'email_unavailable'
+  | 'rate_limited'
+  | 'invalid_code'
+  | 'expired_code'
+  | 'network'
+  | 'unknown';
 
 type ErrorLike = { message?: string; status?: number; code?: string; name?: string } | null;
 
@@ -11,6 +17,12 @@ export function classifyAuthError(error: ErrorLike): AuthErrorKind {
   if (!error) return 'unknown';
   const message = (error.message ?? '').toLowerCase();
   const code = (error.code ?? '').toLowerCase();
+  // A wrong or expired code also comes back as HTTP 403 ("Token has expired or is invalid",
+  // code otp_expired), so codes are recognised before the sign-up refusals.
+  if (code === 'otp_expired' || message.includes('expired or is invalid')) return 'invalid_code';
+  if (message.includes("can't be used")) {
+    return 'email_unavailable';
+  }
   if (message.includes('only for srmist') || code === 'hook_rejected' || error.status === 403) {
     return 'not_institutional';
   }
@@ -39,7 +51,8 @@ export function classifyAuthError(error: ErrorLike): AuthErrorKind {
 export const AUTH_ERROR_COPY: Record<AuthErrorKind, string> = {
   not_institutional: 'SOUL is only for SRMIST students. Use your @srmist.edu.in email.',
   rate_limited: 'Too many attempts. Wait a minute, then try again.',
-  invalid_code: 'That code is not right. Check the latest email from SOUL.',
+  email_unavailable: "This email can't be used for SOUL.",
+  invalid_code: "That code didn't work. Check the latest email from SOUL, or send a new code.",
   expired_code: 'That code has expired. Send a new one.',
   network: "Can't reach SOUL. Check your connection and try again.",
   unknown: 'Something went wrong. Try again.',

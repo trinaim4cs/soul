@@ -43,7 +43,7 @@ export type ConversationAction =
   | { type: 'older-loaded'; page: MessagePage }
   | { type: 'older-failed' }
   | { type: 'queued'; message: ChatMessage }
-  | { type: 'stored'; message: ServerMessage }
+  | { type: 'stored'; message: ServerMessage; fromOther?: boolean }
   | { type: 'send-failed'; clientId: string; notice?: string }
   | { type: 'retrying'; clientId: string }
   | { type: 'their-read'; messageId: number }
@@ -103,6 +103,12 @@ export function conversationReducer(
         ...state,
         // A message from the other person means they have stopped typing.
         otherTyping: false,
+        // and, when read receipts are shared, that they have read everything before it (the
+        // server moves their read position when they send).
+        theirRead:
+          action.fromOther && state.theirRead !== null
+            ? Math.max(state.theirRead, action.message.id)
+            : state.theirRead,
         messages: mergeMessages(state.messages, [fromServer(action.message)]),
       };
     case 'send-failed':

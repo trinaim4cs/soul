@@ -54,9 +54,21 @@ describe('auth errors', () => {
     expect(classifyAuthError({ message: 'email rate limit exceeded', status: 429 })).toBe(
       'rate_limited',
     );
-    expect(
-      classifyAuthError({ message: 'Token has expired or is invalid', code: 'otp_expired' }),
-    ).toBe('expired_code');
+  });
+  it('says a wrong code is a wrong code, although the server answers it with a 403', () => {
+    // The real Supabase Auth shape for a wrong or expired code.
+    const wrongCode = {
+      message: 'Token has expired or is invalid',
+      status: 403,
+      code: 'otp_expired',
+    };
+    expect(classifyAuthError(wrongCode)).toBe('invalid_code');
+    expect(authErrorMessage(wrongCode)).toContain("didn't work");
+  });
+  it('tells a refused address apart from a non-SRMIST one', () => {
+    expect(classifyAuthError({ message: "This email can't be used for SOUL.", status: 403 })).toBe(
+      'email_unavailable',
+    );
   });
   it('never exposes raw messages', () => {
     expect(authErrorMessage({ message: 'relation "x" does not exist' })).toBe(

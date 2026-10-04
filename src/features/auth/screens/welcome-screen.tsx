@@ -1,8 +1,8 @@
 import { router } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { ScreenStatusBar } from '@/components/screen-status-bar';
 import { PressableScale } from '@/components/pressable-scale';
 import { SoulButton } from '@/components/soul-button';
 import { SoulLogo } from '@/components/soul-logo';
@@ -34,7 +34,7 @@ export function WelcomeScreen() {
   return (
     <View
       style={[styles.root, { paddingTop: insets.top, paddingBottom: insets.bottom + spacing.xl }]}>
-      <StatusBar style="light" />
+      <ScreenStatusBar style="light" />
       <View style={styles.brand}>
         <SoulLogo width={176} on="dark-surface" />
         <SoulText variant="subheading" italic style={{ color: colors.onMoment }}>

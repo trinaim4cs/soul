@@ -1,4 +1,4 @@
-import { pushChannels, registerDevice, unregisterDevice } from './server';
+import { cachedPushChannels, pushChannels, registerDevice, unregisterDevice } from './server';
 import type { NotificationService, PushPermission } from './types';
 
 export type { NotificationService, PushPermission } from './types';
@@ -42,7 +42,11 @@ async function registration(): Promise<ServiceWorkerRegistration> {
 
 export const notifications: NotificationService = {
   async getPermission() {
-    return supported() ? toPermission(Notification.permission) : 'unavailable';
+    if (!supported()) return 'unavailable';
+    // Not offered until the server has its Web Push keys.
+    const channels = await cachedPushChannels().catch(() => null);
+    if (channels && !channels.web) return 'unavailable';
+    return toPermission(Notification.permission);
   },
 
   async requestPermission() {

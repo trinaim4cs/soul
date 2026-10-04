@@ -1,7 +1,7 @@
 import * as Notifications from 'expo-notifications';
 import { Linking, Platform } from 'react-native';
 
-import { pushChannels, registerDevice, unregisterDevice } from './server';
+import { cachedPushChannels, pushChannels, registerDevice, unregisterDevice } from './server';
 import type { NotificationService, PushPermission } from './types';
 
 export type { NotificationService, PushPermission } from './types';
@@ -59,6 +59,10 @@ function urlOf(response: Notifications.NotificationResponse): string | null {
 export const notifications: NotificationService = {
   async getPermission() {
     if (Platform.OS !== 'android') return 'unavailable';
+    // Not offered until the server can deliver Android push (FCM credentials, C-16): asking
+    // for the permission would lead nowhere.
+    const channels = await cachedPushChannels().catch(() => null);
+    if (channels && !channels.android) return 'unavailable';
     return toPermission(await Notifications.getPermissionsAsync());
   },
 

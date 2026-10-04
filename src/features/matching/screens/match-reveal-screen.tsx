@@ -1,11 +1,11 @@
 import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
 import { useEffect, useRef } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import Animated, { useReducedMotion } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { ScreenStatusBar } from '@/components/screen-status-bar';
 import { PressableScale } from '@/components/pressable-scale';
 import { SoulButton } from '@/components/soul-button';
 import { SoulIcon } from '@/components/soul-icon';
@@ -13,7 +13,7 @@ import { SoulPhoto } from '@/components/soul-photo';
 import { SoulText } from '@/components/soul-text';
 import { useCurrentUserId } from '@/features/auth/account-status-provider';
 import { cardBucket } from '@/features/discovery/model/card';
-import { markMatchSeen, useMatch } from '@/features/matching/api/matches';
+import { conversationOf, markMatchSeen, useMatch } from '@/features/matching/api/matches';
 import { personName, type Match } from '@/features/matching/model/match';
 import { PHOTO_BUCKET, useMyProfile, usePhotoUrls } from '@/features/profile/api/profile';
 import {
@@ -57,7 +57,7 @@ export function MatchRevealScreen({ id }: { id: string }) {
         styles.root,
         { paddingTop: insets.top + spacing.xl, paddingBottom: insets.bottom + spacing.xl },
       ]}>
-      <StatusBar style="light" />
+      <ScreenStatusBar style="light" />
       {match.isPending ? (
         <View style={styles.center}>
           <ActivityIndicator color={colors.onMoment} accessibilityLabel="Loading" />
@@ -113,9 +113,10 @@ function Reveal({ match }: { match: Match }) {
     animationFillMode: 'both' as const,
   });
 
-  function message() {
-    if (match.conversation_id) {
-      router.replace({ pathname: '/chat/[id]', params: { id: match.conversation_id } });
+  async function message() {
+    const conversation = await conversationOf(match).catch(() => null);
+    if (conversation) {
+      router.replace({ pathname: '/chat/[id]', params: { id: conversation } });
     } else {
       close();
       router.navigate('/chats');
@@ -158,7 +159,7 @@ function Reveal({ match }: { match: Match }) {
         </Animated.View>
       </View>
       <Animated.View style={[styles.actions, enter(rise, 260)]}>
-        <SoulButton label="Message" variant="moment" block onPress={message} />
+        <SoulButton label="Message" variant="moment" block onPress={() => void message()} />
         <PressableScale
           accessibilityRole="button"
           accessibilityLabel="Continue"

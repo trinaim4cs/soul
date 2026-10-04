@@ -86,7 +86,7 @@ function PhotoStep({ profile, userId }: { profile: MyProfile; userId: string | n
           </SoulText>
         ) : null}
       </View>
-      <SoulButton label="Sign out" variant="ghost" onPress={() => void signOut()} />
+      <SoulButton label="Sign out" variant="ghost" inline onPress={() => void signOut()} />
     </SoulScreen>
   );
 }

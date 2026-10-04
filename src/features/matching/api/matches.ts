@@ -29,23 +29,32 @@ export function useMatches(userId: string | null) {
   });
 }
 
+async function fetchMatch(matchId: string): Promise<Match | null> {
+  const { data, error } = await supabase.rpc('get_match', { p_match: matchId });
+  if (error) throw error;
+  const parsed = matchResultSchema.parse(data);
+  return parsed.ok ? parsed.match : null;
+}
+
 /** One match, checked again by the server (used by the reveal and by deep links). */
 export function useMatch(matchId: string) {
-  return useQuery({
-    queryKey: ['match', matchId],
-    queryFn: async (): Promise<Match | null> => {
-      const { data, error } = await supabase.rpc('get_match', { p_match: matchId });
-      if (error) throw error;
-      const parsed = matchResultSchema.parse(data);
-      return parsed.ok ? parsed.match : null;
-    },
+  return useQuery({ queryKey: ['match', matchId], queryFn: () => fetchMatch(matchId) });
+}
+
+/** The match's conversation, asking the server if the match on hand does not have it yet. */
+export async function conversationOf(match: Match): Promise<string | null> {
+  if (match.conversation_id) return match.conversation_id;
+  const fresh = await queryClient.fetchQuery({
+    queryKey: ['match', match.id],
+    queryFn: () => fetchMatch(match.id),
   });
+  return fresh?.conversation_id ?? null;
 }
 
 /**
  * A like that just made a match already knows the person, so the reveal can draw before the
- * full match arrives. The query still fetches the real match at once (it is stale on mount);
- * until then "Message" falls back to Chats, as it would for a match without a conversation.
+ * full match arrives. The placeholder is marked stale so the real match (with its
+ * conversation) is fetched at once; "Message" also waits for it (`conversationOf`).
  */
 export function seedRevealedMatch(matchId: string, person: DiscoveryCard) {
   queryClient.setQueryData<Match | null>(
@@ -60,6 +69,7 @@ export function seedRevealedMatch(matchId: string, person: DiscoveryCard) {
         last_message: null,
         unread: 0,
       },
+    { updatedAt: 0 },
   );
 }
 

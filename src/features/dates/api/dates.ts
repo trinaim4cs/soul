@@ -10,6 +10,9 @@ import {
 import { queryClient } from '@/lib/query-client';
 import { supabase } from '@/lib/supabase';
 
+/** While waiting for the other person's answer, how often to check again. */
+const WAITING_POLL_MS = 15_000;
+
 export const dateStateKey = (otherId: string) => ['dates', 'state', otherId] as const;
 export const myDatesKey = (userId: string) => ['dates', 'mine', userId] as const;
 
@@ -19,6 +22,9 @@ export function useDateState(otherId: string | null) {
     queryKey: dateStateKey(otherId ?? 'none'),
     enabled: otherId !== null,
     staleTime: 0,
+    // The server nudges the account topic when the other person answers; while waiting on
+    // them, a slow re-check also catches a nudge that was missed (a dropped socket).
+    refetchInterval: (query) => (query.state.data?.state === 'waiting' ? WAITING_POLL_MS : false),
     queryFn: async (): Promise<DateState | null> => {
       const { data, error } = await supabase.rpc('date_state', { p_other: otherId! });
       if (error) throw error;

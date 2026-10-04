@@ -34,10 +34,11 @@ export function RestrictedScreen() {
     <SoulScreen scroll>
       <View style={styles.body}>
         <SoulIcon name="lock" size="lg" color="textPrimary" />
-        <SoulText variant="title" align="center" accessibilityRole="header">
+        {/* Stretched: a shrink-wrapped centred title lost its last word on Android. */}
+        <SoulText variant="title" align="center" accessibilityRole="header" style={styles.stretch}>
           {copy.title}
         </SoulText>
-        <SoulText variant="body" tone="secondary" align="center">
+        <SoulText variant="body" tone="secondary" align="center" style={styles.stretch}>
           {copy.body}
         </SoulText>
       </View>
@@ -129,6 +130,7 @@ function Appeal({ userId }: { userId: string }) {
 
 const useStyles = createThemedStyles(() =>
   StyleSheet.create({
+    stretch: { alignSelf: 'stretch' },
     body: {
       flex: 1,
       alignItems: 'center',

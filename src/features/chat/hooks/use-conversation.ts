@@ -1,5 +1,6 @@
 import { randomUUID } from 'expo-crypto';
 import { useCallback, useEffect, useReducer, useRef } from 'react';
+import { AppState } from 'react-native';
 
 import { fetchMessages, markRead, sendMessage } from '@/features/chat/api/chat';
 import { joinConversation, type ConversationConnection } from '@/features/chat/api/realtime';
@@ -18,6 +19,8 @@ const TYPING_SHOWN_MS = 5000;
 const TYPING_IDLE_MS = 3000;
 /** While still typing, the signal is repeated this often so it does not time out. */
 const TYPING_REPEAT_MS = 2500;
+/** How often an open chat checks for anything Realtime did not deliver. */
+const CATCH_UP_MS = 30_000;
 
 /**
  * One open conversation: history, live messages, optimistic sending with retry, read
@@ -55,7 +58,8 @@ export function useConversation(conversationId: string, userId: string | null) {
   useEffect(() => {
     if (!userId || closed) return;
     const joined = joinConversation(conversationId, {
-      onMessage: (message) => dispatch({ type: 'stored', message }),
+      onMessage: (message) =>
+        dispatch({ type: 'stored', message, fromOther: message.sender_id !== userId }),
       onRead: (reader, messageId) => {
         if (reader !== userId) dispatch({ type: 'their-read', messageId });
       },
@@ -73,7 +77,13 @@ export function useConversation(conversationId: string, userId: string | null) {
       onReconnect: () => void load('refreshed'),
     });
     connection.current = joined;
+    // Live messages arrive over Realtime, which is best-effort: a broadcast can be lost while
+    // the socket stays up. While the chat is open and in front, it also catches up quietly.
+    const catchUp = setInterval(() => {
+      if (AppState.currentState === 'active') void load('refreshed');
+    }, CATCH_UP_MS);
     return () => {
+      clearInterval(catchUp);
       connection.current = null;
       joined.leave();
       if (typingShown.current) clearTimeout(typingShown.current);
