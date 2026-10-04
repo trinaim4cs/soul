@@ -5,6 +5,11 @@ import { refreshAccountStatus } from '@/features/auth/api/auth';
 import { useDeckStore } from '@/features/discovery/store/deck-store';
 import { processPhoto } from '@/features/profile/api/photo-processing';
 import {
+  rememberSignedUrls,
+  reuseSignedUrls,
+  SIGNED_URL_TTL_S,
+} from '@/features/profile/api/signed-urls';
+import {
   cleanAbout,
   cleanText,
   myProfileSchema,
@@ -194,11 +199,14 @@ export function usePhotoUrls(bucket: string, paths: string[]) {
     enabled: paths.length > 0,
     staleTime: 50 * 60_000,
     queryFn: async () => {
-      const { data, error } = await supabase.storage.from(bucket).createSignedUrls(paths, 3600);
+      const now = Date.now();
+      const { urls, missing } = reuseSignedUrls(bucket, paths, now);
+      if (missing.length === 0) return urls;
+      const { data, error } = await supabase.storage
+        .from(bucket)
+        .createSignedUrls(missing, SIGNED_URL_TTL_S);
       if (error) throw error;
-      const urls: Record<string, string> = {};
-      for (const item of data) if (item.path && item.signedUrl) urls[item.path] = item.signedUrl;
-      return urls;
+      return { ...urls, ...rememberSignedUrls(bucket, data, now) };
     },
   });
 }

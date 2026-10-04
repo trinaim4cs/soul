@@ -13,6 +13,13 @@ export type LocationFix = {
   timestamp: number;
 };
 
+/**
+ * How often the device is asked for a position (Phase 19, battery). Searching only needs to
+ * stay inside the server's 90 s freshness window on a ~110 m grid; a live meet needs the
+ * distance and arrow to follow the person.
+ */
+export type WatchMode = 'search' | 'session';
+
 export type LocationService = {
   getPermission(): Promise<LocationPermission>;
   /** Must be called from a user action (web browsers require it). */
@@ -25,5 +32,6 @@ export type LocationService = {
   watch(
     onFix: (fix: LocationFix) => void,
     onError: (reason: 'denied' | 'unavailable') => void,
+    mode: WatchMode,
   ): () => void;
 };

@@ -13,6 +13,8 @@ import {
   useAccountStatus,
   useRetryAccountStatus,
 } from '@/features/auth/account-status-provider';
+import { useUpdateNeed } from '@/features/distribution/api/app-release';
+import { UpdateRequired } from '@/features/distribution/components/update-prompts';
 import { isDevelopment } from '@/lib/env';
 import { queryClient } from '@/lib/query-client';
 import { getInstallContext } from '@/services/install-context';
@@ -51,6 +53,10 @@ function RootNavigator() {
   // Always true natively (fonts are embedded); on the web, true once they are registered.
   const fontsReady = useFontsReady();
   const ready = fontsReady && status !== 'loading';
+  // An APK older than the oldest supported build stops here (D-039; Android only).
+  const update = useUpdateNeed(
+    status === 'eligible' || status === 'onboarding' || status === 'restricted',
+  );
 
   useEffect(() => {
     if (ready) {
@@ -63,13 +69,28 @@ function RootNavigator() {
     return null;
   }
 
+  // Every screen, including the two full-screen states below, sets the status bar.
+  const statusBar = <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />;
+
   if (status === 'unavailable') {
     return (
-      <ErrorState
-        title="Can't reach SOUL"
-        body="Check your connection and try again."
-        onRetry={retryStatus}
-      />
+      <>
+        {statusBar}
+        <ErrorState
+          title="Can't reach SOUL"
+          body="Check your connection and try again."
+          onRetry={retryStatus}
+        />
+      </>
+    );
+  }
+
+  if (update.need === 'required' && update.release) {
+    return (
+      <>
+        {statusBar}
+        <UpdateRequired release={update.release} />
+      </>
     );
   }
 
@@ -83,7 +104,7 @@ function RootNavigator() {
 
   return (
     <>
-      <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
+      {statusBar}
       <Stack
         screenOptions={{
           headerShown: false,

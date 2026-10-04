@@ -1,5 +1,6 @@
 import { accountStatusQueryKey } from '@/features/auth/api/account-status';
 import { normalizeEmail } from '@/features/auth/model/email';
+import { forgetSignedUrls } from '@/features/profile/api/signed-urls';
 import { queryClient } from '@/lib/query-client';
 import { supabase } from '@/lib/supabase';
 import { notifications } from '@/services/notifications';
@@ -55,6 +56,7 @@ export async function signOut() {
     new Promise((resolve) => setTimeout(resolve, 3000)),
   ]);
   await supabase.auth.signOut();
+  forgetSignedUrls();
   queryClient.removeQueries({ queryKey: ['account-status'] });
 }
 

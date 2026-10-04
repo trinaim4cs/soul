@@ -26,10 +26,12 @@ Free Vercel hosting with the generated `*.vercel.app` domain for development and
 - Vercel project environment variables (Production and Preview): `APP_ENV=production`, `EXPO_PUBLIC_SUPABASE_URL=https://bdwuhrkgrwzpwqhgsngi.supabase.co`, `EXPO_PUBLIC_SUPABASE_ANON_KEY=<publishable key>`.
 - Deploys come from the GitHub repository. The Vercel URL is also the Supabase Site URL.
 - The beta URL is shared only with testers (owner, 2026-09-27).
+- **The APK download (Phase 20):** `npm run android:release` copies `soul-<version>.apk` and `latest.json` into `public/downloads/` (git-ignored), so the next deploy publishes them at `/downloads/`. `/download` reads `latest.json` and shows the version, size and SHA-256. `vercel.json` serves the APK as `application/vnd.android.package-archive` and `latest.json` uncached. Check the host's per-file size limit against the APK size (BUILD_ANDROID.md); if it is too large, host the APK elsewhere over HTTPS and put that address in `latest.json` (`url` accepts an `https://` address).
+- Nothing in this repository deploys by itself: the owner connects the host and publishes (RELEASE_CHECKLIST.md).
 
 ## Web Push (C-16)
 
-Standards-based Web Push, no Apple Developer or App Store account needed. On iPhone it works only for SOUL added to the Home Screen, on iOS 16.4 or later, after the user allows it. SOUL detects support and works fully without push. The VAPID key pair is generated for the project; the public key ships in the web app and the private key is a server secret (`supabase secrets set`).
+Standards-based Web Push, no Apple Developer or App Store account needed. On iPhone it works only for SOUL added to the Home Screen, on iOS 16.4 or later, after the user allows it. SOUL detects support and works fully without push. The VAPID key pair is generated for the project; the public key ships in the web app and the private key is a server secret (`supabase/functions/.env.production`, sent with `supabase secrets set --env-file`; SUPABASE.md).
 
 ## Requirements and how SOUL meets them
 

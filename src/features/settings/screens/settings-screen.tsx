@@ -1,5 +1,6 @@
+import Constants from 'expo-constants';
 import { router } from 'expo-router';
-import { StyleSheet, View } from 'react-native';
+import { Linking, StyleSheet, View } from 'react-native';
 
 import { SoulButton } from '@/components/soul-button';
 import { SoulScreen } from '@/components/soul-screen';
@@ -7,6 +8,7 @@ import { SoulText } from '@/components/soul-text';
 import { useAdminRole } from '@/features/admin/api/admin';
 import { useCurrentUserId } from '@/features/auth/account-status-provider';
 import { signOut } from '@/features/auth/api/auth';
+import { useUpdateNeed } from '@/features/distribution/api/app-release';
 import { SettingsRow } from '@/features/settings/components/settings-row';
 import { useSwipeBalance } from '@/features/swipes/api/swipes';
 import { balanceSummary } from '@/features/swipes/model/swipes';
@@ -21,6 +23,7 @@ export function SettingsScreen() {
   const swipes = useSwipeBalance(userId);
   // Shown only to people the server lists as moderators or admins (D-055).
   const role = useAdminRole(userId);
+  const update = useUpdateNeed(userId !== null);
   return (
     <SoulScreen scroll edges={{ top: false, bottom: true }}>
       <SoulText variant="title" accessibilityRole="header">
@@ -79,6 +82,17 @@ export function SettingsScreen() {
           detail="What SOUL keeps, and for how long"
           onPress={() => router.push('/legal/retention')}
         />
+        {update.need === 'optional' && update.release?.apk_url ? (
+          <SettingsRow
+            icon="download"
+            label="Update SOUL"
+            detail={update.release.latest_version ?? undefined}
+            onPress={() => {
+              const url = update.release?.apk_url;
+              if (url) void Linking.openURL(url).catch(() => {});
+            }}
+          />
+        ) : null}
         {role.data ? (
           <SettingsRow
             icon="flag"
@@ -101,10 +115,14 @@ export function SettingsScreen() {
         block
         onPress={() => void signOut()}
       />
+      <SoulText variant="caption" tone="tertiary" align="center" style={styles.version} numeric>
+        {`SOUL ${Constants.expoConfig?.version ?? ''}`}
+      </SoulText>
     </SoulScreen>
   );
 }
 
 const styles = StyleSheet.create({
   list: { marginTop: spacing.lg, marginBottom: spacing.xl },
+  version: { marginTop: spacing.lg },
 });

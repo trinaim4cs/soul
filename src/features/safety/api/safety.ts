@@ -7,6 +7,7 @@ import {
   type ReportCategory,
   type SafetyContext,
 } from '@/features/safety/model/safety';
+import { forgetSignedUrls } from '@/features/profile/api/signed-urls';
 import { queryClient } from '@/lib/query-client';
 import { supabase } from '@/lib/supabase';
 import { stripInvisible } from '@/lib/text';
@@ -77,5 +78,6 @@ export async function deleteAccount(): Promise<void> {
   });
   if (error) throw error;
   await supabase.auth.signOut({ scope: 'local' });
+  forgetSignedUrls();
   queryClient.clear();
 }

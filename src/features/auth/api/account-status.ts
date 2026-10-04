@@ -37,5 +37,8 @@ export function useServerStatus(userId: string | null) {
     queryFn: fetchServerStatus,
     enabled: userId !== null,
     staleTime: 60_000,
+    // The splash waits for this answer, so it must not pause while offline (Phase 19): it
+    // fails instead, and the app says it can't reach SOUL, with a retry.
+    networkMode: 'always',
   });
 }

@@ -22,12 +22,13 @@ npm run test:all      # types, lint, format, source text, unit tests, Edge Funct
 |---|---|---|---|
 | Types and lint | `npm run typecheck`, `npm run lint` | whole repo | strict TypeScript; hex colours only in `src/theme` |
 | Source text | `npm run text:check` | every tracked text file | no invisible control or bidi characters in code, SQL or docs (D-057) |
-| Unit tests (Jest) | `npm test` | 192 tests, 26 files | app models (pricing, badges, Instant buckets, chat grouping, payments, safety, admin, notification links) and the Edge Function libraries in `supabase/functions/_shared` (JPEG stripping, Razorpay signatures, **Web Push RFC 8291 test vector**, VAPID, FCM assertions) |
+| Unit tests (Jest) | `npm test` | 202 tests, 28 files | app models (pricing, badges, Instant buckets, chat grouping, payments, safety, admin, notification links) and the Edge Function libraries in `supabase/functions/_shared` (JPEG stripping, Razorpay signatures, **Web Push RFC 8291 test vector**, VAPID, FCM assertions) |
 | Edge Functions | `npm run functions:check` | 11 functions | every function type-checks under Deno |
-| Database (pgTAP) | `npm run db:test` | **689 assertions, 18 files** | every rule enforced by the database, run as the real `authenticated` and `service_role` roles inside a rolled-back transaction |
+| Database (pgTAP) | `npm run db:test` | **695 assertions, 19 files** | every rule enforced by the database, run as the real `authenticated` and `service_role` roles inside a rolled-back transaction |
 | Server over HTTP | `npm run db:verify` | **110 checks** | the real stack end to end: Auth with OTP email, PostgREST, Realtime sockets, Storage, Edge Functions |
 | Cross-account attacks | `npm run security:attack` | **11 checks** | an ordinary student attacks another account's coordinates, billing, reports, verification details, chat, storage and topics through every route the app's credentials reach (Phase 18, SECURITY_AUDIT.md) |
-| Devices | per phase, PHASE_PLAN "Verified" | | the Android emulator (development build) and an iPhone-size web viewport, plus the cross-platform matrix in PLATFORM_MATRIX.md |
+| Devices | per phase, PHASE_PLAN "Verified" | | the Android emulator (development build, and from Phase 19 the release-optimised test APK) and an iPhone-size web viewport, plus the cross-platform matrix in PLATFORM_MATRIX.md |
+| Environment files | `npm run env:check -- development\|production` | every env file | the app files hold no secret, the server files are complete and well-formed (D-059) |
 
 **Fixture rules:** neutral identities only (`Test User 01`, `Profile 07`); each pgTAP file creates its own accounts with a fixed id prefix and counts **only its own fixtures** (a shared local database once broke two tests that assumed it was empty); every pgTAP file rolls back.
 
@@ -60,4 +61,5 @@ npm run test:all      # types, lint, format, source text, unit tests, Edge Funct
 - **Live Razorpay:** waits for the owner's test keys and webhook (C-25); the mock provider signs events for the real webhook.
 - **A real iPhone:** the PWA is tested in an iPhone-size viewport and in Chrome on Android, not yet in Safari on an iPhone (Phase 17 visual QA and the release checklist).
 - **One Android and one PWA in the same Instant Meet:** each platform has been tested with a scripted or browser partner, not with each other.
-- **Performance:** Phase 19. The security audit is done (Phase 18, SECURITY_AUDIT.md).
+- **Performance on a real low-end phone:** the Phase 19 measurements (PERFORMANCE.md) were taken on the emulator with the release-optimised test APK; frame times and start-up on a slow real phone stay on the release checklist.
+- **The production APK on a real phone:** needs the owner's signing key (C-20); the test APK covers the same release build on the emulator.

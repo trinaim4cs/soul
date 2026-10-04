@@ -46,6 +46,7 @@ example
 .env
 .env.*
 !.env.example
+!.env.*.example
 *.keystore
 !debug.keystore
 google-services.json
@@ -77,3 +78,7 @@ GoogleService-Info.plist
 # EAS local credentials (can hold keystore passwords; SECURITY_AUDIT F-8)
 credentials.json
 credentials/
+
+# Release outputs (scripts/android-release.sh): APKs are published on the website, not in git
+dist-android/
+public/downloads/

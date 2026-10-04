@@ -1,9 +1,12 @@
 import * as Location from 'expo-location';
 import { Linking } from 'react-native';
 
-import type { LocationPermission, LocationService } from './types';
+import type { LocationPermission, LocationService, WatchMode } from './types';
 
-export type { LocationFix, LocationPermission, LocationService } from './types';
+export type { LocationFix, LocationPermission, LocationService, WatchMode } from './types';
+
+/** Time between fixes: often enough during a meet, sparing while only searching. */
+export const FIX_INTERVAL_MS: Record<WatchMode, number> = { search: 20_000, session: 5_000 };
 
 function toPermission(response: Location.LocationPermissionResponse): LocationPermission {
   if (response.granted) return 'granted';
@@ -26,13 +29,16 @@ export const location: LocationService = {
   openSettings() {
     void Linking.openSettings().catch(() => {});
   },
-  watch(onFix, onError) {
+  watch(onFix, onError, mode) {
     let stopped = false;
     let subscription: Location.LocationSubscription | null = null;
     Location.watchPositionAsync(
       {
+        // High accuracy in both modes: a coarse fix can exceed the server's 200 m limit
+        // indoors. Battery is saved by asking less often while searching, and no distance
+        // filter, so a person standing still still refreshes before their fix goes stale.
         accuracy: Location.Accuracy.High,
-        timeInterval: 5000,
+        timeInterval: FIX_INTERVAL_MS[mode],
         distanceInterval: 0,
         // Never Google's "Location Accuracy" consent dialog: if location is off, the Instant
         // tab says so in SOUL's own words and links to settings.

@@ -1,5 +1,7 @@
 import { Stack } from 'expo-router';
+import { View } from 'react-native';
 
+import { OfflineNotice } from '@/components/offline-notice';
 import { useAccountRealtime } from '@/features/chat/hooks/use-account-realtime';
 import { useInstantPresence } from '@/features/instant/hooks/use-instant-presence';
 import { usePush } from '@/features/notifications/hooks/use-push';
@@ -25,63 +27,69 @@ export default function AppLayout() {
     headerTitleStyle: { fontFamily: fontFamily.body },
   };
   return (
-    <Stack
-      screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background } }}>
-      <Stack.Screen name="(tabs)" />
-      <Stack.Screen name="profile/edit" options={pageHeader} />
-      <Stack.Screen name="profile/[id]" options={pageHeader} />
-      <Stack.Screen
-        name="filters"
-        options={{
-          ...pageHeader,
-          presentation: 'formSheet',
-          sheetAllowedDetents: [0.92],
-          sheetGrabberVisible: true,
-          sheetCornerRadius: radii.xl,
-        }}
-      />
-      <Stack.Screen
-        name="date/[id]"
-        options={{
-          ...pageHeader,
-          presentation: 'formSheet',
-          sheetAllowedDetents: [0.6],
-          sheetGrabberVisible: true,
-          sheetCornerRadius: radii.xl,
-        }}
-      />
-      <Stack.Screen
-        name="safety/[id]"
-        options={{
-          ...pageHeader,
-          presentation: 'formSheet',
-          sheetAllowedDetents: [0.55],
-          sheetGrabberVisible: true,
-          sheetCornerRadius: radii.xl,
-        }}
-      />
-      <Stack.Screen name="report/[id]" options={pageHeader} />
-      <Stack.Screen name="paywall" options={{ presentation: 'modal', headerShown: false }} />
-      <Stack.Screen name="pay/return" options={{ headerShown: false, gestureEnabled: false }} />
-      <Stack.Screen name="pay/mock" options={{ headerShown: false }} />
-      <Stack.Screen
-        name="match/[id]"
-        options={{
-          presentation: 'fullScreenModal',
-          animation: 'fade',
+    <View style={{ flex: 1 }}>
+      <Stack
+        screenOptions={{
           headerShown: false,
-          contentStyle: { backgroundColor: colors.moment },
-        }}
-      />
-      <Stack.Screen name="chat/[id]" options={{ headerShown: false }} />
-      <Stack.Screen name="instant/session/[id]" options={{ headerShown: false }} />
-      <Stack.Screen name="instant/chat/[id]" options={{ headerShown: false }} />
-      <Stack.Screen name="settings/index" options={pageHeader} />
-      <Stack.Screen name="settings/privacy" options={pageHeader} />
-      <Stack.Screen name="settings/notifications" options={pageHeader} />
-      <Stack.Screen name="settings/purchases" options={pageHeader} />
-      <Stack.Screen name="settings/blocked" options={pageHeader} />
-      <Stack.Screen name="settings/delete" options={pageHeader} />
-    </Stack>
+          contentStyle: { backgroundColor: colors.background },
+        }}>
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="profile/edit" options={pageHeader} />
+        <Stack.Screen name="profile/[id]" options={pageHeader} />
+        <Stack.Screen
+          name="filters"
+          options={{
+            ...pageHeader,
+            presentation: 'formSheet',
+            sheetAllowedDetents: [0.92],
+            sheetGrabberVisible: true,
+            sheetCornerRadius: radii.xl,
+          }}
+        />
+        <Stack.Screen
+          name="date/[id]"
+          options={{
+            ...pageHeader,
+            presentation: 'formSheet',
+            sheetAllowedDetents: [0.6],
+            sheetGrabberVisible: true,
+            sheetCornerRadius: radii.xl,
+          }}
+        />
+        <Stack.Screen
+          name="safety/[id]"
+          options={{
+            ...pageHeader,
+            presentation: 'formSheet',
+            sheetAllowedDetents: [0.55],
+            sheetGrabberVisible: true,
+            sheetCornerRadius: radii.xl,
+          }}
+        />
+        <Stack.Screen name="report/[id]" options={pageHeader} />
+        <Stack.Screen name="paywall" options={{ presentation: 'modal', headerShown: false }} />
+        <Stack.Screen name="pay/return" options={{ headerShown: false, gestureEnabled: false }} />
+        <Stack.Screen name="pay/mock" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="match/[id]"
+          options={{
+            presentation: 'fullScreenModal',
+            animation: 'fade',
+            headerShown: false,
+            contentStyle: { backgroundColor: colors.moment },
+          }}
+        />
+        <Stack.Screen name="chat/[id]" options={{ headerShown: false }} />
+        <Stack.Screen name="instant/session/[id]" options={{ headerShown: false }} />
+        <Stack.Screen name="instant/chat/[id]" options={{ headerShown: false }} />
+        <Stack.Screen name="settings/index" options={pageHeader} />
+        <Stack.Screen name="settings/privacy" options={pageHeader} />
+        <Stack.Screen name="settings/notifications" options={pageHeader} />
+        <Stack.Screen name="settings/purchases" options={pageHeader} />
+        <Stack.Screen name="settings/blocked" options={pageHeader} />
+        <Stack.Screen name="settings/delete" options={pageHeader} />
+      </Stack>
+      <OfflineNotice />
+    </View>
   );
 }

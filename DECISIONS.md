@@ -6,6 +6,30 @@ Status values: `accepted` · `default, confirm` · `open`.
 
 ---
 
+## Phase 20 Android release (2026-10-04)
+
+### D-059 Release builds, environment files and updates
+- **Three Android builds** (BUILD_ANDROID.md): the development build; a **test APK** (release-optimised, local Supabase over plain HTTP, debug key, never published); the **production APK** (hosted project, production key, phones only: arm64-v8a and armeabi-v7a). Nothing is deployed from the repository: the owner publishes the server, the website and the APK (RELEASE_CHECKLIST.md).
+- **The production key stays with the owner (C-20):** the release script refuses to build without it and never falls back to the debug key. Creating it is the owner's step, with the exact command and what to preserve in BUILD_ANDROID.md.
+- **Separate environment files:** `.env` / `.env.production` for the app (only `APP_ENV`, `EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_ANON_KEY`) and `supabase/functions/.env` / `.env.production` for server secrets, each with a committed template. `npm run env:init` creates missing files and generates Web Push keys straight into them (never printed); `npm run env:check` validates every value without printing any, refuses a secret key in the app files, and checks the Web Push pair and the FCM account. `app.config.ts` refuses a production build pointing at a local or non-HTTPS backend.
+- **Versioning:** `package.json` holds the one version; Android's versionCode is derived (`MAJOR × 1 000 000 + MINOR × 1 000 + PATCH`), so it always grows with the version.
+- **Updates without Play (D-039, now built):** `app_config.android_release` adds `latest_version_code` and `min_version_code` to D-039's fields. After sign-in the app shows a full-screen "Update SOUL" below the minimum and a once-per-version card (Chats) and a Settings row below the latest. Read by signed-in people only (signed-out screens have nothing that depends on the version). The release script prints the SQL that publishes a version.
+- **Permissions:** biometrics blocked everywhere; the overlay and Wi-Fi multicast permissions (development-client tools) blocked in production; storage permissions kept for the photo picker on Android 12 and older.
+- **Website:** the release script copies the APK and `latest.json` into `public/downloads/`; `vercel.json` serves APKs with the right type. The compact icon mark (C-21) remains the one design release blocker.
+
+---
+
+## Phase 19 performance (2026-10-04)
+
+### D-058 Performance changes
+- **GPS:** while searching, a high-accuracy fix every 20 s (was 5 s); during a meet, every 5 s. Accuracy stays high in both because a coarse fix can exceed the server's 200 m limit indoors, and there is no distance filter so a still device refreshes within the 90 s freshness window.
+- **Offline:** phones report their connection to React Query (`expo-network`): reads pause while offline and refetch on return, writes never wait to replay, the startup status check still fails fast into "Can't reach SOUL". A "You're offline" note shows on every signed-in screen, below the header.
+- **Photos:** signed URLs are reused across screens while they have 15 minutes left, and the device cache is keyed on the URL without its token, so a photo downloads once.
+- **Size:** R8 shrinking, resource shrinking and compressed native libraries in release builds; the production APK targets phone ABIs only.
+- Measurements and what an emulator cannot judge: PERFORMANCE.md.
+
+---
+
 ## Phase 18 security audit (2026-10-03)
 
 ### D-057 Security audit and text safety
@@ -362,7 +386,7 @@ Status values: `accepted` · `default, confirm` · `open`.
 - The Welcome screen in a browser detects the platform and offers "Download for Android" on Android browsers, or the iPhone install hint in iOS Safari when not already installed.
 - **CONFIG_REQUIRED (C-26):** web hosting and a domain for the PWA and the APK download (HTTPS is required for the PWA, geolocation and service worker).
 
-### D-039 Android updates without Play
+### D-039 Android updates without Play (built in Phase 20 as D-059)
 - `app_config.android_release` holds `{ latest_version, min_supported_version, apk_url, sha256 }`. The app checks it and shows an update prompt (forced only below the minimum).
 - The APK is downloaded from the SOUL site over HTTPS with its SHA-256 published. The signing key must never change between versions (C-20).
 - Over-the-air JS updates (expo-updates / EAS Update) are optional later (needs an EAS account).

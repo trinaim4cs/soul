@@ -28,24 +28,22 @@ npx supabase config push                                  # OTP length/expiry, c
 npx supabase functions deploy health profile-photos payments-checkout payments-webhook payments-sync account-delete push-register push-send
 ```
 
-**Push (D-054, C-16).** Web Push works with two keys you generate once for the cloud project (never reuse the local ones):
+**All hosted secrets in one file (Phase 20).** `supabase/functions/.env.production` (git-ignored; template `supabase/functions/.env.production.example`) holds every server secret for the hosted project:
 ```bash
-node -e "const c=require('crypto');const k=c.generateKeyPairSync('ec',{namedCurve:'prime256v1'}).privateKey.export({format:'jwk'});console.log('VAPID_PUBLIC_KEY='+Buffer.concat([Buffer.from([4]),Buffer.from(k.x,'base64url'),Buffer.from(k.y,'base64url')]).toString('base64url'));console.log('VAPID_PRIVATE_KEY='+k.d)"
+npm run env:init -- production    # creates it and writes a fresh Web Push key pair into it (never printed)
+# fill in Razorpay, PAYMENTS_SITE_URL, VAPID_SUBJECT and, optionally, FCM_SERVICE_ACCOUNT
+npm run env:check -- production   # checks every value without printing any
+npx supabase secrets set --env-file supabase/functions/.env.production
 ```
-```bash
-npx supabase secrets set VAPID_PUBLIC_KEY=<public> VAPID_PRIVATE_KEY=<private> VAPID_SUBJECT=mailto:<support address>
-```
-Keep the private key in your password manager: replacing it later means every browser has to subscribe again. Android push also needs `FCM_SERVICE_ACCOUNT` (BUILD_ANDROID.md). The push migration enables `pg_net`, points `push_dispatch_url` at this project's `push-send` and schedules `soul-push` every minute.
+
+**Push (D-054, C-16).** Web Push uses the key pair `env:init` generated for the hosted project (never the local one). Keep the private key in your password manager: replacing it later means every browser has to subscribe again. Android push also needs `FCM_SERVICE_ACCOUNT` (BUILD_ANDROID.md). The push migration enables `pg_net`, points `push_dispatch_url` at this project's `push-send` and schedules `soul-push` every minute.
 
 Without `profile-photos` deployed, photos cannot be added (D-043).
 
 **Payments (D-052, C-25).** Start in Razorpay's **test mode**; switch the same steps to live keys only after KYC.
 1. In the Razorpay dashboard, make sure Payment Links is available, then create API keys (Account & Settings → API Keys).
 2. Add a webhook (Account & Settings → Webhooks) for `https://bdwuhrkgrwzpwqhgsngi.supabase.co/functions/v1/payments-webhook` with the events `payment_link.paid`, `payment_link.expired`, `payment_link.cancelled` and `refund.processed`. Choose a long random secret.
-3. Set the server secrets (they never go in the app, the repo or chat):
-   ```bash
-   npx supabase secrets set SOUL_ENV=production PAYMENTS_PROVIDER=razorpay PAYMENTS_SITE_URL=https://<your SOUL site> RAZORPAY_KEY_ID=<key id> RAZORPAY_KEY_SECRET=<key secret> RAZORPAY_WEBHOOK_SECRET=<webhook secret>
-   ```
+3. Put the keys and the webhook secret in `supabase/functions/.env.production` (above) and send the file with `npx supabase secrets set --env-file supabase/functions/.env.production`. They never go in the app, the repo or chat.
 4. Deploy the payment functions (above). Do not deploy `payments-mock`; it refuses to run in production anyway.
 5. `payments_allow_mock` stays `false` in the hosted database (only the local seed turns it on). Instant Meet needs nothing extra: PostGIS is created by the foundation migration, and expiry runs inside the Instant functions (no cron). The dates migration enables `pg_cron` and schedules `soul-dates-consistency` hourly; check it under Database → Cron after the push.
 

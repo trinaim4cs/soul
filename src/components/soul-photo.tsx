@@ -1,6 +1,7 @@
 import { Image, type ImageSource } from 'expo-image';
 import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 
+import { stableSource } from '@/lib/image-source';
 import { createThemedStyles, durations, radii, sizes } from '@/theme';
 
 type Props = {
@@ -40,7 +41,7 @@ export function SoulPhoto({
       ]}>
       {source ? (
         <Image
-          source={source}
+          source={stableSource(source)}
           placeholder={blurhash ? { blurhash } : undefined}
           contentFit="cover"
           transition={durations.small}

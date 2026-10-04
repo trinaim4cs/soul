@@ -7,7 +7,8 @@ export PATH="$JAVA_HOME/bin:$PATH"
 export GRADLE_USER_HOME="D:/soul-dev/gradle"
 ADB=/d/soul-dev/android-sdk/platform-tools/adb.exe
 cd "$(dirname "$0")/.."
-if [ ! -d android ] || [ "${CLEAN:-0}" = "1" ]; then
+# A release build (scripts/android-release.sh) leaves ./android configured for release: start over.
+if [ ! -d android ] || [ "${CLEAN:-0}" = "1" ] || [ -f android/.soul-build-mode ]; then
   npx expo prebuild --platform android --clean --no-install
 fi
 # Memory-capped: this machine has 15 GB RAM and a page file on a nearly full C:.

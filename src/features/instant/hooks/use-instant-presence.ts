@@ -33,6 +33,7 @@ export function useInstantPresence() {
   const setLocationProblem = useInstantStore((store) => store.setLocationProblem);
   const noteEnded = useInstantStore((store) => store.noteEnded);
   const instantOn = state.data?.active === true;
+  const inSession = state.data?.session != null;
   const pathname = usePathname();
   const where = useRef(pathname);
   useEffect(() => {
@@ -60,9 +61,10 @@ export function useInstantPresence() {
           });
       },
       (reason) => setLocationProblem(reason),
+      inSession ? 'session' : 'search',
     );
     return stop;
-  }, [userId, instantOn, appActive, setLocationProblem]);
+  }, [userId, instantOn, inSession, appActive, setLocationProblem]);
 
   // Session transitions: open the compass when one starts, remember who when one ends.
   const session = state.data?.session ?? null;

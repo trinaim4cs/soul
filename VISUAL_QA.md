@@ -38,5 +38,5 @@ Test data: four neutral accounts (`Test User 01` to `04`, one anonymous) with ab
 
 - **Motion feel:** swipe physics, the reveal's entrance and the compass spring were judged in their phases by interaction; screenshots cannot judge timing. Feel on a slow real phone belongs to Phase 19.
 - **A real iPhone in Safari / installed PWA:** not available on this machine; the PWA was checked at phone width in Chrome on Android. iOS-only behaviour (Dynamic Type, the iOS keyboard, standalone safe areas) stays on the release checklist.
-- **Splash to first screen without a white flash:** the development client shows its own loading; check on a release build (Phase 20).
+- **Splash to first screen without a white flash:** checked on the release-optimised test APK in Phase 20 (dark mode: black splash with the white logo straight into the dark app; `docs/release-qa/`).
 - **Deep links opened from outside a running development client** to `com.soul.srm://instant` and `com.soul.srm://paywall` sometimes stayed on the current screen. In-app navigation and notification taps use the router directly and were not affected; recheck on a release build.

@@ -11,6 +11,8 @@ import { cardBucket } from '@/features/discovery/model/card';
 import { refreshMatches, useMatches } from '@/features/matching/api/matches';
 import { MatchRow } from '@/features/matching/components/match-row';
 import type { Match } from '@/features/matching/model/match';
+import { useUpdateNeed } from '@/features/distribution/api/app-release';
+import { UpdateCard } from '@/features/distribution/components/update-prompts';
 import { PushPrompt } from '@/features/notifications/components/push-prompt';
 import { BLURRED_BUCKET, PHOTO_BUCKET, usePhotoUrls } from '@/features/profile/api/profile';
 import { createThemedStyles, layout, radii, sizes, spacing, useTheme } from '@/theme';
@@ -26,6 +28,7 @@ export function MatchesScreen() {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const userId = useCurrentUserId();
+  const update = useUpdateNeed(userId !== null);
   const matches = useMatches(userId);
   const list = matches.data ?? [];
 
@@ -83,7 +86,14 @@ export function MatchesScreen() {
         <FlatList
           data={list}
           keyExtractor={(match) => match.id}
-          ListHeaderComponent={<PushPrompt userId={userId} />}
+          ListHeaderComponent={
+            <>
+              {update.need === 'optional' && update.release ? (
+                <UpdateCard release={update.release} />
+              ) : null}
+              <PushPrompt userId={userId} />
+            </>
+          }
           renderItem={({ item }) => (
             <MatchRow match={item} photoUrl={photoUrl(item)} onPress={() => open(item)} />
           )}

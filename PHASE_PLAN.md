@@ -26,8 +26,8 @@ Skills per phase come from `skills/SOUL_SKILL_MAP.md`. `soul-audit` is enabled o
 | 16 | Testing (incl. the cross-platform matrix in `PLATFORM_MATRIX.md`) | done (`npm run test:all`, CI, TESTING.md) |
 | 17 | Visual QA (Android + iPhone-size web) | done (Android + PWA on Android; real iPhone pending) |
 | 18 | Security audit | done (SECURITY_AUDIT.md, `security:attack` in CI) |
-| 19 | Performance | todo |
-| 20 | APK + website (`/download`, `/install`, PWA deploy) | todo |
+| 19 | Performance | done (PERFORMANCE.md; release-optimised test APK on the emulator) |
+| 20 | APK + website (`/download`, `/install`, PWA deploy) | done in code (test APK built and verified; the production APK waits for the owner's signing key, C-20; nothing deployed, by owner instruction) |
 
 **Spec v2 (2026-09-27) changes to scope:**
 - Verification is SRMIST email + OTP only, and age is a self-declared DOB with 18+ enforced by the server (D-027, D-028).
@@ -262,6 +262,40 @@ Skills per phase come from `skills/SOUL_SKILL_MAP.md`. `soul-audit` is enabled o
   - A `visualViewport` keyboard inset in `SoulScreen` (iPhone Safari keeps the page size). Verified in Chrome; the iPhone path needs a real iPhone.
 
 **Closed 2026-09-28:** the Android rebuild embeds the new `remove` icon (verified in Filters).
+
+## Phase 20: Android release and website (2026-10-04)
+
+**Built (D-059, BUILD_ANDROID.md, RELEASE_CHECKLIST.md):**
+- Three Android builds: development, a **test APK** (`npm run android:test-apk`: release-optimised, local backend, debug key) and the **production APK** (`npm run android:release`: `.env.production`, phone ABIs, the owner's key). The release script writes the APK, its SHA-256, `latest.json` and `release.sql`, and copies the APK and `latest.json` into `public/downloads/` for `/download`.
+- **Separate environment files** with committed templates and `npm run env:init` / `env:check` (Web Push keys generated into the file, never printed; secrets refused in app files). `supabase/functions/.env.production` created on this machine with fresh Web Push keys; Razorpay, the site URL, the push contact and FCM are the owner's to fill in.
+- **Versioning** from `package.json` (versionCode derived); the version shows in Settings.
+- **Updates without Play (D-039):** `app_config.android_release`, a full-screen "Update SOUL" below the minimum build, a once-per-version card and a Settings row below the latest (pgTAP `019`, unit tests).
+- **Release permission review:** biometrics blocked everywhere; development-client permissions blocked in production. **Guards:** a production build refuses a local or non-HTTPS backend, and refuses to build without the production key.
+- `vercel.json` serves APKs with the right type and `latest.json` uncached.
+
+**Verified on the emulator with the test APK:** release build with no developer menu; update card, Settings row and full-screen gate driven from the database; splash in light and dark mode with no white flash; R8 build working across chat, photos, the photo picker, Instant and settings. `npm run android:release` without a key stopped at "SOUL release signing is not configured" after the environment checks passed, and the generated production manifest had the expected name, permissions and no cleartext.
+
+**Fixed while verifying:** the update gate and the "Can't reach SOUL" screen did not set the status bar (its icons disappeared on white); `docs/release-qa/update-required.jpg` predates the fix.
+
+**Owner steps left (not code):** create the production key with the command in BUILD_ANDROID.md (C-20), fill `supabase/functions/.env.production` (Razorpay C-25, site URL, push contact, optional FCM C-16), the compact icon mark (C-21, release blocker), then follow RELEASE_CHECKLIST.md to deploy. Nothing was deployed.
+
+---
+
+## Phase 19: Performance (2026-10-04)
+
+**Method:** PERFORMANCE.md (D-058). Every spec 73 item reviewed in code, and measured on the release-optimised test APK on the emulator: sizes, start-up, memory, frames, location request intervals (`dumpsys location`), offline and reconnect.
+
+**Fixed or improved:**
+- APK size 49 MB to 23 MB (x86_64) with R8, resource shrinking and compressed native libraries; production APK for phones only (about 28 MB projected). Cold start 2.7 to 3.3 s became 1.9 to 2.5 s, memory 166 to 179 MB became 152 MB.
+- GPS while searching every 20 s instead of 5 s (5 s only during a meet), verified in Android's location service; off after End Meet and Instant off.
+- Offline: reads pause and resume (`expo-network`), a "You're offline" note below the header, writes never replay, the startup check still fails fast. A message sent while offline arrived within 12 s of reconnecting.
+- Photos: signed URLs reused across screens and cached under a token-free key, so each photo downloads once.
+
+**Verified:** all checks green through `npm run test:all` (see the Phase 20 commit for counts).
+
+**Not verifiable here:** frame times and start-up on a slow real phone, battery over a real outdoor session, the web on a real iPhone.
+
+---
 
 ## Phase 18: Security audit (2026-10-03)
 
@@ -803,3 +837,5 @@ Release build config, signing workflow (owner keystore, C-20), launcher icon (C-
 - 2026-10-03: Phase 16 done: `npm run test:all`, GitHub Actions CI with no secrets, schema-wide structural tests (which closed a PUBLIC execute gap in the private schema), TESTING.md mapping every spec 70 item, live Android ↔ web chat, receipts and block (D-056).
 - 2026-10-03: Phase 17 done: every spec 71 screen reviewed on Android (light, dark, 1.3× text) and the PWA; seven defects fixed (link alignment, the reveal's wait, Instant's hidden duration choice, web composer focus and keyboard), VISUAL_QA.md with screenshots.
 - 2026-10-03: Phase 18 done: security audit (SECURITY_AUDIT.md); User A shown unable to reach User B's coordinates, billing, reports or verification details; text spoofing characters refused (F-1), mock payments fail closed (F-2); `security:attack` and `text:check` added to `test:all` and CI; the intermittent CI failure traced to refused Realtime channels and fixed (F-11).
+- 2026-10-04: Phase 19 done: performance audit on the release-optimised test APK (PERFORMANCE.md); APK 49 to 23 MB, faster cold start, GPS every 20 s while searching, offline pause and notice, photo URL reuse.
+- 2026-10-04: Phase 20 done in code: test APK and production release pipeline, separate env files with `env:init` / `env:check`, versioning, the in-app update prompt (D-039), permission review, RELEASE_CHECKLIST.md. The production APK waits for the owner's key (C-20); nothing deployed.

@@ -38,6 +38,10 @@ npm run test:all             # every check incl. pgTAP and db:verify (TESTING.md
 npm run format:check
 npx expo prebuild --platform android   # regenerate ./android (git-ignored, never hand-edited)
 npm run android:build        # memory-capped dev build (emulator + Docker stopped), installs if a device is up
+npm run android:test-apk     # release-optimised test APK against the local stack (BUILD_ANDROID.md)
+npm run android:release      # production APK: .env.production + the owner's signing key, never the debug key
+npm run env:init -- production   # env files from templates (Web Push keys generated, never printed)
+npm run env:check -- production  # validates env values without printing them
 npm run emulator             # boot the D:-based emulator
 npm start                    # Metro for the dev client
 ```
