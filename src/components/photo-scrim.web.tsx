@@ -10,7 +10,7 @@ export function PhotoScrim({ heightShare = 0.55 }: { heightShare?: number }) {
       pointerEvents="none"
       style={[
         styles.scrim,
-        { height: `${heightShare * 100}%`, backgroundImage: colors.photoGradient },
+        { height: `${heightShare * 100}%`, backgroundImage: colors.photoGradient } as any,
       ]}
     />
   );
